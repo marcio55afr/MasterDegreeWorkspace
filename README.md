@@ -7,13 +7,13 @@
 
         resolutions = resolutions_definition( data )
       
-        sample_size_per_class = 2
+        number_of_samples_per_class = 2
       
         while( resolutions.size > 1 ){
 
-            sample = get_sample( data, labels, sample_size_per_class )
+            samples = get_samples( data, labels, number_of_samples_per_class )
 
-            word_sequences = discretization_extraction( sample, resolutions.windows )
+            word_sequences = discretization_extraction( samples, resolutions.windows )
 
             ngram_sequences = ngrams_definition( word_sequences, resolutions )
 
@@ -21,11 +21,9 @@
 
             resolutions_rank = separability_calculation( bag_of_bags, resolutions )
 
-            worst_resolutions = get_last_half( resolutions_rank )
+            resolutions = get_first_half( resolutions_rank )
 
-            resolutions = resolutions.remove( worst_resolutions )
-
-            sample_size_per_class = 2*sample_size_per_class
+            number_of_samples_per_class = 2*number_of_samples_per_class
       
         }
       
