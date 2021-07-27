@@ -19,7 +19,7 @@
 
             bag_of_bags = frequency_counter( ngram_sequences )
 
-            resolutions_rank = separability_calculation( bag_of_bags, resolutions )
+            resolutions_rank = calcule_separability( bag_of_bags, resolutions )
 
             resolutions = get_first_half( resolutions_rank )
 
