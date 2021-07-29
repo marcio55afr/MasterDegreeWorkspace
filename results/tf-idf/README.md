@@ -1,5 +1,7 @@
 # TF-IDF
 
+![alt text](formula.png?raw=true)
+
 Here is described the conclusions about the indice tf-idf and some results that contributed to it.
 
 ## Class Separability
