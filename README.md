@@ -38,3 +38,8 @@
         clf = clf.fit( bag_of_bags, labels )
     
     }
+
+
+## Search Technique - Sequence Diagram
+
+![alt text](https://github.com/marcio55afr/MasterDegreeWorkspace/blob/main/sequence-diagram.png?raw=true)
