@@ -1,12 +1,7 @@
 
 
-
-
-
-
 # vscode or spyder files
 .vscode
-
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

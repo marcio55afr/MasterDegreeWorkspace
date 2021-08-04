@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
+import numpy as np
 from sktime.transformations.base import _PanelToPanelTransformer
 from sktime.utils.data_processing import from_nested_to_2d_array
 from sktime.utils.validation.panel import check_X
@@ -91,12 +92,11 @@ class PAA(_PanelToPanelTransformer):
         """
                 
         # Check the data
-        self.check_is_fitted()
-        X = check_X(X, enforce_univariate=True, coerce_to_numpy=True)
+        #X = check_X(X, enforce_univariate=True, coerce_to_numpy=True)
         
         num_atts = X.shape[1]
         num_insts = X.shape[0]
-        appr_set = []
+        frame_set = []
 
         for i in range(num_insts):
             series = X[i, :]
@@ -128,10 +128,9 @@ class PAA(_PanelToPanelTransformer):
             if current_frame == self.num_intervals - 1:
                 frames.append(frame_sum / frame_length)
 
-            data.append(np.asarray(frames))
+            frame_set.append(np.asarray(frames))
 
-        appr_set = np.asarray(data)
-        return appr_set        
+        return np.asarray(frame_set)       
         
         
 

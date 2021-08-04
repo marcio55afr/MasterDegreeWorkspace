@@ -6,7 +6,7 @@ import pandas as pd
 import scipy.stats
 
 from sktime.transformations.base import _PanelToPanelTransformer
-from sktime.transformations.panel.dictionary_based import PAA
+from source.transformations.paa import PAA
 
 #    TO DO: verify this returned pandas is consistent with sktime
 #    definition. Timestamps?
@@ -69,11 +69,15 @@ class MSAX(_PanelToPanelTransformer):
         self.word_prop = word_prop
         self.normalize = normalize 
         self.remove_repeat_words = remove_repeat_words
+        
+        self._breakpoints = self._generate_breakpoints()
+        self._alphabet = self._generate_alphabet()
 
         if self.alphabet_size < 2 or self.alphabet_size > 4:
             raise RuntimeError("Alphabet size must be an integer between 2 and 4")
 
         super(MSAX, self).__init__()
+
 
     def transform(self, X, window_lengths, word_lengths, y=None):
         """
@@ -95,11 +99,12 @@ class MSAX(_PanelToPanelTransformer):
         -------
         dims: Pandas data frame with first dimension in column zero
         """
+
+        #X = check_X(X, enforce_univariate=True, coerce_to_numpy=True)
+        #X = X.squeeze(1)
         
-        
-        self.check_is_fitted()
-        X = check_X(X, enforce_univariate=True, coerce_to_numpy=True)
-        X = X.squeeze(1)
+        if(window_lengths.size != word_lengths.size):
+            raise RuntimeError("Each window must have one and only one correspondent window")
 
         for word_length in word_lengths:
             if word_length < 1 or word_length > 16:
@@ -108,46 +113,41 @@ class MSAX(_PanelToPanelTransformer):
         # TODO 
         # another function breakpoints if normalize is False
         breakpoints = self._generate_breakpoints()
-        series_length = X.shape[1]
+        series_length = X.size
 
         bags = pd.DataFrame()
         dim = []
 
-        for window_length in range(window_lengths):
+        for i in range(window_lengths.size):
+            window_length = window_lengths[i]
+            word_length = word_lengths[i]
+            
             bag = {}
-            lastWord = -1
-
+            
+            # TODO
+            # windows = [ts[i:i+9] for i in range(3)]  test Speed up!!
             num_windows_per_inst = series_length - window_length + 1
-            split = np.array(
-                X[
-                    np.arange(window_length)[None, :]
-                    + np.arange(num_windows_per_inst)[:, None],
-                ]
-            )
+            split = np.array([X[i:i+window_length] for i in range(num_windows_per_inst)])
 
             split = scipy.stats.zscore(split, axis=1)
+            split = np.nan_to_num(split)
 
-            paa = PAA(num_intervals=self.word_length)
-            patterns = paa.fit().transform_univariate(split)
-            patterns = np.asarray([a.values for a in patterns.iloc[:, 0]])
+            paa = PAA(num_intervals=word_length)
+            patterns = paa.transform_univariate(split)
+            
+            words = [self._create_word(pattern, )
+                     for pattern in patterns]
 
-            for n in range(patterns.shape[0]):
-                pattern = patterns[n, :]
-                word = self._create_word(pattern, breakpoints)
-                lastWord = self._add_to_bag(bag, word, lastWord)
+            dim.append(words)
 
-            dim.append(pd.Series(bag) if self.return_pandas_data_series else bag)
+        return dim
 
-        bags[0] = dim
-
-        return bags
-
-    def _create_word(self, pattern, breakpoints):
-        word = 0
-        for i in range(self.word_length):
+    def _create_word(self, pattern):
+        word = ''
+        for i in range(pattern.size):
             for bp in range(self.alphabet_size):
-                if pattern[i] <= breakpoints[bp]:
-                    word = (word << 2) | bp
+                if pattern[i] <= self._breakpoints[bp]:
+                    word = word + self._alphabet[bp]
                     break
         return word
 
@@ -168,16 +168,19 @@ class MSAX(_PanelToPanelTransformer):
             7: [-1.07, -0.57, -0.18, 0.18, 0.57, 1.07, sys.float_info.max],
             8: [-1.15, -0.67, -0.32, 0, 0.32, 0.67, 1.15, sys.float_info.max],
             9: [-1.22, -0.76, -0.43, -0.14, 0.14, 0.43, 0.76, 1.22, sys.float_info.max],
-            10: [
-                -1.28,
-                -0.84,
-                -0.52,
-                -0.25,
-                0.0,
-                0.25,
-                0.52,
-                0.84,
-                1.28,
-                sys.float_info.max,
-            ],
+            10: [-1.28, -0.84, -0.52, -0.25, 0.0, 0.25, 0.52, 0.84, 1.28, sys.float_info.max]
+        }[self.alphabet_size]
+    
+    def _generate_alphabet(self):
+        # Unique alphabet symbols to be used in the discretization
+        return {
+            2: ['a', 'b'],
+            3: ['a', 'b','c'],
+            4: ['a', 'b','c','d'],
+            5: ['a', 'b','c','d','e'],
+            6: ['a', 'b','c','d','e','f'],
+            7: ['a', 'b','c','d','e','f','g'],
+            8: ['a', 'b','c','d','e','f','g','h'],
+            9: ['a', 'b','c','d','e','f','g','h','i'],
+            10: ['a', 'b','c','d','e','f','g','h','i','j'],
         }[self.alphabet_size]
