@@ -6,7 +6,7 @@ import pandas as pd
 import scipy.stats
 
 from sktime.transformations.base import _PanelToPanelTransformer
-from source.transformations.paa import PAA
+from transformations.paa import PAA
 
 #    TO DO: verify this returned pandas is consistent with sktime
 #    definition. Timestamps?
@@ -83,64 +83,62 @@ class MSAX(_PanelToPanelTransformer):
         """
         Parameters
         ----------
-        X : pandas DataFrame of shape [1, n_dimension]
-            Time series as a Dataframe with each dimension in each cell.
-        window_lengths : list or iterator
+        X : pandas Series
+            Time series as a Series with all time steps.
+        window_lengths : set, list or nd-array
             Set of window lengths that will generate the splits within each time
             series. The numbers of subseries generated depends on the length of
             the time series and the length of the window. The normalization is
             the same as it was defined for all windows generated.
-        word_lengths : list or iterator
+        word_lengths : set, list or nd-array
             Set of words lengths that will generate the bag of bags. Each word
             length generates each bag of words and the same alphabet is kept for
             all of the discretizations.
         
         Returns
         -------
-        dims: Pandas data frame with first dimension in column zero
+        word_sequence: 
         """
 
-        #X = check_X(X, enforce_univariate=True, coerce_to_numpy=True)
-        #X = X.squeeze(1)
-        
-        if(window_lengths.size != word_lengths.size):
+        if(type(X) != pd.Series):
+            raise TypeError('MSAX.transform requires as input one timeseries as a pandas Series \
+                            and it received the data as {}'.format(type(X)))
+
+
+        n_window_lens = len(window_lengths)
+        n_word_lens = len(word_lengths)
+        if(n_window_lens != n_word_lens):
             raise RuntimeError("Each window must have one and only one correspondent window")
 
-        for word_length in word_lengths:
-            if word_length < 1 or word_length > 16:
+        for word_len in word_lengths:
+            if word_len < 1 or word_len > 16:
                 raise RuntimeError("Every word length must be an integer between 1 and 16")
 
         # TODO 
         # another function breakpoints if normalize is False
-        breakpoints = self._generate_breakpoints()
-        series_length = X.size
+        series_len = X.size
 
-        bags = pd.DataFrame()
-        dim = []
+        multiresolution = dict()
 
-        for i in range(window_lengths.size):
-            window_length = window_lengths[i]
-            word_length = word_lengths[i]
+        for i in range(n_window_lens):
+            window_len = window_lengths[i]
+            word_len = word_lengths[i]
             
-            bag = {}
-            
-            # TODO
-            # windows = [ts[i:i+9] for i in range(3)]  test Speed up!!
-            num_windows_per_inst = series_length - window_length + 1
-            split = np.array([X[i:i+window_length] for i in range(num_windows_per_inst)])
+            num_windows_per_inst = series_len - window_len + 1
+            split = np.array([X[i:i+window_len] for i in range(num_windows_per_inst)])
 
             split = scipy.stats.zscore(split, axis=1)
             split = np.nan_to_num(split)
 
-            paa = PAA(num_intervals=word_length)
+            paa = PAA(num_intervals=word_len)
             patterns = paa.transform_univariate(split)
             
             words = [self._create_word(pattern, )
                      for pattern in patterns]
+            resolution = '{} {}'.format(window_len,word_len)
+            multiresolution[resolution] = words
 
-            dim.append(words)
-
-        return dim
+        return multiresolution
 
     def _create_word(self, pattern):
         word = ''
