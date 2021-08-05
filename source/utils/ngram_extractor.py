@@ -6,7 +6,7 @@ from utils.resolution import ResolutionHandler
 
 class NgramExtractor(object):
 
-    @classmethod
+
     def get_bonw(word_sequence, reso_matrix):
         '''
         This function receives a multiresolution discretization of a
@@ -22,11 +22,13 @@ class NgramExtractor(object):
             reso_matrix : pandas.DataFrame
                 Columns are resolutions and indexes are ngrams. Each cell
                 must be a boolean validating the correspondent
-                ngram-resolution ()
+                ngram-resolution
             
         Returns
         -------
-
+            bag_of_bags : DataFrame
+                Return a bag of bags as a DataFrame containing all ngram-word
+                frequencies of each resolution to a specific word sequence. 
 
         '''
 
@@ -69,7 +71,10 @@ class NgramExtractor(object):
         return bag_of_bags
 
 
-    def get_ngram_frequency(sequence, window_len, valid_ngrams):
+    def get_ngram_frequency(sequence: pd.Series, window_len, valid_ngrams):
+
+        if(type(sequence)!=pd.Series):
+            raise TypeError('The sequence of words must be a pandas Series')
 
         # variables
         seq_len = len(sequence)
