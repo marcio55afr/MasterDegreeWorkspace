@@ -4,13 +4,13 @@ import unittest
 import random
 from utils.ngram_extractor import NgramExtractor
 
-class TestFunction_get_bonw(unittest.TestCase):
+class TestFunction_get_bob(unittest.TestCase):
 
     def test_simple_run(self):
         word_sequence = {'2 1' : pd.Series(['a','b','c','d','e'])}
         reso_matrix = pd.DataFrame([True], index=[1], columns=['2 1'])
 
-        NgramExtractor.get_bonw(word_sequence, reso_matrix)
+        NgramExtractor.get_bob(word_sequence, reso_matrix)
     
     def test_return_type_and_columns(self):
         word_sequence = {'2 1' : pd.Series(['a','b','c','d','e']),
@@ -20,7 +20,7 @@ class TestFunction_get_bonw(unittest.TestCase):
         expected_type = pd.DataFrame
         expected_columns = ['ngram word','resolution','ngram']
 
-        result = NgramExtractor.get_bonw(word_sequence, reso_matrix)
+        result = NgramExtractor.get_bob(word_sequence, reso_matrix)
         
         received_type = type(result)
         received_columns = result.columns
@@ -30,14 +30,14 @@ class TestFunction_get_bonw(unittest.TestCase):
             assert (col in received_columns)
 
 
-class TestFunction_get_ngram_frequency(unittest.TestCase):
+class TestFunction_get_bonw(unittest.TestCase):
     
     def test_simple_run(self):
         sequence = ['t','e','s','t','r','u','n']
         window_length = 2
         valid_ngrams = [1]
 
-        NgramExtractor.get_ngram_frequency(pd.Series(sequence), window_length, valid_ngrams)
+        NgramExtractor.get_bonw(pd.Series(sequence), window_length, valid_ngrams)
 
     def test_return_bonw_columns(self):
         sequence = ['t','e','s','t','r','u','n']
@@ -46,7 +46,7 @@ class TestFunction_get_ngram_frequency(unittest.TestCase):
 
         expected_columns = ['ngram word', 'frequency']
 
-        df_bonw = NgramExtractor.get_ngram_frequency(pd.Series(sequence), window_length, valid_ngrams)
+        df_bonw = NgramExtractor.get_bonw(pd.Series(sequence), window_length, valid_ngrams)
 
         for col in expected_columns:
             assert (col in df_bonw.columns)
@@ -61,7 +61,7 @@ class TestFunction_get_ngram_frequency(unittest.TestCase):
             'window_intersection c', 'test d', 'c e'
         ]
         
-        df_bonw = NgramExtractor.get_ngram_frequency(pd.Series(sequence), window_length, valid_ngrams)
+        df_bonw = NgramExtractor.get_bonw(pd.Series(sequence), window_length, valid_ngrams)
         received_ngram_words = df_bonw['ngram word'].values
         
         comparison = received_ngram_words == correct_ngram_words
@@ -75,7 +75,7 @@ class TestFunction_get_ngram_frequency(unittest.TestCase):
         
         incorrect_ngram = 'ThisShould NotHappen'
         
-        df_bonw = NgramExtractor.get_ngram_frequency(pd.Series(sequence), window_length, valid_ngrams)
+        df_bonw = NgramExtractor.get_bonw(pd.Series(sequence), window_length, valid_ngrams)
         received_ngram_words = df_bonw['ngram word'].values
         
         assert (incorrect_ngram in received_ngram_words) == False
@@ -90,7 +90,7 @@ class TestFunction_get_ngram_frequency(unittest.TestCase):
         three_gram_word = 'This Should Happen'
         five_gram_word = 'This Should Happen For Sure'
         
-        df_bonw = NgramExtractor.get_ngram_frequency(pd.Series(sequence), window_length, valid_ngrams)
+        df_bonw = NgramExtractor.get_bonw(pd.Series(sequence), window_length, valid_ngrams)
         received_ngram_words = df_bonw['ngram word'].values
         
         assert (three_gram_word in received_ngram_words)
@@ -106,7 +106,7 @@ class TestFunction_get_ngram_frequency(unittest.TestCase):
         
         expected_unique_words = True        
 
-        df_bonw = NgramExtractor.get_ngram_frequency(pd.Series(sequence), window_length, valid_ngrams)
+        df_bonw = NgramExtractor.get_bonw(pd.Series(sequence), window_length, valid_ngrams)
         received_bonw = df_bonw.set_index('ngram word')['frequency']
         
         assert df_bonw['ngram word'].is_unique == expected_unique_words
@@ -125,7 +125,7 @@ class TestFunction_get_ngram_frequency(unittest.TestCase):
         expected_count_word = {'this': 8,
                                'this this': 5}
 
-        df_bonw = NgramExtractor.get_ngram_frequency(pd.Series(sequence), window_length, valid_ngrams)
+        df_bonw = NgramExtractor.get_bonw(pd.Series(sequence), window_length, valid_ngrams)
         received_bonw = df_bonw.set_index('ngram word')['frequency']
         
         assert received_bonw['this'] == expected_count_word['this']

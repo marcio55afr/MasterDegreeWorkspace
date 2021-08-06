@@ -7,12 +7,16 @@ from utils.resolution import ResolutionHandler
 class NgramExtractor(object):
 
 
-    def get_bonw(word_sequence, reso_matrix):
+    def get_bob(word_sequence, reso_matrix):
         '''
+        bob refers to bag of bags.
         This function receives a multiresolution discretization of a
-        single time series and a resolution matrix of ngram-resolutions.
-        It will return the valid ngram-resolutions pointed in the matrix
-        of each resolution inside the multiresolution discretization.
+        single time series and a ngram-multiresolution matrix. It will
+        return the ngram-word frequencies for all valid ngram-resolution
+        that consist in the resolution present in the discretization 
+        word_sequence and a possible ngram present in the reso_matrix.
+        The ngram-resolution is used as a coordinate in the
+        ngram-resolution matrix and it is valid if the ceil is True.
 
         Parameters
         ----------
@@ -60,7 +64,7 @@ class NgramExtractor(object):
             valid_ngrams = reso_matrix[resolution]
             
             # create and count all valid ngrams for this sequence
-            bag_of_ngrams = NgramExtractor.get_ngram_frequency(sequence,
+            bag_of_ngrams = NgramExtractor.get_bonw(sequence,
                                                                window_len,
                                                                valid_ngrams)
             bag_of_ngrams['resolution'] = resolution
@@ -71,14 +75,42 @@ class NgramExtractor(object):
         return bag_of_bags
 
 
-    def get_ngram_frequency(sequence: pd.Series, window_len, valid_ngrams):
+    def get_bonw(sequence: pd.Series, window_len, valid_ngrams):
+        '''
+        bonw refers to bag of ngram words.
+        This function receives a sequence of words discretized with only
+        one resolution and based on the window length used in the
+        discretization it will create the ngrams. The ngrams are created
+        without any intersection of windows inside itself but there is
+        interesections between different ngrams. The 'n' used is passed
+        as a list, valid_ngrams, and the occourence of each one is counted
+        using a dictionary and then transformed to a DataFrame in order
+        to save some info. 
+
+        Parameters
+        ----------
+            sequence : pandas.Series
+                Word sequence discretized in a single resolution.                
+            window_len : pandas.DataFrame
+                Length of the window used to discretize the sequence.
+                Used to avoid intersection of windows inside a ngram.
+            valid_ngrams : list or iterator of int
+                Set of ngrams to create the ngram words.
+            
+        Returns
+        -------
+            bag_of_ngram_words : DataFrame
+                Return a bonw as a DataFrame containing all ngram-word
+                frequencies of a word sequence in a specific resolution. 
+
+        '''
 
         if(type(sequence)!=pd.Series):
             raise TypeError('The sequence of words must be a pandas Series')
 
         # variables
         seq_len = len(sequence)
-        bag_of_ngrams = pd.DataFrame()
+        bag_of_ngram_words = pd.DataFrame()
         
         # loop to process each ngram at a time
         for n in valid_ngrams:
@@ -102,6 +134,6 @@ class NgramExtractor(object):
             df['ngram'] = n
 
             # Concatenate all dataframes
-            bag_of_ngrams = bag_of_ngrams.append(df, ignore_index=True)
+            bag_of_ngram_words = bag_of_ngram_words.append(df, ignore_index=True)
 
-        return bag_of_ngrams
+        return bag_of_ngram_words
