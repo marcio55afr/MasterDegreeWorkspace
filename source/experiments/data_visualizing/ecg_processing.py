@@ -8,8 +8,8 @@ and its importance.
 import sys
 sys.path.append('C:\\Users\\marci\\Desktop\\MasterDegreeWorkspace\\source')
 from experiments.database.ts_handler import get_dataset
-from utils.resolution_handler import ResolutionHandler
+from utils import ResolutionMatrix, ResolutionHandler
 
 train, test = get_dataset('ECG5000')
 
-ResolutionHandler.create_matrix(train.iloc[0,0].size)
+ResolutionMatrix.create_matrix(train.iloc[0,0].size)
