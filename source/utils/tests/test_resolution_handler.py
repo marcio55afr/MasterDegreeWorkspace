@@ -93,7 +93,7 @@ class Test_function_generate_dataframe(unittest.TestCase):
         windows = ResolutionHandler.generate_window_lengths(smallest_window,
                                                                  biggest_window,
                                                                  num_windows)
-        ResolutionHandler._generate_word_lengths(windows,
+        ResolutionHandler.generate_word_lengths(windows,
                                             smallest_word,
                                             dimension_reduction)
         assert True
