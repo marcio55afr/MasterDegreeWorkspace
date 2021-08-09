@@ -3,16 +3,15 @@ from sktime.benchmarking.data import UEADataset
 import pandas as pd
 import numpy as np
 
-TS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Univariate_ts\\")
+#TS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Univariate_ts\\")
+#DATASETS = [UEADataset(path=TS_PATH, name=name) for name in DATASET_NAMES]
+
 HDF_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "hdf\\")
 EXTENSION = '.h5'
-
 DATASET_NAMES = ['Worms', 'StarLightCurves', 'ECG5000']
-DATASETS = [UEADataset(path=TS_PATH, name=name) for name in DATASET_NAMES]
 KEYS = ['train', 'test']
 
-
-def get_ts( dataset_name ):
+def get_dataset( dataset_name ) -> tuple:
     path = HDF_PATH + dataset_name + EXTENSION
     train = pd.read_hdf(path,key='train')
     test = pd.read_hdf(path,key='test')
