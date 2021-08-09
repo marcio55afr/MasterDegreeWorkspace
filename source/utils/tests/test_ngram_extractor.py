@@ -1,3 +1,6 @@
+import sys
+sys.path.append('C:\\Users\\marci\\Desktop\\MasterDegreeWorkspace\\source')
+
 import pandas as pd
 import numpy as np
 import unittest

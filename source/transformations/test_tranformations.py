@@ -1,5 +1,5 @@
 import sys
-sys.path.append('C:\\Users\\danie\\Documents\\Marcio\\MasterDegreeWorkspace\\source')
+sys.path.append('C:\\Users\\marci\\Desktop\\MasterDegreeWorkspace\\source')
 
 import pandas as pd
 import numpy as np
@@ -29,9 +29,7 @@ class TestPAAaprroximation(unittest.TestCase):
         
         paa = PAA(num_intervals=word_length)
         approximations = paa.fit(None).transform_univariate(timeseries)
-        
-        print(approximations)
-        
+                
         comparison = approximations == correct_answer
         assert comparison.all() == True
 
