@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 
-from utils.resolution import ResolutionHandler
+from utils.resolution_handler import ResolutionHandler
 
 class NgramExtractor(object):
 
