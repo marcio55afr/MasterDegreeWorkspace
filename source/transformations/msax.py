@@ -6,7 +6,7 @@ import pandas as pd
 import scipy.stats
 
 from sktime.transformations.base import _PanelToPanelTransformer
-from transformations.paa import PAA
+from source.transformations import PAA
 
 #    TO DO: verify this returned pandas is consistent with sktime
 #    definition. Timestamps?
@@ -61,12 +61,10 @@ class MSAX(_PanelToPanelTransformer):
 
     def __init__(self,
                  alphabet_size = 4,
-                 word_prop = .80,
                  normalize = True,
                  remove_repeat_words=False):
 
         self.alphabet_size = alphabet_size
-        self.word_prop = word_prop
         self.normalize = normalize 
         self.remove_repeat_words = remove_repeat_words
         
@@ -110,10 +108,11 @@ class MSAX(_PanelToPanelTransformer):
         if(n_window_lens != n_word_lens):
             raise RuntimeError("Each window must have one and only one correspondent window")
 
+        '''
         for word_len in word_lengths:
             if word_len < 1 or word_len > 16:
                 raise RuntimeError("Every word length must be an integer between 1 and 16")
-
+        '''
         # TODO 
         # another function breakpoints if normalize is False
         series_len = X.size
@@ -133,8 +132,8 @@ class MSAX(_PanelToPanelTransformer):
             paa = PAA(num_intervals=word_len)
             patterns = paa.transform_univariate(split)
             
-            words = [self._create_word(pattern, )
-                     for pattern in patterns]
+            words = pd.Series([self._create_word(pattern)
+                               for pattern in patterns])
             resolution = '{} {}'.format(window_len,word_len)
             multiresolution[resolution] = words
 

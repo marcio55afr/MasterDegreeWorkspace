@@ -6,8 +6,7 @@ import numpy as np
 import unittest
 import scipy.stats
 import random
-from transformations.paa import PAA
-from transformations.msax import MSAX
+from source.transformations import MSAX, PAA
 
 
 
