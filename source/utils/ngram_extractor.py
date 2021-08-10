@@ -7,7 +7,7 @@ from utils.resolution_handler import ResolutionHandler
 class NgramExtractor(object):
 
 
-    def get_bob(word_sequence, reso_matrix):
+    def get_bob(word_sequence, resolution_matrix):
         '''
         bob refers to bag of bags.
         This function receives a multiresolution discretization of a
@@ -23,7 +23,7 @@ class NgramExtractor(object):
             word_sequence : dict
                 The key is the resolution and its content is a word
                 sequence discretized using this key.
-            reso_matrix : pandas.DataFrame
+            resolution_matrix : pandas.DataFrame
                 Columns are resolutions and indexes are ngrams. Each cell
                 must be a boolean validating the correspondent
                 ngram-resolution
@@ -40,15 +40,15 @@ class NgramExtractor(object):
             raise TypeError('The parameter word_sequence needs to be a '+
             'multiresolution discretization as a dict format.')
         
-        if(type(reso_matrix) != pd.DataFrame):
+        if(type(resolution_matrix) != pd.DataFrame):
             raise TypeError('The parameter reso_matrix needs to be a '+
             'DataFrame')
 
-        expec_reso = reso_matrix.columns
-        recev_reso = word_sequence.keys()
+        expected_resolutions = resolution_matrix.columns
+        received_resolutions = word_sequence.keys()
 
-        for resolution in recev_reso:
-            if(resolution not in expec_reso):
+        for resolution in received_resolutions:
+            if(resolution not in expected_resolutions):
                 raise RuntimeError('Received a resolution within the '+
                 'word_sequence that is not expected in the reso_matrix.')
         
@@ -56,17 +56,18 @@ class NgramExtractor(object):
         # Loop for processing each sequence related to each resolution
         # one by one.
         bag_of_bags = pd.DataFrame()
-        for resolution in recev_reso:
+        for resolution in received_resolutions:
 
             # variables
             sequence = word_sequence[resolution]
             window_len = ResolutionHandler.get_window_from(resolution)
-            valid_ngrams = reso_matrix[resolution]
+            valid_ngrams = resolution_matrix[resolution] == 1
+            ngrams = resolution_matrix[valid_ngrams].index
             
             # create and count all valid ngrams for this sequence
             bag_of_ngrams = NgramExtractor.get_bonw(sequence,
-                                                               window_len,
-                                                               valid_ngrams)
+                                                    window_len,
+                                                    ngrams)
             bag_of_ngrams['resolution'] = resolution
 
             # concatenate all bag of ngram words in the same dataframe
@@ -75,7 +76,7 @@ class NgramExtractor(object):
         return bag_of_bags
 
 
-    def get_bonw(sequence: pd.Series, window_len, valid_ngrams):
+    def get_bonw(sequence: pd.Series, window_len, ngrams):
         '''
         bonw refers to bag of ngram words.
         This function receives a sequence of words discretized with only
@@ -113,7 +114,7 @@ class NgramExtractor(object):
         bag_of_ngram_words = pd.DataFrame()
         
         # loop to process each ngram at a time
-        for n in valid_ngrams:
+        for n in ngrams:
             # It is necessary to verify this?
             # check 
             if((seq_len -(n-1)*window_len) <= 0):
