@@ -1,5 +1,3 @@
-
-import math
 import numpy as np
 import pandas as pd
 
@@ -13,15 +11,67 @@ class ResolutionHandler():
     
     
     # Class functions
-
+    
     def get_window_from(resolution):
-        return int(resolution.split()[ ResolutionHandler.WINDOW_SPLIT_INDEX ])
+        """
+        Parameters
+        ----------
+        resolution : str
+            Resolution as string with one window and word lengths.
 
-    def get_word_from(resolution):
-        return int(resolution.split()[ ResolutionHandler.WORD_SPLIT_INDEX ])
+        Returns
+        -------
+        window : int
+            Return only the window length.
 
-    def get_ngram_from(ngram_resolution):
-        return int(ngram_resolution.split()[ ResolutionHandler.NGRAM_SPLIT_INDEX ])    
+        """
+        window = int(resolution.split()[ ResolutionHandler.WINDOW_SPLIT_INDEX ])
+        return window
+
+    def get_ww_from(resolution):
+        """
+        ww - abreviation of Window Word
+
+        Parameters
+        ----------
+        resolution : str
+            String with window and word lengths, in this order, splited by a
+            space
+
+        Returns
+        -------
+        window : int
+            window length.
+        word : TYPE
+            word length.
+
+        """
+        split = resolution.split()
+        window = int(split[ ResolutionHandler.WINDOW_SPLIT_INDEX ])
+        word = int(split[ ResolutionHandler.WORD_SPLIT_INDEX ])
+        return window, word
+    
+    def get_wwn_from(ngram_resolution):
+        """
+        wwn - abreviation of Window Word Ngram
+        
+        Parameters
+        ----------
+        ngram_resolution : str
+            String with the lengths of window word and ngram in this order.
+            Splited by a space
+
+        Returns
+        -------
+        tuple : int, int, int
+            Return the window, word and ngram
+            
+        """
+        split = ngram_resolution.split()
+        return (int(split[ ResolutionHandler.WINDOW_SPLIT_INDEX ]),
+                int(split[ ResolutionHandler.WORD_SPLIT_INDEX ]),
+                int(split[ ResolutionHandler.NGRAM_SPLIT_INDEX ]))
+    
 
     def generate_window_lengths(min_window_len, max_window_len, num_windows):       
         windows = []

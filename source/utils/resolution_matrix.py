@@ -38,3 +38,14 @@ class ResolutionMatrix(object):
                                                               word_lengths,
                                                               self.max_ngram)
         return matrix
+    
+    def get_windows_and_words(self):
+        windows = []
+        words = []
+        columns = self.matrix.columns
+        for resolution in columns:
+            wi,wo = ResolutionHandler.get_ww_from(resolution)
+            windows.append(wi)
+            words.append(wo)
+        
+        return windows, words

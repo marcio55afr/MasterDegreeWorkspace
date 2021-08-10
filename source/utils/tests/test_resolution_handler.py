@@ -9,7 +9,20 @@ from utils.resolution_handler import ResolutionHandler
 
 
 class Test_function_get_info_from(unittest.TestCase):
-    
+
+    def test_WindowWord_from_Resolution(self):
+        resolution = '5421 2312'
+        
+        expected_window = 5421
+        expected_word = 2312
+        
+        result = ResolutionHandler.get_ww_from(resolution)
+        received_window = result[0]
+        received_word = result[1]
+        
+        assert expected_window == received_window
+        assert expected_word == received_word
+        
     def test_WindowWordNgram_from_NgramResolution(self):
         ngram_resolution = '55 44 8'
         
@@ -17,9 +30,10 @@ class Test_function_get_info_from(unittest.TestCase):
         expected_word = 44
         expected_ngram = 8
         
-        received_window = ResolutionHandler.get_window_from(ngram_resolution)
-        received_word = ResolutionHandler.get_word_from(ngram_resolution)
-        received_ngram = ResolutionHandler.get_ngram_from(ngram_resolution)
+        result = ResolutionHandler.get_wwn_from(ngram_resolution)
+        received_window = result[0]
+        received_word = result[1]
+        received_ngram = result[2]
         
         assert expected_window == received_window
         assert expected_word == received_word
