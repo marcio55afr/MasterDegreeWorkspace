@@ -13,8 +13,17 @@ The first look at the bag of bags extracted from the datasets, couting the total
 comparing the counts of train and test split and what not.
 
 ### Total of words
+
 ```
 ECG5000 - train
-get_unique_words(bag_of_bags).size
+>>> train.size
+500
+>>> get_unique_words(bag_of_bags).size
 1367590
+
+ECG5000 - test
+>>> train.size
+4500
+>>> get_unique_words(bag_of_bags).size
+11159985
 ```
