@@ -4,9 +4,6 @@ import pandas as pd
 import numpy as np
 
 DATASET_NAMES = ['Worms', 'StarLightCurves', 'ECG5000']
-TS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Univariate_ts\\")
-DATASETS = [UEADataset(path=TS_PATH, name=name) for name in DATASET_NAMES]
-
 HDF_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "hdf\\")
 EXTENSION = '.h5'
 KEYS = ['train', 'test']
@@ -40,6 +37,8 @@ def get_dataframe_from_tsfiles():
     None.
 
     """
+    TS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Univariate_ts\\")
+    DATASETS = [UEADataset(path=TS_PATH, name=name) for name in DATASET_NAMES]
     
     if not os.path.exists(HDF_PATH):
         os.mkdir(HDF_PATH)
