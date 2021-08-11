@@ -108,6 +108,8 @@ class NgramExtractor(object):
 
         if(type(sequence)!=pd.Series):
             raise TypeError('The sequence of words must be a pandas Series')
+        if( (ngrams < 1).any() ):
+            raise ValueError('All ngrams must be greater than or equal to 1')
 
         # variables
         seq_len = len(sequence)
