@@ -28,10 +28,10 @@ def main():
     
     dataset = 'ECG5000'
     #exp_CountUniqueWords(dataset)
-    exp_CountUniqueWordsByClass(dataset)
+    #exp_CountUniqueWordsByClass(dataset)
     #exp_CountUniqueWordsByResolution(dataset)
-    exp_CountAlwaysPresentWordByClass(dataset)
     exp_CountExclusiveWordByClass(dataset)
+    exp_CountAlwaysPresentWordByClass(dataset)
     exp_CountAlmostAlwaysPresentWordByClass(dataset)
 
 
@@ -72,8 +72,8 @@ def exp_CountUniqueWordsByClass(dataset):
         result.loc[c,'test'] = unique_test.size
         result.loc[c,'intersection'] = np.intersect1d(unique_train,
                                                       unique_test).size
-        result.loc[c,'train samples'] = (bob_train['label'] == c).size
-        result.loc[c,'test samples'] = (bob_test['label'] == c).size
+        result.loc[c,'train samples'] = (bob_train['label'] == c).sum()
+        result.loc[c,'test samples'] = (bob_test['label'] == c).sum()
 
     result.index.name = 'Class'
     print(result)
@@ -118,7 +118,7 @@ def exp_CountAlwaysPresentWordByClass(dataset):
     bob_train['label'] = train_labels.loc[bob_train['sample']].values
     bob_test['label'] = test_labels.loc[bob_test['sample']].values
     
-    def _get_always_present_word(data, _class):
+    def _get_always_present_word(data, c):
         equaL_class_sample = data.loc[data['label'] == c]
         n_samples = equaL_class_sample['sample'].unique().size
         class_words = Counter(equaL_class_sample['ngram word'])
@@ -136,8 +136,8 @@ def exp_CountAlwaysPresentWordByClass(dataset):
         
         train_size.loc[c] = ap_word_train.size
         test_size.loc[c] = ap_word_test.size
-        intersection.loc[c] = np.intersect1d(ap_word_train,
-                                             ap_word_test).size
+        intersection.loc[c] = np.intersect1d(ap_word_train.index,
+                                             ap_word_test.index).size
     
     result = pd.DataFrame()
     result.index.name = 'Class'
@@ -176,8 +176,8 @@ def exp_CountExclusiveWordByClass(dataset):
         
         train_size.loc[c] = ex_word_train.size
         test_size.loc[c] = ex_word_test.size
-        intersection.loc[c] = np.intersect1d(ex_word_train,
-                                             ex_word_test).size
+        intersection.loc[c] = np.intersect1d(ex_word_train.index,
+                                             ex_word_test.index).size
     
     result = pd.DataFrame()
     result.index.name = 'Class'
@@ -195,12 +195,12 @@ def exp_CountAlmostAlwaysPresentWordByClass(dataset):
     bob_train['label'] = train_labels.loc[bob_train['sample']].values
     bob_test['label'] = test_labels.loc[bob_test['sample']].values
     
-    def _get_always_present_word(data, _class):
+    def _get_always_present_word(data, c):
         equaL_class_sample = data.loc[data['label'] == c]
         n_samples = equaL_class_sample['sample'].unique().size
         class_words = Counter(equaL_class_sample['ngram word'])
         class_words = pd.Series(class_words)
-        ap_word = class_words.loc[class_words >= .5*n_samples]
+        ap_word = class_words.loc[class_words >= .8*n_samples]
         return ap_word
     
     train_size = pd.Series(dtype=np.int64)
@@ -213,8 +213,8 @@ def exp_CountAlmostAlwaysPresentWordByClass(dataset):
         
         train_size.loc[c] = ap_word_train.size
         test_size.loc[c] = ap_word_test.size
-        intersection.loc[c] = np.intersect1d(ap_word_train,
-                                             ap_word_test).size
+        intersection.loc[c] = np.intersect1d(ap_word_train.index,
+                                             ap_word_test.index).size
     
     result = pd.DataFrame()
     result.index.name = 'Class'
