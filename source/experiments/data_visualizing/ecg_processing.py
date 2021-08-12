@@ -6,7 +6,8 @@ and its importance.
 """
 from genericpath import isfile
 import sys
-sys.path.append('C:\\Users\\marci\\Desktop\\MasterDegreeWorkspace\\source')
+sys.path.append('C:/Users/danie/Documents/Marcio/MasterDegreeWorkspace/source')
+sys.path.append('C:/Users/danie/Documents/Marcio/MasterDegreeWorkspace')
 import os
 from collections import Counter
 import pandas as pd
@@ -228,7 +229,7 @@ def _get_labels_from(dataset):
 
 def _get_bag_of_bags_from(dataset):    
     folder = {
-        'ECG5000' : 'ecg'
+        'ECG5000' : 'C:/Users/danie/Documents/Marcio/MasterDegreeWorkspace/source/experiments/data_visualizing/ecg'
         }
     
     bob_train_path = folder[dataset]+'/bag_of_bags_train.csv'
@@ -240,12 +241,14 @@ def _get_bag_of_bags_from(dataset):
         return bob_train, bob_test
     
     train_set, test_set = get_dataset(dataset)
-    bob_train = _extract_bob_from(test_set.data)
-    bob_test = _extract_bob_from(train_set.data)
+    bob_train = _extract_bob_from(train_set.data)
     print('\nWriting down the bag of bags of the train part')
-    bob_train.to_csv(bob_train_path)
+    bob_train.to_csv(bob_train_path, index=False)
+
+    bob_test = _extract_bob_from(test_set.data)
     print('\nWriting down the bag of bags of the test part')
-    bob_test.to_csv(bob_test_path)
+    bob_test.to_csv(bob_test_path, index=False)
+    return bob_train, bob_test
 
 def _extract_bob_from(timeseries_set):
     rm = ResolutionMatrix(timeseries_set.iloc[0].size)
