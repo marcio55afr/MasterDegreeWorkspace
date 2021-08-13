@@ -24,46 +24,45 @@ from transformations import MSAX
 
 def main():
 
+    # get the bag of bags
     DATASETS = ['ECG5000', 'StartLightCurtes', 'Worms']
-    
     dataset = 'ECG5000'
-    #exp_CountUniqueWords(dataset)
-    #exp_CountUniqueWordsByClass(dataset)
-    #exp_CountUniqueWordsByResolution(dataset)
-    exp_CountExclusiveWordByClass(dataset)
-    exp_CountAlwaysPresentWordByClass(dataset)
-    exp_CountAlmostAlwaysPresentWordByClass(dataset)
+    print('\n\nDataset: {}'.format(dataset))
+    bob_train, bob_test = _get_bag_of_bags_from(dataset)
+    classes = bob_train['label'].unique()
+
+    # start the experiments
+    #exp_CountUniqueWords(bob_train, bob_test)
+    #exp_CountUniqueWordsByClass(bob_train, bob_test, classes)
+    #exp_CountUniqueWordsByResolution(bob_train, bob_test)
+    #exp_CountExclusiveWordByClass(bob_train, bob_test, classes)
+    #exp_CountAlwaysPresentWordByClass(bob_train, bob_test, classes)
+    #exp_CountAlmostAlwaysPresentWordByClass(bob_train, bob_test, classes)
+    exp_AlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes)
 
 
-def exp_CountUniqueWords(dataset):
+def exp_CountUniqueWords(bob_train, bob_test):
     
     print("\n\nExperiment - Counting unique words\n")
-    bob_train, bob_test = _get_bag_of_bags_from(dataset)
     
     unique_train = bob_train['ngram word'].unique()
     del(bob_train)
     unique_test = bob_test['ngram word'].unique()
     del(bob_test)
-    
-    print(dataset)
+
     print('Train unique words: {}'.format(unique_train.size))
     print('Test unique words: {}'.format(unique_test.size))
     intersection = np.intersect1d(unique_train, unique_test)
     print("Intersecting unique words: {}".format(intersection.size))
 
-def exp_CountUniqueWordsByClass(dataset):
+def exp_CountUniqueWordsByClass(bob_train, bob_test, classes):
     
     print("\n\nExperiment - Counting unique words per class\n")
-    # get data
-    bob_train, bob_test = _get_bag_of_bags_from(dataset)
-    train_labels, test_labels = _get_labels_from(dataset)
-    train_classes = train_labels.unique()
     
-    bob_train['label'] = train_labels.loc[bob_train['sample']].values
-    bob_test['label'] = test_labels.loc[bob_test['sample']].values
-    
-    result = pd.DataFrame(dtype=np.int64)
-    for c in train_classes:
+    gp_train = bob_train[['sample','label','ngram']].groupby(['sample','label']).count().groupby('label').count()['ngram']
+    gp_test = bob_test[['sample','label','ngram']].groupby(['sample','label']).count().groupby('label').count()['ngram']
+    result = pd.DataFrame()
+    for c in classes:
         unique_train = bob_train.loc[bob_train['label'] == c,
                                      'ngram word'].unique()
         unique_test = bob_test.loc[bob_test['label'] == c,
@@ -72,17 +71,15 @@ def exp_CountUniqueWordsByClass(dataset):
         result.loc[c,'test'] = unique_test.size
         result.loc[c,'intersection'] = np.intersect1d(unique_train,
                                                       unique_test).size
-        result.loc[c,'train samples'] = (bob_train['label'] == c).sum()
-        result.loc[c,'test samples'] = (bob_test['label'] == c).sum()
+        result.loc[c,'train samples'] = gp_train.loc[c]
+        result.loc[c,'test samples'] = gp_test.loc[c]
 
     result.index.name = 'Class'
-    print(result)
+    print(result.astype(np.int64))
 
-def exp_CountUniqueWordsByResolution(dataset):
+def exp_CountUniqueWordsByResolution(bob_train, bob_test):
     
     print("\n\nExperiment - Counting unique words per resolution\n")
-    # get data
-    bob_train, bob_test = _get_bag_of_bags_from(dataset)
     
     rm_train = pd.DataFrame(dtype=int)
     rm_test = pd.DataFrame(dtype=int)
@@ -102,21 +99,15 @@ def exp_CountUniqueWordsByResolution(dataset):
                                           unique_words_test).size
             rm_intersection.loc[n,reso] = unique_words
     
-    rm_train.columns.name = 'train'
-    rm_test.columns.name = 'test'
-    rm_intersection.columns.name = 'intersection'
+    rm_train.fillna(0).astype(np.int64).columns.name = 'train'
+    rm_test.fillna(0).astype(np.int64).columns.name = 'test'
+    rm_intersection.fillna(0).astype(np.int64).columns.name = 'intersection'
     print(rm_train,end='\n\n')
     print(rm_test,end='\n\n')
     print(rm_intersection,end='\n\n')
     
-def exp_CountAlwaysPresentWordByClass(dataset):    
+def exp_CountAlwaysPresentWordByClass(bob_train, bob_test, classes):    
     print("\n\nExperiment - Counting words always present in each class\n")
-    # get data
-    bob_train, bob_test = _get_bag_of_bags_from(dataset)
-    train_labels, test_labels = _get_labels_from(dataset)
-    
-    bob_train['label'] = train_labels.loc[bob_train['sample']].values
-    bob_test['label'] = test_labels.loc[bob_test['sample']].values
     
     def _get_always_present_word(data, c):
         equaL_class_sample = data.loc[data['label'] == c]
@@ -126,36 +117,22 @@ def exp_CountAlwaysPresentWordByClass(dataset):
         ap_word = class_words.loc[class_words == n_samples]
         return ap_word
     
-    train_size = pd.Series(dtype=np.int64)
-    test_size = pd.Series(dtype=np.int64)
-    intersection = pd.Series(dtype=np.int64)
-    classes = train_labels.unique()
+    result = pd.DataFrame(dtype=np.int64)
     for c in classes:
         ap_word_train = _get_always_present_word(bob_train, c)
         ap_word_test = _get_always_present_word(bob_test, c)
         
-        train_size.loc[c] = ap_word_train.size
-        test_size.loc[c] = ap_word_test.size
-        intersection.loc[c] = np.intersect1d(ap_word_train.index,
-                                             ap_word_test.index).size
-    
-    result = pd.DataFrame()
+        result.loc[c,'Train'] = ap_word_train.size
+        result.loc[c,'Test'] = ap_word_test.size
+        result.loc[c,'Intersection']  = np.intersect1d(ap_word_train.index,
+                                                       ap_word_test.index).size 
     result.index.name = 'Class'
-    result['train'] = train_size
-    result['test'] = test_size
-    result['intersection'] = intersection
-    print(result)
+    print(result.astype(np.int64))
     
-def exp_CountExclusiveWordByClass(dataset):    
+def exp_CountExclusiveWordByClass(bob_train, bob_test, classes):    
     print("\n\nExperiment - Counting exclusive words of each class\n")
-    # get data
-    bob_train, bob_test = _get_bag_of_bags_from(dataset)
-    train_labels, test_labels = _get_labels_from(dataset)
     
-    bob_train['label'] = train_labels.loc[bob_train['sample']].values
-    bob_test['label'] = test_labels.loc[bob_test['sample']].values
-    
-    def _get_exclusive_word(data, _class):
+    def _get_exclusive_word(data, c):
         mask = data['label'] == c
         equaL_class_sample = data.loc[ mask ]
         others_classes_sample = data.loc[ ~mask ]
@@ -166,36 +143,22 @@ def exp_CountExclusiveWordByClass(dataset):
         ex_words = class_words - (class_words&other_classes_words)
         return pd.Series(ex_words)
     
-    train_size = pd.Series(dtype=np.int64)
-    test_size = pd.Series(dtype=np.int64)
-    intersection = pd.Series(dtype=np.int64)
-    classes = train_labels.unique()
+    result = pd.DataFrame(dtype=np.int64)
     for c in classes:
         ex_word_train = _get_exclusive_word(bob_train, c)
         ex_word_test = _get_exclusive_word(bob_test, c)
         
-        train_size.loc[c] = ex_word_train.size
-        test_size.loc[c] = ex_word_test.size
-        intersection.loc[c] = np.intersect1d(ex_word_train.index,
+        result.loc['Train',c] = ex_word_train.size
+        result.loc['Test',c] = ex_word_test.size
+        result.loc['Intersection',c] = np.intersect1d(ex_word_train.index,
                                              ex_word_test.index).size
-    
-    result = pd.DataFrame()
     result.index.name = 'Class'
-    result['train'] = train_size
-    result['test'] = test_size
-    result['intersection'] = intersection
-    print(result)
+    print(result.astype(np.int64))
     
-def exp_CountAlmostAlwaysPresentWordByClass(dataset):    
+def exp_CountAlmostAlwaysPresentWordByClass(bob_train, bob_test, classes):    
     print("\n\nExperiment - Counting words almost always present in each class\n")
-    # get data
-    bob_train, bob_test = _get_bag_of_bags_from(dataset)
-    train_labels, test_labels = _get_labels_from(dataset)
     
-    bob_train['label'] = train_labels.loc[bob_train['sample']].values
-    bob_test['label'] = test_labels.loc[bob_test['sample']].values
-    
-    def _get_always_present_word(data, c):
+    def _get_almost_always_present_word(data, c):
         equaL_class_sample = data.loc[data['label'] == c]
         n_samples = equaL_class_sample['sample'].unique().size
         class_words = Counter(equaL_class_sample['ngram word'])
@@ -203,25 +166,57 @@ def exp_CountAlmostAlwaysPresentWordByClass(dataset):
         ap_word = class_words.loc[class_words >= .8*n_samples]
         return ap_word
     
-    train_size = pd.Series(dtype=np.int64)
-    test_size = pd.Series(dtype=np.int64)
-    intersection = pd.Series(dtype=np.int64)
-    classes = train_labels.unique()
+    result = pd.DataFrame(dtype=np.int64)
     for c in classes:
-        ap_word_train = _get_always_present_word(bob_train, c)
-        ap_word_test = _get_always_present_word(bob_test, c)
-        
-        train_size.loc[c] = ap_word_train.size
-        test_size.loc[c] = ap_word_test.size
-        intersection.loc[c] = np.intersect1d(ap_word_train.index,
-                                             ap_word_test.index).size
-    
-    result = pd.DataFrame()
+        ap_word_train = _get_almost_always_present_word(bob_train, c)
+        ap_word_test = _get_almost_always_present_word(bob_test, c)
+        intersecting_words = np.intersect1d(ap_word_train.index,
+                                            ap_word_test.index)
+        result.loc['Train',c] = ap_word_train.size
+        result.loc['Test',c] = ap_word_test.size
+        result.loc['Intersection',c] = len(intersecting_words)
     result.index.name = 'Class'
-    result['train'] = train_size
-    result['test'] = test_size
-    result['intersection'] = intersection
-    print(result)
+    print(result.astype(np.int64))
+
+def exp_AlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes):    
+    print("\n\nExperiment - Counting the frequency of words always present in each class\n")
+    
+    def _get_relative_frequency_of_always_present_word(data, c):
+        equaL_class_sample = data.loc[data['label'] == c]
+        n_samples = equaL_class_sample['sample'].unique().size
+        class_words = Counter(equaL_class_sample['ngram word'])
+        class_words = pd.Series(class_words)
+        ap_word = class_words.loc[class_words >= n_samples]
+        
+        equaL_class_words = equaL_class_sample.set_index('ngram word')
+        equaL_class_words = equaL_class_words.loc[ap_word.index,'frequency']
+        word_frequencies = equaL_class_words.groupby('ngram word').sum()
+        return word_frequencies, n_samples
+    
+    for c in classes:
+        ap_word_freq_train, train_samples = _get_relative_frequency_of_always_present_word(bob_train, c)
+        ap_word_freq_test, test_samples = _get_relative_frequency_of_always_present_word(bob_test, c)
+        intersecting_words = np.intersect1d(ap_word_freq_train.index,
+                                            ap_word_freq_test.index)
+        print('\n\nClass :{}\n'.format(c))
+        
+        ap_word_freq_train.name = 'Train'
+        ap_word_mean_freq = ap_word_freq_train/train_samples
+        ap_word_mean_freq.name = 'Mean'
+        train = pd.concat([ap_word_freq_train,ap_word_mean_freq],axis=1)
+        
+        ap_word_freq_test.name = 'Test'
+        ap_word_mean_freq = ap_word_freq_test/test_samples
+        ap_word_mean_freq.name = 'Mean'
+        test = pd.concat([ap_word_freq_train,ap_word_mean_freq],axis=1)
+        
+        result = pd.concat([train, test],axis=1)
+        result = result.fillna(0).astype(np.int64)
+        result.loc[ intersecting_words, 'Intersection' ] = intersecting_words
+        result['train_samples'] = int(train_samples)
+        result['test_samples'] = int(test_samples)
+        result = result.fillna('')
+        print(result)
 
 def _get_labels_from(dataset):
     train_set, test_set = get_dataset(dataset)
