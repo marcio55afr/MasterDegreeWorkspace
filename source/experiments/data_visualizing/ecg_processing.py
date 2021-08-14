@@ -6,8 +6,8 @@ and its importance.
 """
 from genericpath import isfile
 import sys
-sys.path.append('C:/Users/danie/Documents/Marcio/MasterDegreeWorkspace/source')
-sys.path.append('C:/Users/danie/Documents/Marcio/MasterDegreeWorkspace')
+sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace/source')
+sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace')
 import os
 from collections import Counter
 import pandas as pd
@@ -24,21 +24,21 @@ from transformations import MSAX
 
 def main():
 
-    # get the bag of bags
     DATASETS = ['ECG5000', 'StartLightCurtes', 'Worms']
-    dataset = 'ECG5000'
-    print('\n\nDataset: {}'.format(dataset))
-    bob_train, bob_test = _get_bag_of_bags_from(dataset)
-    classes = bob_train['label'].unique()
-
-    # start the experiments
-    #exp_CountUniqueWords(bob_train, bob_test)
-    #exp_CountUniqueWordsByClass(bob_train, bob_test, classes)
-    #exp_CountUniqueWordsByResolution(bob_train, bob_test)
-    #exp_CountExclusiveWordByClass(bob_train, bob_test, classes)
-    #exp_CountAlwaysPresentWordByClass(bob_train, bob_test, classes)
-    #exp_CountAlmostAlwaysPresentWordByClass(bob_train, bob_test, classes)
-    exp_AlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes)
+    for dataset in ['ECG5000']:
+        print('\n\nDataset: {}'.format(dataset))
+        # get the bag of bags
+        bob_train, bob_test = _get_bag_of_bags_from(dataset)
+        classes = bob_train['label'].unique()
+    
+        # start the experiments
+        exp_CountUniqueWords(bob_train, bob_test)
+        exp_CountUniqueWordsByClass(bob_train, bob_test, classes)
+        #exp_CountUniqueWordsByResolution(bob_train, bob_test)
+        #exp_CountExclusiveWordByClass(bob_train, bob_test, classes)
+        #exp_CountAlwaysPresentWordByClass(bob_train, bob_test, classes)
+        #exp_CountAlmostAlwaysPresentWordByClass(bob_train, bob_test, classes)
+        #exp_AlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes)
 
 
 def exp_CountUniqueWords(bob_train, bob_test):
@@ -222,9 +222,11 @@ def _get_labels_from(dataset):
     train_set, test_set = get_dataset(dataset)
     return train_set.target, test_set.target
 
-def _get_bag_of_bags_from(dataset):    
+def _get_bag_of_bags_from(dataset):
+    path = 'C:/Users/marci/Desktop/MasterDegreeWorkspace/source/experiments/data_visualizing/'
     folder = {
-        'ECG5000' : 'C:/Users/danie/Documents/Marcio/MasterDegreeWorkspace/source/experiments/data_visualizing/ecg'
+        'ECG5000' : path+'ecg',
+        'Worms': path+'worms'
         }
     
     bob_train_path = folder[dataset]+'/bag_of_bags_train.csv'
@@ -236,11 +238,15 @@ def _get_bag_of_bags_from(dataset):
         return bob_train, bob_test
     
     train_set, test_set = get_dataset(dataset)
+    train_labels, test_labels = _get_labels_from(dataset)
+    
     bob_train = _extract_bob_from(train_set.data)
+    bob_train['label'] = train_labels.loc[bob_train['sample']].values
     print('\nWriting down the bag of bags of the train part')
     bob_train.to_csv(bob_train_path, index=False)
 
     bob_test = _extract_bob_from(test_set.data)
+    bob_test['label'] = test_labels.loc[bob_test['sample']].values
     print('\nWriting down the bag of bags of the test part')
     bob_test.to_csv(bob_test_path, index=False)
     return bob_train, bob_test
