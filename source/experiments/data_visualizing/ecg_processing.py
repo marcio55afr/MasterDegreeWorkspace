@@ -26,7 +26,20 @@ def main():
 
     DATASETS = ['ECG5000', 'StartLightCurtes', 'Worms']
     for dataset in ['ECG5000']:
-        print('\n\nDataset: {}'.format(dataset))
+        # change the print location
+        path='C:/Users/marci/Desktop/MasterDegreeWorkspace/source/experiments/data_visualizing/'
+        print_path = path+dataset+'.txt'
+        f = open(print_path, 'a')
+        sys.stdout = f
+        
+        print('\n\nDataset: {}'.format(dataset))    
+        print('################################')
+        train_set,_ = get_dataset(dataset)
+        rm = ResolutionMatrix(train_set.iloc[0,0].size)
+        del(train_set)
+        print('Resolution Matrix')
+        print(rm.matrix)
+        
         # get the bag of bags
         bob_train, bob_test = _get_bag_of_bags_from(dataset)
         classes = bob_train['label'].unique()
@@ -34,11 +47,11 @@ def main():
         # start the experiments
         exp_CountUniqueWords(bob_train, bob_test)
         exp_CountUniqueWordsByClass(bob_train, bob_test, classes)
-        #exp_CountUniqueWordsByResolution(bob_train, bob_test)
-        #exp_CountExclusiveWordByClass(bob_train, bob_test, classes)
-        #exp_CountAlwaysPresentWordByClass(bob_train, bob_test, classes)
-        #exp_CountAlmostAlwaysPresentWordByClass(bob_train, bob_test, classes)
-        #exp_AlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes)
+        exp_CountUniqueWordsByResolution(bob_train, bob_test)
+        exp_CountExclusiveWordByClass(bob_train, bob_test, classes)
+        exp_CountAlwaysPresentWordByClass(bob_train, bob_test, classes)
+        exp_CountAlmostAlwaysPresentWordByClass(bob_train, bob_test, classes)
+        exp_AlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes)
 
 
 def exp_CountUniqueWords(bob_train, bob_test):
