@@ -12,6 +12,11 @@ class ResolutionHandler():
     
     # Class functions
     
+    def get_ngrams_from(matrix, resolution):
+        mask = matrix[resolution] > False
+        return matrix.loc[mask, resolution].index.values
+        
+    
     def get_window_from(resolution):
         """
         Parameters
