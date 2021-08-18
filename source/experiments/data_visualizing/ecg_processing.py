@@ -30,6 +30,7 @@ def main():
         # change the print location
         path='C:/Users/marci/Desktop/MasterDegreeWorkspace/source/experiments/data_visualizing/'
         print_path = path+dataset+'.txt'
+        stdout = sys.stdout
         with open(print_path, 'a') as f:
             #sys.stdout = f
             
@@ -54,6 +55,7 @@ def main():
             exp_CountAlwaysPresentWordByClass(bob_train, bob_test, classes)
             exp_CountAlmostAlwaysPresentWordByClass(bob_train, bob_test, classes)
             exp_AlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes)
+        sys.stdout = stdout
 
 
 def exp_CountUniqueWords(bob_train, bob_test, matrix, alphabet_size):
@@ -254,7 +256,7 @@ def exp_AlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes):
         ap_word_freq_test.name = 'Test'
         ap_word_mean_freq = ap_word_freq_test/test_samples
         ap_word_mean_freq.name = 'Mean'
-        test = pd.concat([ap_word_freq_train,ap_word_mean_freq],axis=1)
+        test = pd.concat([ap_word_freq_test,ap_word_mean_freq],axis=1)
         
         result = pd.concat([train, test],axis=1)
         result = result.fillna(0).astype(np.int64)
