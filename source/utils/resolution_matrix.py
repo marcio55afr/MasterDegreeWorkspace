@@ -6,19 +6,17 @@ class ResolutionMatrix(object):
         
     def __init__(self,
                  ts_length,
-                 smallest_window = 4,
-                 biggest_window_prop = 1/2,
-                 max_num_windows = 10,
-                 smallest_word = 2,
-                 dimension_reduction = .8
+                 word_size = 8,
+                 num_windows = 10,
+                 max_window_length = None
                  ):
-        self.smallest_window = smallest_window
-        self.biggest_window_prop = biggest_window_prop
-        self.biggest_window = math.floor(ts_length*biggest_window_prop)
+        self.word_size = word_size
         self.num_windows = 10 # Fixed number of windows
-        self.smallest_word = smallest_word
-        self.dimension_reduction = dimension_reduction
-        
+        self.smallest_window = word_size
+        if max_window_length is None:
+            self.biggest_window = ts_length
+        else:
+            self.biggest_window = max_window_length
         self.max_ngram = self.biggest_window//self.smallest_window
         self.matrix = self.create_matrix(ts_length)
 
@@ -31,12 +29,11 @@ class ResolutionMatrix(object):
         window_lengths = ResolutionHandler.generate_window_lengths(self.smallest_window,
                                                            self.biggest_window,
                                                            self.num_windows)
-        word_lengths = ResolutionHandler.generate_word_lengths(window_lengths,
-                                                       self.smallest_word,
-                                                       self.dimension_reduction)
+        #word_lengths = ResolutionHandler.generate_word_lengths(window_lengths,
+        #                                               self.smallest_word,
+        #                                               self.dimension_reduction)
         matrix = ResolutionHandler.generate_resolution_matrix(window_lengths,
-                                                              word_lengths,
-                                                              self.max_ngram)
+                                                         self.max_ngram)
         return matrix
     
     def get_windows_and_words(self):
