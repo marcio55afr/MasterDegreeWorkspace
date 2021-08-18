@@ -1,5 +1,11 @@
 
 
+# experiment files
+data_visualizing/*.txt
+data_visualizing/ecg/
+data_visualizing/worms/
+data_visualizing/stars/
+
 # vscode or spyder files
 .vscode
 
