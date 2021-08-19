@@ -7,7 +7,7 @@ from utils.resolution_handler import ResolutionHandler
 class NgramExtractor(object):
 
 
-    def get_bob(word_sequence, resolution_matrix):
+    def get_bob(word_sequences, resolution_matrix):
         '''
         bob refers to bag of bags.
         This function receives a multiresolution discretization of a
@@ -36,7 +36,7 @@ class NgramExtractor(object):
 
         '''
 
-        if(type(word_sequence) != dict):
+        if(type(word_sequences) != dict):
             raise TypeError('The parameter word_sequence needs to be a '+
             'multiresolution discretization as a dict format.')
         
@@ -44,31 +44,30 @@ class NgramExtractor(object):
             raise TypeError('The parameter reso_matrix needs to be a '+
             'DataFrame')
 
-        expected_resolutions = resolution_matrix.columns
-        received_resolutions = word_sequence.keys()
+        windows_expected = resolution_matrix.columns
+        windows_received = word_sequences.keys()
 
-        for resolution in received_resolutions:
-            if(resolution not in expected_resolutions):
-                raise RuntimeError('Received a resolution within the '+
-                'word_sequence that is not expected in the reso_matrix.')
+        for window in windows_received:
+            if(window not in windows_expected):
+                raise RuntimeError('A sequence was transformed using an'+
+                'window length unexpected by the reso_matrix passed as a parameter')
         
         
         # Loop for processing each sequence related to each resolution
         # one by one.
         bag_of_bags = pd.DataFrame()
-        for resolution in received_resolutions:
+        for window in windows_received:
 
             # variables
-            sequence = word_sequence[resolution]
-            window_len = ResolutionHandler.get_window_from(resolution)
-            valid_ngrams = resolution_matrix[resolution] == 1
-            ngrams = resolution_matrix[valid_ngrams].index
+            sequence = word_sequences[window]
+            valid_mask = resolution_matrix[window] == 1
+            ngrams = resolution_matrix[valid_mask].index
             
             # create and count all valid ngrams for this sequence
             bag_of_ngrams = NgramExtractor.get_bonw(sequence,
-                                                    window_len,
+                                                    window,
                                                     ngrams)
-            bag_of_ngrams['resolution'] = resolution
+            bag_of_ngrams['window'] = window
 
             # concatenate all bag of ngram words in the same dataframe
             bag_of_bags = bag_of_bags.append(bag_of_ngrams, ignore_index=True)

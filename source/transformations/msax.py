@@ -60,10 +60,12 @@ class MSAX(_PanelToPanelTransformer):
     _tags = {"univariate-only": True, "fit-in-transform": True}
 
     def __init__(self,
+                 word_length = 8,
                  alphabet_size = 4,
                  normalize = True,
                  remove_repeat_words=False):
 
+        self.word_length = word_length
         self.alphabet_size = alphabet_size
         self.normalize = normalize 
         self.remove_repeat_words = remove_repeat_words
@@ -73,11 +75,13 @@ class MSAX(_PanelToPanelTransformer):
 
         if self.alphabet_size < 2 or self.alphabet_size > 4:
             raise RuntimeError("Alphabet size must be an integer between 2 and 4")
+        if self.word_length < 1 or self.word_length > 16:
+            raise RuntimeError("Word length must be an integer between 1 and 16")
 
         super(MSAX, self).__init__()
 
 
-    def transform(self, X, window_lengths, word_lengths, y=None):
+    def transform(self, X, window_lengths, y=None):
         """
         Parameters
         ----------
@@ -88,10 +92,6 @@ class MSAX(_PanelToPanelTransformer):
             series. The numbers of subseries generated depends on the length of
             the time series and the length of the window. The normalization is
             the same as it was defined for all windows generated.
-        word_lengths : set, list or nd-array
-            Set of words lengths that will generate the bag of bags. Each word
-            length generates each bag of words and the same alphabet is kept for
-            all of the discretizations.
         
         Returns
         -------
@@ -102,26 +102,13 @@ class MSAX(_PanelToPanelTransformer):
             raise TypeError('MSAX.transform requires as input one timeseries as a pandas Series \
                             and it received the data as {}'.format(type(X)))
 
-
-        n_window_lens = len(window_lengths)
-        n_word_lens = len(word_lengths)
-        if(n_window_lens != n_word_lens):
-            raise RuntimeError("Each window must have one and only one correspondent window")
-
-        '''
-        for word_len in word_lengths:
-            if word_len < 1 or word_len > 16:
-                raise RuntimeError("Every word length must be an integer between 1 and 16")
-        '''
         # TODO 
         # another function breakpoints if normalize is False
         series_len = X.size
 
-        multiresolution = dict()
+        word_sequences = dict()
 
-        for i in range(n_window_lens):
-            window_len = window_lengths[i]
-            word_len = word_lengths[i]
+        for window_len in window_lengths:
             
             num_windows_per_inst = series_len - window_len + 1
             split = np.array([X[i:i+window_len] for i in range(num_windows_per_inst)])
@@ -129,15 +116,14 @@ class MSAX(_PanelToPanelTransformer):
             split = scipy.stats.zscore(split, axis=1)
             split = np.nan_to_num(split)
 
-            paa = PAA(num_intervals=word_len)
+            paa = PAA(num_intervals=self.word_length)
             patterns = paa.transform_univariate(split)
             
             words = pd.Series([self._create_word(pattern)
                                for pattern in patterns])
-            resolution = '{} {}'.format(window_len,word_len)
-            multiresolution[resolution] = words
+            word_sequences[window_len] = words
 
-        return multiresolution
+        return word_sequences
 
     def _create_word(self, pattern):
         word = ''
