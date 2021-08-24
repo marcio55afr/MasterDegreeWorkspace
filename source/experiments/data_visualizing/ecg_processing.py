@@ -24,37 +24,44 @@ from transformations import MSAX
 
 
 def main():
-
+    
+    
+    path = 'C:/Users/marci/Desktop/MasterDegreeWorkspace/source/experiments/data_visualizing/'
+    folder = {
+        'ECG5000' : path+'ecg/',
+        'Worms': path+'worms/'
+        }
     DATASETS = ['ECG5000', 'StartLightCurtes', 'Worms']
+    
     for dataset in ['ECG5000']:
         # change the print location
-        path='C:/Users/marci/Desktop/MasterDegreeWorkspace/source/experiments/data_visualizing/'
-        print_path = path+dataset+'.txt'
+        folder_path = folder[dataset]
+        print_path = folder_path + 'relatory.txt'
         stdout = sys.stdout
         with open(print_path, 'a') as f:
-            #sys.stdout = f
+            sys.stdout = f
             
             print('\n\nDataset: {}'.format(dataset))    
-            print('################################\n\n')
+            print('##################\n\n')
             train_set,_ = get_dataset(dataset)
             rm = ResolutionMatrix(train_set.iloc[0,0].size)
             del(train_set)
             print('Resolution Matrix')
-            print(rm.matrix)
+            print(rm.matrix, end='\n\n')
             
             # get the bag of bags
             alphabet_size = 4
-            bob_train, bob_test = _get_bag_of_bags_from(dataset)
+            bob_train, bob_test = _get_bag_of_bags_from(dataset, folder_path)
             classes = bob_train['label'].unique()
         
             # start the experiments
-            exp_CountUniqueWords(bob_train, bob_test, rm.matrix, alphabet_size)
-            exp_CountUniqueWordsByClass(bob_train, bob_test, classes)
-            exp_CountUniqueWordsByResolution(bob_train, bob_test, rm.matrix, alphabet_size)
-            exp_CountExclusiveWordByClass(bob_train, bob_test, classes)
-            exp_CountAlwaysPresentWordByClass(bob_train, bob_test, classes)
-            exp_CountAlmostAlwaysPresentWordByClass(bob_train, bob_test, classes)
-            exp_AlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes)
+            #exp_CountUniqueWords(bob_train, bob_test, rm.matrix, alphabet_size)
+            #exp_CountUniqueWordsByClass(bob_train, bob_test, classes)
+            #exp_CountUniqueWordsByResolution(bob_train, bob_test, rm.matrix, alphabet_size)
+            #exp_CountExclusiveWordByClass(bob_train, bob_test, classes)
+            #exp_CountAlwaysPresentWordByClass(bob_train, bob_test, classes)
+            #exp_CountAlmostAlwaysPresentWordByClass(bob_train, bob_test, classes)
+            exp_AlmostAlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes)
         sys.stdout = stdout
 
 
@@ -70,11 +77,10 @@ def exp_CountUniqueWords(bob_train, bob_test, matrix, alphabet_size):
     intersection = np.intersect1d(unique_train, unique_test)
     
     total_unique_words = 0
-    for resolution in matrix.columns:
-        _, word = ResolutionHandler.get_ww_from(resolution)
-        ngrams = ResolutionHandler.get_ngrams_from(matrix, resolution)
+    for window in matrix.columns:
+        ngrams = ResolutionHandler.get_ngrams_from(matrix, window)
         for n in ngrams:
-            total_unique_words += (alphabet_size**word)**n
+            total_unique_words += (alphabet_size**6)**n
 
     print('Train unique words: {}'.format(unique_train.size))
     print('Test unique words: {}'.format(unique_test.size))
@@ -115,23 +121,22 @@ def exp_CountUniqueWordsByResolution(bob_train, bob_test, matrix, alphabet_size)
     rm_intersection = pd.DataFrame(dtype=int)
     rm_possible = pd.DataFrame(dtype=int)
     words_used = pd.DataFrame(dtype=int)
-    for reso in bob_train.resolution.unique():
-        for n in bob_train.loc[bob_train.resolution == reso, 'ngram'].unique():
+    for window in bob_train.window.unique():
+        for n in bob_train.loc[bob_train.window == window, 'ngram'].unique():
             # train
-            mask = (bob_train.resolution == reso) & (bob_train.ngram == n)
+            mask = (bob_train.window == window) & (bob_train.ngram == n)
             unique_words_train = bob_train.loc[mask, 'ngram word'].unique()
-            rm_train.loc[n,reso] = unique_words_train.size
+            rm_train.loc[n,window] = unique_words_train.size
             # test
-            mask = (bob_test.resolution == reso) & (bob_test.ngram == n)
+            mask = (bob_test.window == window) & (bob_test.ngram == n)
             unique_words_test = bob_test.loc[mask, 'ngram word'].unique()
-            rm_test.loc[n,reso] = unique_words_test.size
+            rm_test.loc[n,window] = unique_words_test.size
             # intersection
             unique_words = np.intersect1d(unique_words_train,
                                           unique_words_test).size
-            rm_intersection.loc[n,reso] = unique_words
+            rm_intersection.loc[n,window] = unique_words
             # possible
-            _, word_len = ResolutionHandler.get_ww_from(reso)
-            rm_possible.loc[n,reso] = (alphabet_size**word_len)**n
+            rm_possible.loc[n,window] = (alphabet_size**6)**n
     
     rm_train = rm_train.fillna(0).astype(np.int64)
     rm_test = rm_test.fillna(0).astype(np.int64)
@@ -226,7 +231,7 @@ def exp_CountAlmostAlwaysPresentWordByClass(bob_train, bob_test, classes):
     result.index.name = 'Class'
     print(result.astype(np.int64))
 
-def exp_AlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes):    
+def exp_AlmostAlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes):    
     print("\n\nExperiment - Counting the frequency of words always present in each class\n")
     
     def _get_relative_frequency_of_always_present_word(data, c):
@@ -234,7 +239,7 @@ def exp_AlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes):
         n_samples = equaL_class_sample['sample'].unique().size
         class_words = Counter(equaL_class_sample['ngram word'])
         class_words = pd.Series(class_words)
-        ap_word = class_words.loc[class_words >= n_samples]
+        ap_word = class_words.loc[class_words >= .8*n_samples]
         
         equaL_class_words = equaL_class_sample.set_index('ngram word')
         equaL_class_words = equaL_class_words.loc[ap_word.index,'frequency']
@@ -270,15 +275,10 @@ def _get_labels_from(dataset):
     train_set, test_set = get_dataset(dataset)
     return train_set.target, test_set.target
 
-def _get_bag_of_bags_from(dataset):
-    path = 'C:/Users/marci/Desktop/MasterDegreeWorkspace/source/experiments/data_visualizing/'
-    folder = {
-        'ECG5000' : path+'ecg',
-        'Worms': path+'worms'
-        }
+def _get_bag_of_bags_from(dataset, folder_path):
     
-    bob_train_path = folder[dataset]+'/bag_of_bags_train.csv'
-    bob_test_path = folder[dataset]+'/bag_of_bags_test.csv'
+    bob_train_path = folder_path+'/bag_of_bags_train.csv'
+    bob_test_path = folder_path+'/bag_of_bags_test.csv'
     
     if(os.path.isfile(bob_train_path) and os.path.isfile(bob_test_path)):
         bob_train = pd.read_csv(bob_train_path)
@@ -301,8 +301,8 @@ def _get_bag_of_bags_from(dataset):
 
 def _extract_bob_from(timeseries_set):
     rm = ResolutionMatrix(timeseries_set.iloc[0].size)
-    wi, wo =  rm.get_windows_and_words()
-    tf = MSAX()
+    windows =  rm.get_windows()
+    msax = MSAX()
     
     i=0
     n_samples = timeseries_set.shape[0]
@@ -312,7 +312,7 @@ def _extract_bob_from(timeseries_set):
     for ts in timeseries_set:
         if(i%(n_samples/10) == 0):
             print('#',end='')
-        word_seq = tf.transform(ts, wi, wo)
+        word_seq = msax.transform(ts, windows)
         bob = NgramExtractor.get_bob(word_seq, rm.matrix)
         bob['sample'] = i
         i+=1
