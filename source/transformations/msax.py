@@ -60,12 +60,10 @@ class MSAX(_PanelToPanelTransformer):
     _tags = {"univariate-only": True, "fit-in-transform": True}
 
     def __init__(self,
-                 word_length = 8,
                  alphabet_size = 4,
                  normalize = True,
                  remove_repeat_words=False):
 
-        self.word_length = word_length
         self.alphabet_size = alphabet_size
         self.normalize = normalize 
         self.remove_repeat_words = remove_repeat_words
@@ -75,8 +73,6 @@ class MSAX(_PanelToPanelTransformer):
 
         if self.alphabet_size < 2 or self.alphabet_size > 4:
             raise RuntimeError("Alphabet size must be an integer between 2 and 4")
-        if self.word_length < 1 or self.word_length > 16:
-            raise RuntimeError("Word length must be an integer between 1 and 16")
 
         super(MSAX, self).__init__()
 
@@ -101,6 +97,9 @@ class MSAX(_PanelToPanelTransformer):
         if(type(X) != pd.Series):
             raise TypeError('MSAX.transform requires as input one timeseries as a pandas Series \
                             and it received the data as {}'.format(type(X)))
+        word_length = window_lengths[0]
+        if word_length < 1 or word_length > 16:
+            raise RuntimeError("Word length must be an integer between 1 and 16")
 
         # TODO 
         # another function breakpoints if normalize is False
@@ -116,7 +115,7 @@ class MSAX(_PanelToPanelTransformer):
             split = scipy.stats.zscore(split, axis=1)
             split = np.nan_to_num(split)
 
-            paa = PAA(num_intervals=self.word_length)
+            paa = PAA(num_intervals = word_length)
             patterns = paa.transform_univariate(split)
             
             words = pd.Series([self._create_word(pattern)

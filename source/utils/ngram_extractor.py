@@ -125,6 +125,7 @@ class NgramExtractor(object):
             ngram_freq = dict()
             for j in range(seq_len -(n-1)*window_len):
                 ngram = ' '.join(sequence.iloc[np.asarray(range(n))*window_len + j])
+                ngram = '{} {}'.format(window_len, ngram)
                 ngram_freq[ngram] = ngram_freq.get(ngram,0) + 1
                 # Second Paper - technique ability
                 # todo - assign on the feature its dimension id

@@ -6,13 +6,13 @@ class ResolutionMatrix(object):
         
     def __init__(self,
                  ts_length,
-                 word_size = 8,
+                 word_length = 6,
                  num_windows = 10,
                  max_window_length = None
                  ):
-        self.word_size = word_size
+        self.word_length = word_length
         self.num_windows = 10 # Fixed number of windows
-        self.smallest_window = word_size
+        self.smallest_window = word_length
         if max_window_length is None:
             self.biggest_window = ts_length
         else:
@@ -35,6 +35,9 @@ class ResolutionMatrix(object):
         matrix = ResolutionHandler.generate_resolution_matrix(window_lengths,
                                                          self.max_ngram)
         return matrix
+        
+    def get_windows(self):
+        return self.matrix.columns.values
     
     def get_windows_and_words(self):
         windows = []
