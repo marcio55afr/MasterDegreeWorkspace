@@ -6,8 +6,8 @@ class ResolutionMatrix(object):
         
     def __init__(self,
                  ts_length,
-                 word_length = 6,
-                 num_windows = 10,
+                 word_length,
+                 num_windows = None,
                  max_window_length = None
                  ):
         self.word_length = word_length
