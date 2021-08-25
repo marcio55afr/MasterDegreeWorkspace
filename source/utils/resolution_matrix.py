@@ -1,6 +1,6 @@
 
 import math
-from utils.resolution_handler import ResolutionHandler
+from source.utils import ResolutionHandler
 
 class ResolutionMatrix(object):
         

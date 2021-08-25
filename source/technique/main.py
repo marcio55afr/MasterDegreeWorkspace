@@ -1,4 +1,6 @@
-
+import sys
+sys.path.append('C:\\Users\\danie\\Documents\\Marcio\\MasterDegreeWorkspace')
+sys.path.append('C:\\Users\\danie\\Documents\\Marcio\\MasterDegreeWorkspace\\source')
 
 import pandas as pd
 import numpy as np
@@ -45,8 +47,7 @@ class SearchTechnique(BaseClassifier):
         data = data.squeeze()                
         bob = self._extract_bob_from(data, labels)
         
-        
-        WHERE DO I PUT THIS VECTORIZATION????
+        feature_vec = bob.pivot(index='sample', columns='ngram word', values='frequency')
         
         #vectorizer = DictVectorizer(sparse=True, dtype=np.int32, sort=False)
         #bag_vec = vectorizer.fit_transform(bob)
