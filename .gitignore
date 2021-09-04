@@ -5,6 +5,9 @@ source/experiments/data_visualizing/*.txt
 source/experiments/data_visualizing/ecg/
 source/experiments/data_visualizing/worms/
 source/experiments/data_visualizing/stars/
+source/experiments/accuracies/ecg/
+source/experiments/accuracies/worms/
+source/experiments/accuracies/stars/
 source/experiments/database/hdf/
 
 # vscode or spyder files
