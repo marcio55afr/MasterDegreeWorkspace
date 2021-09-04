@@ -20,6 +20,7 @@ FLOAT_FORMAT = pd.options.display.float_format
 
 from experiments.database.ts_handler import get_dataset
 from utils import ResolutionMatrix, ResolutionHandler, NgramExtractor
+from technique import SearchTechnique
 from transformations import MSAX
 
 
@@ -33,18 +34,18 @@ def main():
         }
     DATASETS = ['ECG5000', 'StartLightCurtes', 'Worms']
     
-    for dataset in ['ECG5000']:
+    for dataset in ['Worms']:
         # change the print location
         folder_path = folder[dataset]
         print_path = folder_path + 'relatory.txt'
         stdout = sys.stdout
         with open(print_path, 'a') as f:
-            sys.stdout = f
+            #sys.stdout = f
             
             print('\n\nDataset: {}'.format(dataset))    
             print('##################\n\n')
-            train_set,_ = get_dataset(dataset)
-            rm = ResolutionMatrix(train_set.iloc[0,0].size)
+            train_set,_,_,_ = get_dataset(dataset)
+            rm = ResolutionMatrix(train_set.iloc[0].size, 6)
             del(train_set)
             print('Resolution Matrix')
             print(rm.matrix, end='\n\n')
@@ -55,12 +56,12 @@ def main():
             classes = bob_train['label'].unique()
         
             # start the experiments
-            #exp_CountUniqueWords(bob_train, bob_test, rm.matrix, alphabet_size)
-            #exp_CountUniqueWordsByClass(bob_train, bob_test, classes)
-            #exp_CountUniqueWordsByResolution(bob_train, bob_test, rm.matrix, alphabet_size)
-            #exp_CountExclusiveWordByClass(bob_train, bob_test, classes)
-            #exp_CountAlwaysPresentWordByClass(bob_train, bob_test, classes)
-            #exp_CountAlmostAlwaysPresentWordByClass(bob_train, bob_test, classes)
+            exp_CountUniqueWords(bob_train, bob_test, rm.matrix, alphabet_size)
+            exp_CountUniqueWordsByClass(bob_train, bob_test, classes)
+            exp_CountUniqueWordsByResolution(bob_train, bob_test, rm.matrix, alphabet_size)
+            exp_CountExclusiveWordByClass(bob_train, bob_test, classes)
+            exp_CountAlwaysPresentWordByClass(bob_train, bob_test, classes)
+            exp_CountAlmostAlwaysPresentWordByClass(bob_train, bob_test, classes)
             exp_AlmostAlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes)
         sys.stdout = stdout
 
@@ -271,10 +272,6 @@ def exp_AlmostAlwaysPresentWordFrequenciesByClass(bob_train, bob_test, classes):
         result = result.fillna('')
         print(result)
 
-def _get_labels_from(dataset):
-    train_set, test_set = get_dataset(dataset)
-    return train_set.target, test_set.target
-
 def _get_bag_of_bags_from(dataset, folder_path):
     
     bob_train_path = folder_path+'/bag_of_bags_train.csv'
@@ -285,10 +282,9 @@ def _get_bag_of_bags_from(dataset, folder_path):
         bob_test = pd.read_csv(bob_test_path)
         return bob_train, bob_test
     
-    train_set, test_set = get_dataset(dataset)
-    train_labels, test_labels = _get_labels_from(dataset)
+    train_set, train_labels, test_set, test_labels = get_dataset(dataset)
     
-    bob_train = _extract_bob_from(train_set.data)
+    bob_train = SearchTechnique._extract_bob_from(train_set, train_labels)
     bob_train['label'] = train_labels.loc[bob_train['sample']].values
     print('\nWriting down the bag of bags of the train part')
     bob_train.to_csv(bob_train_path, index=False)
