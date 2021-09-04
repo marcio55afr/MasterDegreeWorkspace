@@ -100,32 +100,6 @@ class ResolutionHandler():
             word_len += stepwise
         words.append(word_len)
         return words
-    
-    def generate_resolution_matrix(window_lens, word_lens, max_ngram) -> pd.DataFrame:
-        if(len(window_lens)!=len(word_lens)):
-            raise RuntimeError('The quantity of window and word lengths should be the same')
-        
-        # Defining the column names based on the window and word size
-        cols = []
-        for i in range(len(window_lens)):
-            window_len = window_lens[i]
-            word_len = word_lens[i]
-            if( word_len>window_len ):
-                raise RuntimeError('The word is greater than the window')
-            cols.append( '{} {}'.format(window_len, word_len) )
-        
-        # Defining the indexes bases on the ngrams used
-        idx = np.arange(max_ngram) + 1
-        
-        # Creating the dataframe setting the possibles ngram resolutions as 1
-        # and the rest as False
-        biggest_window = window_lens[-1]
-        matrix = pd.DataFrame(False, index=idx, columns=cols)
-        for j in range(matrix.shape[1]):
-            max_ngram = biggest_window//(window_lens[j])
-            matrix.iloc[0:max_ngram, j] = 1
-        
-        return matrix
 
     def generate_resolution_matrix(window_lens, max_ngram) -> pd.DataFrame:
         
