@@ -6,16 +6,18 @@ class ResolutionHandler():
     # Class attributes
 
     WINDOW_SPLIT_INDEX=0
-    WORD_SPLIT_INDEX=1
-    NGRAM_SPLIT_INDEX=2  
+    NGRAM_SPLIT_INDEX=1  
     
     
     # Class functions
     
-    def get_ngrams_from(matrix, resolution):
-        mask = matrix[resolution] > False
-        return matrix.loc[mask, resolution].index.values
-        
+    def get_ngrams_from(matrix, window):
+        mask = matrix[window] > False
+        return matrix.loc[mask, window].index.values
+    
+    def get_resolution_from(word):
+        s = word.split()
+        return '{} {}'.format( s[0], s[1] )
     
     def get_window_from(resolution):
         """

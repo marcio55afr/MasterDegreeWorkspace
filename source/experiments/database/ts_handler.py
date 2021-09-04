@@ -3,7 +3,7 @@ from sktime.benchmarking.data import UEADataset
 import pandas as pd
 import numpy as np
 
-DATASET_NAMES = ['Worms', 'StarLightCurves', 'ECG5000']
+DATASET_NAMES = ['ECG5000', 'Worms', 'StarLightCurves']
 HDF_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "hdf\\")
 EXTENSION = '.h5'
 KEYS = ['train', 'test']
@@ -12,7 +12,17 @@ def get_dataset( dataset_name ) -> tuple:
     path = HDF_PATH + dataset_name + EXTENSION
     train = pd.read_hdf(path,key='train')
     test = pd.read_hdf(path,key='test')
-    return train, test
+    return train.data, train.target, test.data, test.target
+
+def get_Xy_from( dataset_name:str , split: str ) -> tuple:
+    
+    path = HDF_PATH + dataset_name + EXTENSION
+    data = pd.read_hdf(path,key=split)
+    y = data.target
+    X = data.drop('target', axis=1)
+    
+    return X, y
+
 
 def write_ts( data: pd.DataFrame, path, key):
     data.index = range(data.shape[0])

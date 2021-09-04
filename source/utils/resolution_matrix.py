@@ -37,7 +37,10 @@ class ResolutionMatrix(object):
         return matrix
         
     def get_windows(self):
-        return self.matrix.columns.values
+        
+        num_resolutions = self.matrix.sum()
+        used_columns = num_resolutions[num_resolutions > 0].index.values
+        return used_columns
     
     def get_windows_and_words(self):
         windows = []

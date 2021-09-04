@@ -2,8 +2,6 @@
 import numpy as np
 import pandas as pd
 
-from utils.resolution_handler import ResolutionHandler
-
 class NgramExtractor(object):
 
 
@@ -67,7 +65,6 @@ class NgramExtractor(object):
             bag_of_ngrams = NgramExtractor.get_bonw(sequence,
                                                     window,
                                                     ngrams)
-            bag_of_ngrams['window'] = window
 
             # concatenate all bag of ngram words in the same dataframe
             bag_of_bags = bag_of_bags.append(bag_of_ngrams, ignore_index=True)
@@ -122,19 +119,18 @@ class NgramExtractor(object):
                 break
 
             # Create and count all word with the specific n-gram
-            ngram_freq = dict()
+            nw_freq = dict()
             for j in range(seq_len -(n-1)*window_len):
-                ngram = ' '.join(sequence.iloc[np.asarray(range(n))*window_len + j])
-                ngram = '{} {}'.format(window_len, ngram)
-                ngram_freq[ngram] = ngram_freq.get(ngram,0) + 1
+                ngram_word = ' '.join(sequence.iloc[np.asarray(range(n))*window_len + j])
+                ngram_word = '{} {} {}'.format(window_len, n, ngram_word)
+                nw_freq[ngram_word] = nw_freq.get(ngram_word,0) + 1
                 # Second Paper - technique ability
                 # todo - assign on the feature its dimension id
 
             # Set the bag as a DataFrame and add some informations
-            df = pd.DataFrame.from_dict(ngram_freq, orient='index', columns=['frequency'])
+            df = pd.DataFrame.from_dict(nw_freq, orient='index', columns=['frequency'])
             df.index.name = 'ngram word'
             df = df.reset_index()
-            df['ngram'] = n
 
             # Concatenate all dataframes
             bag_of_ngram_words = bag_of_ngram_words.append(df, ignore_index=True)
