@@ -17,7 +17,7 @@ class ResolutionMatrix(object):
             self.biggest_window = ts_length
         else:
             self.biggest_window = max_window_length
-        self.max_ngram = self.biggest_window//self.smallest_window
+        self.max_ngram = min(5, self.biggest_window//self.smallest_window)
         self.matrix = self.create_matrix(ts_length)
 
     def create_matrix(self, ts_length):        
