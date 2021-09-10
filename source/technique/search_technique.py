@@ -55,7 +55,8 @@ class SearchTechnique(BaseClassifier):
                                                   max_window_length)
         self.discretizer = MSAX(alphabet_size)
         
-        self.clf = LogisticRegression(random_state=random_state)
+        self.clf = LogisticRegression(max_iter=500,
+                                      random_state=random_state)
         
         self.selected_words = set()
     
@@ -66,7 +67,7 @@ class SearchTechnique(BaseClassifier):
             raise RuntimeError('The labels isn\'t compatible with the data received')
         
         # testing one specific dataset to avoid rework
-        folder_path = 'C:/Users/marci/Desktop/MasterDegreeWorkspace/source/experiments/data_visualizing/ecg'
+        folder_path = 'C:/Users/marci/Desktop/MasterDegreeWorkspace/source/experiments/data_visualizing/worms/WordLen_6/'
         bob_path = folder_path+'/bag_of_bags_train.csv'
         bob = pd.read_csv(bob_path)
         
@@ -116,7 +117,7 @@ class SearchTechnique(BaseClassifier):
         self.check_is_fitted()
         
         # testing one specific dataset to avoid rework
-        folder_path = 'C:/Users/marci/Desktop/MasterDegreeWorkspace/source/experiments/data_visualizing/ecg'
+        folder_path = 'C:/Users/marci/Desktop/MasterDegreeWorkspace/source/experiments/data_visualizing/worms/WordLen_6/'
         bob_path = folder_path+'/bag_of_bags_test.csv'
         bob = pd.read_csv(bob_path)
         
