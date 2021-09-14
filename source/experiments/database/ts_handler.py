@@ -23,7 +23,6 @@ def get_Xy_from( dataset_name:str , split: str ) -> tuple:
     
     return X, y
 
-
 def write_ts( data: pd.DataFrame, path, key):
     data.index = range(data.shape[0])
     data.columns = ['data','target']

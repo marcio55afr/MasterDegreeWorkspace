@@ -28,9 +28,9 @@ class ParametersRelevance():
         }
     
     def execute_all(dataset_name):
-        ParametersRelevance.resolution_relevance(dataset_name)
+        #ParametersRelevance.resolution_relevance(dataset_name)
         #ParametersRelevance.chi2_p_value_relevance(dataset_name)
-        #ParametersRelevance.chi2_ranking_relevance(dataset_name)
+        ParametersRelevance.chi2_ranking_relevance(dataset_name)
         #ParametersRelevance.word_relevance(dataset_name)
         #ParametersRelevance.classifier_parameters_relevance(dataset_name)
         #ParametersRelevance.resolution_selection_relevance(dataset_name)
@@ -118,10 +118,10 @@ class ParametersRelevance():
         ts_length = train.iloc[0,0].size
         
         stdout = sys.stdout
-        for p_threshold in [0.05, 0.005, 0.0005, 0.00001]:
+        for p_threshold in [0.0005, 0.00005, 0.000005, 0.0000001]:
             print('p_threshold: {}'.format(p_threshold))           
             with open(ParametersRelevance.folder_path[dataset_name]+'word_selection.txt', 'a') as f:
-                sys.stdout = f
+                #sys.stdout = f
                 print('p_threshold: {}'.format(p_threshold))         
                         
                 clf = SearchTechnique(ts_length,
@@ -142,28 +142,31 @@ class ParametersRelevance():
     def chi2_ranking_relevance(dataset_name):
         train, labels = get_Xy_from(dataset_name, split='train')
         ts_length = train.iloc[0,0].size
-        
+
+        verbose=True        
         stdout = sys.stdout
-        for n_words in [70, 80, 100, 110, 120, 200, 300, 400]:
+        for n_words in [10, 20, 70, 80, 100, 110, 120, 200, 300, 400, 500, 600, 800, 1000]:
             print('n_words: {}'.format(n_words)) 
             with open(ParametersRelevance.folder_path[dataset_name]+'word_selection.txt', 'a') as f:
-                sys.stdout = f
-                print('n_words: {}'.format(n_words))         
+                #sys.stdout = f
+                print('n_words: {}'.format(n_words))
                         
                 clf = SearchTechnique(ts_length,
                                       word_selection = 'best n words',
                                       n_words = n_words,
-                                      random_state = 19)
+                                      random_state = 19,
+                                      verbose=verbose)
                 clf.fit(train, labels)        
                         
                 test, y_true = get_Xy_from(dataset_name, split='test')
                 y_pred = clf.predict(test)
                         
                 acc = accuracy_score(y_true, y_pred)
-                print('keeping the best {} words according to the chi2 ranking'.format(n_words))
+                #print('keeping the best {} words according to the chi2 ranking'.format(n_words))
                 print('acc = {}'.format(acc))
                 print('\n\n')
-                sys.stdout = stdout
+                verbose=False
+            sys.stdout = stdout
     
     def word_relevance(dataset_name):
         
@@ -285,4 +288,4 @@ class ParametersRelevance():
                 print('')
             sys.stdout = stdout
 
-ParametersRelevance.execute_all(DATASET_NAMES[1])
+ParametersRelevance.execute_all(DATASET_NAMES[0])
