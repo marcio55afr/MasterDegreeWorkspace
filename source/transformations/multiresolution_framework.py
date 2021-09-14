@@ -22,7 +22,8 @@ class MultiresolutionFramework(_PanelToPanelTransformer):
                  alphabet_size = 4,
                  normalize = False,
                  remove_repeat_words=False,
-                 discretization = "Multidomain"):
+                 discretization = "Multidomain",
+                 verbose=True):
 
         self.resolution_matrix = resolution_matrix
         self.word_len = word_len
@@ -30,6 +31,10 @@ class MultiresolutionFramework(_PanelToPanelTransformer):
         self.normalize = normalize 
         self.remove_repeat_words = remove_repeat_words
         self.discretization = discretization
+        self.verbose = verbose
+        
+        if self.verbose:
+            print('Initializating the framework and its discretizers...\n')
         
         mask = self.resolution_matrix.sum() > 0
         self.windows = self.resolution_matrix.columns[mask].values
@@ -66,6 +71,10 @@ class MultiresolutionFramework(_PanelToPanelTransformer):
                     "It was receive {} samples and {} labels".format(X.shape[0],
                                                                      y.shape[0])
                 )
+
+            if (X.index.values != y.index.values).any():
+                raise ValueError("The indices of the samples in the X must be"
+                                 " the same indices of the labels")
         
         if self.resolution_matrix.shape[0] > 5:
             raise ValueError(
@@ -129,44 +138,60 @@ class MultiresolutionFramework(_PanelToPanelTransformer):
         return self        
 
     def transform(self, X, y=None):
+        
+        if y is not None:
+            if X.shape[0] != y.shape[0]:
+                raise ValueError(
+                    "The number of labels must be equal to the number of samples."
+                    "It was receive {} samples and {} labels".format(X.shape[0],
+                                                                     y.shape[0])
+                )
+
+            if (X.index.values != y.index.values).any():
+                raise ValueError("The indices of the samples in the X must be"
+                                 " the same indices of the labels")
                 
         self.check_is_fitted()
-        #TODO extend to multivariate
-        idcs = X.index.values
-        #X = check_X(X, enforce_univariate=True, coerce_to_numpy=True)
-        #X = X.squeeze(1)
-        
+        #TODO extend to multivariate        
         #TODO verify the time spend with DataFrame form
         word_sequences = pd.DataFrame()
+        if self.verbose:
+            print('Discretizing the time series...')
+            for v in range(len(self.windows)):
+                print('_', end='')
+            print('')
         for window in self.windows:
             if self.sax:
                 word_sequences = pd.concat(
-                    [word_sequences, self.extract_word_sequences("SAX", window, X, idcs)],
-                    ignore_index = True,
+                    [word_sequences, self.extract_word_sequences("SAX", window, X)],
+                    ignore_index = False,
                     axis=0
                     )
             if self.sfa:
                 word_sequences = pd.concat(
-                    [word_sequences, self.extract_word_sequences("SFA", window, X, idcs)],
-                    ignore_index = True,
+                    [word_sequences, self.extract_word_sequences("SFA", window, X)],
+                    ignore_index = False,
                     axis=0
                     )
+            if self.verbose:
+                print('#', end='')
+        if self.verbose:
+            print('')
         
         return word_sequences
                 
                 
-    def extract_word_sequences(self, discretization, window, X, indices, dim=None, y=None):
+    def extract_word_sequences(self, discretization, window, X, dim=None, y=None):
         
-        discretizer = self.sax_transformers.loc[window]
-        if(discretization=="SFA"):
-            discretizer = self.sfa_transformers.loc[window]
+        discretizers = self.sax_transformers if discretization=="SAX" else self.sfa_transformers
+        discretizer = discretizers.loc[window]
             
         word_sequences = discretizer.transform(X, y)
-        self._add_identifier(word_sequences, window, "window")
-        self._add_identifier(word_sequences, discretization, "discretization")
+        self._add_identifier(word_sequences, discretization, window)
+        #self._add_identifier(word_sequences, discretization, "discretization")
         #TODO add the dimension identifier
         #self.add_identifier(word_sequences, dim, "dimension")
-        word_sequences['sample'] = indices
+        word_sequences['window'] = window
         return word_sequences
         
         
@@ -192,25 +217,18 @@ class MultiresolutionFramework(_PanelToPanelTransformer):
                 "of the fitted windows"
                 )
 
-    def _add_identifier(self, word_sequences, value, identifier):
+    def _add_identifier(self, word_sequences, discretization, window):
         
-        value_id = 0
-        shift = 0
-        if identifier == "window":
-            value_id = self.fitted_windows.index(value)
-            shift = self.window_bits
-            
-        elif identifier == "discretization":
-            value_id = self.disc_id[value]
-            shift = self.discretization_bits
-            
-        else:
-            raise ValueError("The identifier {} is not expected in the "
-                             "function _add_identifier".format(identifier))
-            
-        for dim in word_sequences:
-            for sample in word_sequences[dim]:
-                sample.apply( lambda w: ( w<<shift ) | value_id )
+        # TODO extends it to a multivariate process
+        dim = 0
+        disc_id = self.disc_id[discretization]
+        n = word_sequences.shape[0]
+        for i in range(n):
+            sample = word_sequences.loc[i,dim]
+            word_sequences.loc[i,dim] = sample.apply( lambda w: '{} {} {}'.format(disc_id,
+                                                                                  window,
+                                                                                  w)
+                                                     ).values
         
         
         

@@ -213,7 +213,7 @@ class AdaptedSFA(_PanelToPanelTransformer):
 
         dim = list(transform)
         bags = pd.DataFrame() if self.return_pandas_data_series else [None]
-        bags[0] = list(dim)
+        bags[0] = dim
 
         return bags
 
