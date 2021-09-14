@@ -11,7 +11,7 @@ class ResolutionMatrix(object):
                  max_window_length = None
                  ):
         self.word_length = word_length
-        self.num_windows = 10 # Fixed number of windows
+        self.num_windows =  num_windows# Fixed number of windows
         self.smallest_window = word_length
         if max_window_length is None:
             self.biggest_window = ts_length

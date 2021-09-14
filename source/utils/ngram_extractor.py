@@ -1,11 +1,14 @@
-
+import time
 import numpy as np
 import pandas as pd
+
+from scipy.sparse import csr_matrix
+from pandas.api.types import CategoricalDtype
 
 class NgramExtractor(object):
 
 
-    def get_bob(word_sequences, resolution_matrix):
+    def get_bob(word_sequences, resolution_matrix, verbose=True):
         '''
         bob refers to bag of bags.
         This function receives a multiresolution discretization of a
@@ -34,45 +37,88 @@ class NgramExtractor(object):
 
         '''
 
-        if(type(word_sequences) != dict):
-            raise TypeError('The parameter word_sequence needs to be a '+
-            'multiresolution discretization as a dict format.')
+        #if(type(word_sequences) != dict):
+        #    raise TypeError('The parameter word_sequence needs to be a '+
+        #    'multiresolution discretization as a dict format.')
         
         if(type(resolution_matrix) != pd.DataFrame):
             raise TypeError('The parameter reso_matrix needs to be a '+
             'DataFrame')
 
         windows_expected = resolution_matrix.columns
-        windows_received = word_sequences.keys()
+        windows_received = word_sequences.window.unique()
 
         for window in windows_received:
             if(window not in windows_expected):
                 raise RuntimeError('A sequence was transformed using an'+
                 'window length unexpected by the reso_matrix passed as a parameter')
         
-        
-        # Loop for processing each sequence related to each resolution
-        # one by one.
-        bag_of_bags = pd.DataFrame()
-        for window in windows_received:
-
-            # variables
-            sequence = word_sequences[window]
-            valid_mask = resolution_matrix[window] == 1
-            ngrams = resolution_matrix[valid_mask].index
+        # TODO expand to multivariate ngram_extractor
+        dim=0
+        if verbose:
+            print('Extracting the ngrams...')
+            print('__________', end='')
+            print('')
+        samples = word_sequences.index.unique()
+        n = samples.size
+        v=1
+        # Loop for processing all sequences of each sample
+        bag_of_bags_T = pd.DataFrame()
+        for sample in samples:
+            sample_sequences = word_sequences.loc[sample]
             
-            # create and count all valid ngrams for this sequence
-            bag_of_ngrams = NgramExtractor.get_bonw(sequence,
-                                                    window,
-                                                    ngrams)
+            bag_of_ngrams = []
+            for i in range(sample_sequences.shape[0]):
+                # variables
+                row = sample_sequences.iloc[i]
+                sequence = row.loc[dim]
+                window = row.loc['window']
+                valid_mask = resolution_matrix[window] == 1
+                ngrams = resolution_matrix[valid_mask].index
+            
+                #TODO test sequential ngrams
+                #     test ngrams with space of the window size
+                #     test ngrams between different windows sizes
+                # create and count all valid ngrams for this sequence
+                bonw = NgramExtractor.get_bonw(sequence,
+                                               window,
+                                               ngrams)
+                
+                # concatenate all bag of ngram words in the same dataframe
+                bag_of_ngrams.append(bonw)
+            bag_of_ngrams = pd.concat(bag_of_ngrams,
+                                      ignore_index=False,
+                                      axis=0)
+            bag_of_ngrams['sample'] = sample
+            bag_of_bags_T = pd.concat([bag_of_bags_T, bag_of_ngrams],
+                                      axis=0,
+                                      ignore_index=False)
+            v+=1
+            if verbose:
+                if(v%(n//10) == 0):
+                    print('#', end='')
+        if verbose: print('')
+        
+        bag_of_bags_T = bag_of_bags_T.reset_index()
+        print('Creating the feature sparse matrix...')
+        
+        samples_ordered = sorted(bag_of_bags_T['sample'].unique())
+        ngram_words_ordered = sorted(bag_of_bags_T['index'].unique())
+        
+        sample_c = CategoricalDtype( samples_ordered, ordered=True)
+        ngram_word_c = CategoricalDtype( ngram_words_ordered, ordered=True)
+        
+        row = bag_of_bags_T['sample'].astype(sample_c).cat.codes
+        col = bag_of_bags_T['index'].astype(ngram_word_c).cat.codes
+        sparse_matrix = csr_matrix((bag_of_bags_T['frequency'],(row, col)),
+                                   shape=(sample_c.categories.size,
+                                          ngram_word_c.categories.size)
+                                   )
 
-            # concatenate all bag of ngram words in the same dataframe
-            bag_of_bags = bag_of_bags.append(bag_of_ngrams, ignore_index=True)
-
-        return bag_of_bags
+        return sparse_matrix, samples_ordered, ngram_words_ordered
 
 
-    def get_bonw(sequence: pd.Series, window_len, ngrams):
+    def get_bonw(sequence, window_len, ngrams):
         '''
         bonw refers to bag of ngram words.
         This function receives a sequence of words discretized with only
@@ -102,15 +148,14 @@ class NgramExtractor(object):
 
         '''
 
-        if(type(sequence)!=pd.Series):
-            raise TypeError('The sequence of words must be a pandas Series')
+        #if(type(sequence)!=pd.Series):
+        #    raise TypeError('The sequence of words must be a pandas Series')
         if( (ngrams < 1).any() ):
             raise ValueError('All ngrams must be greater than or equal to 1')
 
         # variables
         seq_len = len(sequence)
         bag_of_ngram_words = pd.DataFrame()
-        
         # loop to process each ngram at a time
         for n in ngrams:
             # It is necessary to verify this?
@@ -121,18 +166,16 @@ class NgramExtractor(object):
             # Create and count all word with the specific n-gram
             nw_freq = dict()
             for j in range(seq_len -(n-1)*window_len):
-                ngram_word = ' '.join(sequence.iloc[np.asarray(range(n))*window_len + j])
-                ngram_word = '{} {} {}'.format(window_len, n, ngram_word)
+                ngram_word = ' '.join(sequence[np.arange(n)*window_len + j])
                 nw_freq[ngram_word] = nw_freq.get(ngram_word,0) + 1
                 # Second Paper - technique ability
                 # todo - assign on the feature its dimension id
 
             # Set the bag as a DataFrame and add some informations
             df = pd.DataFrame.from_dict(nw_freq, orient='index', columns=['frequency'])
-            df.index.name = 'ngram word'
-            df = df.reset_index()
 
             # Concatenate all dataframes
-            bag_of_ngram_words = bag_of_ngram_words.append(df, ignore_index=True)
-
+            bag_of_ngram_words = pd.concat([bag_of_ngram_words, df],
+                                           ignore_index=False,
+                                           axis=0)
         return bag_of_ngram_words
