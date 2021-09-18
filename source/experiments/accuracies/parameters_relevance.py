@@ -3,7 +3,7 @@ import sys
 sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace/source')
 sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace')
 
-from source.technique import SearchTechnique
+from source.technique import SearchTechnique, SearchTechniqueCV
 from source.experiments.database import get_dataset, get_Xy_from, DATASET_NAMES
 
 from sklearn.metrics import accuracy_score
@@ -48,7 +48,7 @@ class ParametersRelevance():
         clf = SearchTechnique(ts_length)
         rm = clf.resolution_matrix.matrix.copy()
         
-        for p_threshold in [0.00001, 0.000005, 0.000001]:            
+        for p_threshold in []:#[0.00001, 0.000005, 0.000001]:            
             acc = pd.DataFrame()
             for window in rm:
                 for ngram in rm.index:
@@ -59,8 +59,7 @@ class ParametersRelevance():
                         unique_resolution = pd.DataFrame(data=False, index=rm.index, columns=[window])
                         unique_resolution.loc[ngram,window] = 1            
                         
-                        clf = SearchTechnique(ts_length,
-                                              word_selection = 'p threshold',
+                        clf = SearchTechnique(word_selection = 'p threshold',
                                               p_threshold = p_threshold,
                                               random_state = 19)
                         clf.resolution_matrix.matrix = unique_resolution   
@@ -81,6 +80,7 @@ class ParametersRelevance():
                 print('\n\n', file=f)
     
         for n_words in [70, 80, 100, 110, 120, 200, 300, 400]:        
+            print('\n\n n words: {}'.format(n_words))
             acc = pd.DataFrame()
             for window in rm:
                 for ngram in rm.index:
@@ -91,11 +91,10 @@ class ParametersRelevance():
                         unique_resolution = pd.DataFrame(data=False, index=rm.index, columns=[window])
                         unique_resolution.loc[ngram,window] = 1            
                         
-                        clf = SearchTechnique(ts_length,
-                                              word_selection = 'best n words',
+                        clf = SearchTechnique(word_selection = 'best n words',
                                               n_words = n_words,
                                               random_state = 19)
-                        clf.resolution_matrix.matrix = unique_resolution   
+                        clf.resolution_matrix_aux = unique_resolution   
                         clf.fit(train, labels)
                         
                         
@@ -124,8 +123,7 @@ class ParametersRelevance():
                 #sys.stdout = f
                 print('p_threshold: {}'.format(p_threshold))         
                         
-                clf = SearchTechnique(ts_length,
-                                      word_selection = 'p threshold',
+                clf = SearchTechnique(word_selection = 'p threshold',
                                       p_threshold = p_threshold,
                                       random_state = 19)
                 clf.fit(train, labels)        
@@ -151,11 +149,11 @@ class ParametersRelevance():
                 #sys.stdout = f
                 print('n_words: {}'.format(n_words))
                         
-                clf = SearchTechnique(ts_length,
-                                      word_selection = 'best n words',
+                clf = SearchTechnique(word_selection = 'best n words',
                                       n_words = n_words,
                                       random_state = 19,
                                       verbose=verbose)
+                clf = SearchTechniqueCV()
                 clf.fit(train, labels)        
                         
                 test, y_true = get_Xy_from(dataset_name, split='test')
@@ -180,8 +178,7 @@ class ParametersRelevance():
                 sys.stdout = f
                 print('n_words: {}'.format(n_words))         
                         
-                clf = SearchTechnique(ts_length,
-                                      word_selection = 'best n words',
+                clf = SearchTechnique(word_selection = 'best n words',
                                       n_words = n_words,
                                       random_state = 19)
                 clf.fit(train, labels)        
@@ -244,8 +241,7 @@ class ParametersRelevance():
                     sys.stdout = f
                     
                     print('n_words: {}'.format(n_words))                
-                    st = SearchTechnique(ts_length,
-                                          word_selection = 'best n words',
+                    st = SearchTechnique(word_selection = 'best n words',
                                           n_words = n_words,
                                           random_state = 19)
                     st.clf = clf_
@@ -274,8 +270,7 @@ class ParametersRelevance():
             for n_words in [70, 80, 100, 110, 120, 200, 300, 400]:
                 print('n_words: {}'.format(n_words))
                 print('n_words: {}'.format(n_words), file=stdout)
-                clf = SearchTechnique(ts_length,
-                                      word_selection = 'best n words',
+                clf = SearchTechnique(word_selection = 'best n words',
                                       n_words = n_words,
                                       random_state = 19)
                 clf.fit(train, labels)        
@@ -288,4 +283,4 @@ class ParametersRelevance():
                 print('')
             sys.stdout = stdout
 
-ParametersRelevance.execute_all(DATASET_NAMES[0])
+ParametersRelevance.execute_all(DATASET_NAMES[1])

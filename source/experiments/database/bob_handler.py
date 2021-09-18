@@ -12,6 +12,33 @@ EXTENSION = '.csv'
 CONFIG_PATH = '{}/{}/WordLen_{}/'.format
 # "dataset_name"/"discretization"/WordLen_6/bob_"split".csv
 
+def write_bag(bag: pd.DataFrame, dataset_name, discretization, wordlen, split):
+    
+    config_path = CONFIG_PATH(dataset_name, discretization, wordlen)
+    folder_path = BOB_PATH+config_path
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    
+    #print('Writing the bag of bags...')
+    bag_path = folder_path+'bag_{}.csv'.format(split)
+    
+    bag.to_csv(bag_path)
+    
+def read_bag(dataset_name, discretization, wordlen, split):
+    
+    config_path = CONFIG_PATH(dataset_name, discretization, wordlen)
+    folder_path = BOB_PATH+config_path
+    bag_path = folder_path+'bag_{}.csv'.format(split)
+    
+    if not os.path.isfile(bag_path):
+        raise RuntimeError("Tried to read an inexistent file with path: ",
+                           bag_path)
+    
+    #print('Reading the bag of bags...')
+    bag = pd.read_csv(bag_path, index_col = 0)
+    return bag
+    
+    
 def write_bob( bob: spmatrix , samples_id, words, dataset_name, discretization, wordlen, split):
     
     config_path = CONFIG_PATH(dataset_name, discretization, wordlen)

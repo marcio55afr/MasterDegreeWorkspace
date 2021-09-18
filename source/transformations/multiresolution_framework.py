@@ -20,17 +20,17 @@ class MultiresolutionFramework(_PanelToPanelTransformer):
                  resolution_matrix,
                  word_len = 6,
                  alphabet_size = 4,
-                 normalize = False,
                  remove_repeat_words=False,
                  discretization = "Multidomain",
+                 normalize = True,
                  verbose=True):
 
         self.resolution_matrix = resolution_matrix
         self.word_len = word_len
         self.alphabet_size = alphabet_size
-        self.normalize = normalize 
         self.remove_repeat_words = remove_repeat_words
         self.discretization = discretization
+        self.normalize = normalize 
         self.verbose = verbose
         
         if self.verbose:

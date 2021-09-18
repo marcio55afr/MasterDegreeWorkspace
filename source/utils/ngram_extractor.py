@@ -50,7 +50,7 @@ class NgramExtractor(object):
 
         for window in windows_received:
             if(window not in windows_expected):
-                raise RuntimeError('A sequence was transformed using an'+
+                raise RuntimeError('A sequence was transformed using a '+
                 'window length unexpected by the reso_matrix passed as a parameter')
         
         # TODO expand to multivariate ngram_extractor
@@ -63,7 +63,7 @@ class NgramExtractor(object):
         n = samples.size
         v=1
         # Loop for processing all sequences of each sample
-        bag_of_bags_T = pd.DataFrame()
+        bag_of_bags = pd.DataFrame()
         for sample in samples:
             sample_sequences = word_sequences.loc[sample]
             
@@ -83,6 +83,7 @@ class NgramExtractor(object):
                 bonw = NgramExtractor.get_bonw(sequence,
                                                window,
                                                ngrams)
+                bonw['window'] = window
                 
                 # concatenate all bag of ngram words in the same dataframe
                 bag_of_ngrams.append(bonw)
@@ -90,27 +91,28 @@ class NgramExtractor(object):
                                       ignore_index=False,
                                       axis=0)
             bag_of_ngrams['sample'] = sample
-            bag_of_bags_T = pd.concat([bag_of_bags_T, bag_of_ngrams],
-                                      axis=0,
-                                      ignore_index=False)
+            bag_of_bags = pd.concat([bag_of_bags, bag_of_ngrams],
+                                    axis=0,
+                                    ignore_index=False)
             v+=1
             if verbose:
                 if(v%(n//10) == 0):
                     print('#', end='')
         if verbose: print('')
         
-        bag_of_bags_T = bag_of_bags_T.reset_index()
+        #return bag_of_bags
+        bag_of_bags = bag_of_bags.reset_index()
         print('Creating the feature sparse matrix...')
         
-        samples_ordered = sorted(bag_of_bags_T['sample'].unique())
-        ngram_words_ordered = sorted(bag_of_bags_T['index'].unique())
+        samples_ordered = sorted(bag_of_bags['sample'].unique())
+        ngram_words_ordered = sorted(bag_of_bags['index'].unique())
         
         sample_c = CategoricalDtype( samples_ordered, ordered=True)
         ngram_word_c = CategoricalDtype( ngram_words_ordered, ordered=True)
         
-        row = bag_of_bags_T['sample'].astype(sample_c).cat.codes
-        col = bag_of_bags_T['index'].astype(ngram_word_c).cat.codes
-        sparse_matrix = csr_matrix((bag_of_bags_T['frequency'],(row, col)),
+        row = bag_of_bags['sample'].astype(sample_c).cat.codes
+        col = bag_of_bags['index'].astype(ngram_word_c).cat.codes
+        sparse_matrix = csr_matrix((bag_of_bags['frequency'],(row, col)),
                                    shape=(sample_c.categories.size,
                                           ngram_word_c.categories.size)
                                    )
@@ -173,7 +175,8 @@ class NgramExtractor(object):
 
             # Set the bag as a DataFrame and add some informations
             df = pd.DataFrame.from_dict(nw_freq, orient='index', columns=['frequency'])
-
+            df['ngram'] = n
+            
             # Concatenate all dataframes
             bag_of_ngram_words = pd.concat([bag_of_ngram_words, df],
                                            ignore_index=False,

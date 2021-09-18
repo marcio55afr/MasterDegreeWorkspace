@@ -1,5 +1,4 @@
 
-import math
 from source.utils import ResolutionHandler
 
 class ResolutionMatrix(object):
@@ -11,20 +10,28 @@ class ResolutionMatrix(object):
                  max_window_length = None
                  ):
         self.word_length = word_length
-        self.num_windows =  num_windows# Fixed number of windows
         self.smallest_window = word_length
+        
         if max_window_length is None:
-            self.biggest_window = ts_length
+            self.biggest_window = ts_length//2
         else:
             self.biggest_window = max_window_length
+            
+        if num_windows is not None:
+            self.num_windows =  num_windows 
+        else:
+            self.num_windows = (self.biggest_window-self.smallest_window )//2
+        self.num_windows = min(20, self.num_windows)
+            
         self.max_ngram = min(5, self.biggest_window//self.smallest_window)
         self.matrix = self.create_matrix(ts_length)
 
     def create_matrix(self, ts_length):        
         if (self.biggest_window-self.smallest_window) < self.num_windows:
-            raise ValueError('the difference between the smallest windows {}'.format(self.smallest_window)+
-            'and the greatest window {} must be greater than {}'.format(self.biggest_window,
-                                                                        self.num_windows))
+            raise ValueError(
+                f'the difference between the smallest window {self.smallest_window} '
+                f'and the greatest window {self.biggest_window} must be greater than {self.num_windows}'
+            )
 
         window_lengths = ResolutionHandler.generate_window_lengths(self.smallest_window,
                                                            self.biggest_window,

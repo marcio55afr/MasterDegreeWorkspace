@@ -19,6 +19,7 @@ from sklearn.feature_selection import SelectKBest
 from source.technique.resolution_selector import ResolutionSelector
 
 from source.experiments.database import read_bob, write_bob
+from source.experiments.database.bob_handler import read_bag, write_bag
 
 
 class SearchTechnique(BaseClassifier):
@@ -26,57 +27,47 @@ class SearchTechnique(BaseClassifier):
     
     
     def __init__(self,
-                 ts_length,
                  word_length = 6,
                  alphabet_size = 4,
                  word_ranking_method = 'chi2',
                  word_selection = 'best n words', # ['p threshold', 'best n words']
                  p_threshold = 0.05,
                  n_words = 120,
-                 verbose = True,
                  num_windows = None,
                  max_window_length = None,
+                 normalize = True,
+                 verbose = True,
                  random_state = None):
         
         
         if (word_selection != 'p threshold') and (word_selection != 'best n words'):
             raise ValueError('The word selection must the a valid method of selection, as "p threshold" or "best n words"')
         
+        self.word_length = word_length
+        self.alphabet_size = alphabet_size
+        self.num_windows = num_windows
+        self.max_window_length = max_window_length
         
-        self.ts_length = ts_length
         self.word_ranking_method = word_ranking_method
         self.word_selection = word_selection
         self.p_threshold = p_threshold
         self.n_words = n_words
+        self.normalize = normalize
         self.verbose = verbose
-                    
-        if self.verbose:
-            print('Initializating the classifier...\n')
         
-        self.word_length = word_length
-        self.alphabet_size = alphabet_size
-        self.num_windows = 20
-        self.max_window_length = 50
         
+        self.discretization = "SFA"        
         self.random_state = random_state
-        # TODO implement the function create_matrix in the ResolutionHandler
-        # no need for this ResolutionMatrix class
-        self.resolution_matrix = ResolutionMatrix(self.ts_length,
-                                                  self.word_length,
-                                                  self.num_windows,
-                                                  self.max_window_length)
-        
-        self.discretization = "Multidomain"
-        self.framework = MultiresolutionFramework(self.resolution_matrix.matrix,
-                                                  word_len=self.word_length,
-                                                  alphabet_size=self.alphabet_size,
-                                                  discretization=self.discretization)
-        
         self.clf = LogisticRegression(max_iter=5000,
-                                      random_state=random_state)
+                                      random_state=self.random_state)
         
+        self.ts_length = None
+        self.resolution_matrix = None
+        self.framework = None        
         self.selected_words = set()
     
+        # test variables
+        # self.resolution_matrix_aux = None
     
     def fit(self, data, labels):
         
@@ -96,27 +87,55 @@ class SearchTechnique(BaseClassifier):
                 raise RuntimeError("The samples indices must be the equal to "
                                    "the labels indices")
         
+        if self.verbose:
+            print('Creating the Resolution Matrix...\n')
         
+        ts_length = data.iloc[0,0].size
+        self.ts_length = ts_length
+        # TODO implement the function create_matrix in the ResolutionHandler
+        # no need for this ResolutionMatrix class
+        self.resolution_matrix = ResolutionMatrix(self.ts_length,
+                                                  self.word_length,
+                                                  self.num_windows,
+                                                  self.max_window_length)
+        
+        self.framework = MultiresolutionFramework(self.resolution_matrix.matrix,
+                                                  word_len=self.word_length,
+                                                  alphabet_size=self.alphabet_size,
+                                                  discretization=self.discretization,
+                                                  normalize=self.normalize,
+                                                  verbose=self.verbose)
+                
         if self.verbose:
             print('Fitting the Classifier with data...\n')
         
         # testing one specific dataset to avoid rework
-        try:
-            bob, samples_id, words = read_bob( 'ecg', self.discretization, self.word_length, 'train' )
-            self.framework.fit(data, labels)
-        except Exception as e:
-            print(e)
-            bob, samples_id, words = self._extract_bob_from(data, labels)
-            write_bob( bob, samples_id, words, 'ecg', self.discretization, self.word_length, 'train' )
+        #try:
+        #    bob, samples_id, words = read_bob( 'ecg', self.discretization, self.word_length, 'train' )
+        #    #bag = read_bag( 'ecg', self.discretization, self.word_length, 'train' )
+        #    self.framework.fit(data, labels)
+        #except Exception as e:
+        #    print(e)
+        #    bob, samples_id, words = self._extract_bob_from(data, labels)
+        #    write_bob( bob, samples_id, words, 'ecg', self.discretization, self.word_length, 'train' )
+            #bag = self._extract_bob_from(data, labels)
+            #write_bag(bag, 'ecg', self.discretization, self.word_length, 'train' )
         
         # testing one specific resolution
-        #matrix = self.resolution_matrix.matrix
+        #bob = bag
+        #matrix = self.resolution_matrix_aux
         #window = matrix.columns[0]
         #ngram = matrix[matrix[window] > 0].index[0]
         #bob = bob[ bob.window == window]
         #bob = bob[ bob.ngram == ngram]
+        #bob.index.name = 'word'
+        #bob = bob.pivot_table(values='frequency',
+        #                      columns='word',
+        #                      index='sample').fillna(0).astype(np.int32)
+        #words = bob.columns.values
+        #samples_id = bob.index.values
                                 
-        #bob = self._extract_bob_from(data, labels)
+        bob, samples_id, words = self._extract_bob_from(data, labels)
         
         
         rank_value, p = chi2(bob, labels)
@@ -140,10 +159,11 @@ class SearchTechnique(BaseClassifier):
 
         self.selected_words = sorted(best_words)
         
-        feature_vec = pd.DataFrame()
+        feature_vec = pd.DataFrame(index=samples_id)
         indices = word_rank.index.get_indexer(self.selected_words)
         for i,j in zip(range(indices.size),indices):
             feature_vec[self.selected_words[i]] = bob.getcol(j).toarray().squeeze()
+            #feature_vec[self.selected_words[i]] = bob[self.selected_words[i]]
             
         s = time.time()
         self.clf.fit(feature_vec, labels)
@@ -156,25 +176,34 @@ class SearchTechnique(BaseClassifier):
         
         if self.verbose:
             print('Predicting data with the Classifier...\n')
-        
         self.check_is_fitted()
         
         # testing one specific dataset to avoid rework
-        try:
-            bob, samples_id, words = read_bob( 'ecg', self.discretization, self.word_length, 'test' )
-        except:
-            bob, samples_id, words  = self._extract_bob_from(data)
-            write_bob( bob, samples_id, words, 'ecg', self.discretization, self.word_length, 'test' )
-        
+        #try:
+        #    bob, samples_id, words = read_bob( 'ecg', self.discretization, self.word_length, 'test' )
+            #bag = read_bag( 'ecg', self.discretization, self.word_length, 'test' )
+        #except:
+        #    bob, samples_id, words  = self._extract_bob_from(data)
+        #    write_bob( bob, samples_id, words, 'ecg', self.discretization, self.word_length, 'test' )
+            #bag = self._extract_bob_from(data)
+            #write_bag( bag, 'ecg', self.discretization, self.word_length, 'test' )
+            
         
         # testing one specific resolution
+        #bob = bag
         #matrix = self.resolution_matrix.matrix
         #window = matrix.columns[0]
         #ngram = matrix[matrix[window] > 0].index[0]
         #bob = bob[ bob.window == window]
         #bob = bob[ bob.ngram == ngram]
-                     
-        #bob = self._extract_bob_from(data)
+        #bob.index.name = 'word'
+        #bob = bob.pivot_table(values='frequency',
+        #                      columns='word',
+        #                      index='sample').fillna(0).astype(np.int32)
+        #words = bob.columns.values        
+        #samples_id = bob.index.values
+        
+        bob, samples_id, words = self._extract_bob_from(data)
         
         intersecting_words = []
         
@@ -184,12 +213,12 @@ class SearchTechnique(BaseClassifier):
         for i,j in zip(range(indices.size),indices):
             if j>=0:
                 feature_vec[self.selected_words[i]] = bob.getcol(j).toarray().squeeze()
+                #feature_vec[self.selected_words[i]] = bob[self.selected_words[i]]
                 intersecting_words.append(self.selected_words[i])
             else:
                 feature_vec[self.selected_words[i]] = 0
         
         print('Intersecting words: {}'.format( len(intersecting_words)) )
-        print(intersecting_words)
         
         #all_samples = set(bob['sample'].unique())
         #filtered_samples = set(filtered_bob['sample'].unique())
@@ -206,12 +235,34 @@ class SearchTechnique(BaseClassifier):
         #filtered_vec = feature_vec[self.selected_words]
         
         return self.clf.predict(feature_vec)
+    
+    def predict_proba(self, data):
         
+        if self.verbose:
+            print('Predicting data with the Classifier...\n')
+        self.check_is_fitted()
+        
+        bob, samples_id, words = self._extract_bob_from(data)
+        
+        intersecting_words = []
+        
+        words_index = pd.Index(words)
+        indices = words_index.get_indexer(self.selected_words)
+        feature_vec = pd.DataFrame(index=samples_id)
+        for i,j in zip(range(indices.size),indices):
+            if j>=0:
+                feature_vec[self.selected_words[i]] = bob.getcol(j).toarray().squeeze()
+                intersecting_words.append(self.selected_words[i])
+            else:
+                feature_vec[self.selected_words[i]] = 0
+        
+        print('Intersecting words: {}'.format( len(intersecting_words)) )
     
     def _extract_bob_from(self, data, labels=None):        
         
         word_sequences = self.framework.transform(data) if labels is None \
             else self.framework.fit_transform(data, labels)
         bag_of_bags, samples_id, words = NgramExtractor.get_bob(word_sequences, self.resolution_matrix.matrix)
-        
         return bag_of_bags, samples_id, words
+        #bag_of_bags = NgramExtractor.get_bob(word_sequences, self.resolution_matrix.matrix)
+        #return bag_of_bags
