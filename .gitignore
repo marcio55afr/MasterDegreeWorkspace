@@ -9,6 +9,10 @@ source/experiments/accuracies/ecg/
 source/experiments/accuracies/worms/
 source/experiments/accuracies/stars/
 source/experiments/database/hdf/
+source/experiments/database/bob/
+
+# datasets
+source/experiments/UEA_Experiments/datasets/
 
 # vscode or spyder files
 .vscode

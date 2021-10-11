@@ -117,17 +117,17 @@ class MultiresolutionFramework(_PanelToPanelTransformer):
         
         for window in self.windows:
             if self.sax:
-                 disc = AdaptedSAX(word_length = self.word_len,
+                 disc = AdaptedSAX(window_size = window,
+                            word_length = self.word_len,
                             alphabet_size = self.alphabet_size,
-                            window_size = window,
                             remove_repeat_words=self.remove_repeat_words,
                             return_pandas_data_series=True).fit(1)
                  self.sax_transformers.loc[window] = disc
 
             if self.sfa:
-                disc = AdaptedSFA(word_length=self.word_len,
+                disc = AdaptedSFA(window_size = window,
+                           word_length=self.word_len,
                            alphabet_size = self.alphabet_size,
-                           window_size = window,
                            norm=self.normalize,
                            remove_repeat_words=self.remove_repeat_words,
                            return_pandas_data_series=True).fit(X, y)
