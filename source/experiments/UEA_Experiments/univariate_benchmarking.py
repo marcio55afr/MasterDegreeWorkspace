@@ -28,6 +28,7 @@ from sktime.classification.shapelet_based import (
 )
 from sktime.series_as_features.model_selection import PresplitFilesCV
 
+from source.utils.cd_diagram import draw_cd_diagram
 from datasets.univariate.config import DATASET_NAMES, LARGER_DATASETS_NAMES
 from source.technique import (
     SearchTechnique,
@@ -35,7 +36,13 @@ from source.technique import (
     SearchTechnique_CV_RFSF,
     SearchTechnique_SG,
     SearchTechnique_SG_RR,
-    SearchTechnique_WS
+    SearchTechnique_WS,
+    SearchTechnique_MR_WS,
+    SearchTechnique_DWS,
+    SearchTechnique_5WS,
+    SearchTechnique_KWS,
+    SearchTechnique_SG_CLF,
+    SearchTechnique_MR
 )
 
 warnings.simplefilter(action='ignore', category=UserWarning)
@@ -50,7 +57,7 @@ EVALUATION_FILE = RESULTS_PATH + "evaluation_v"
 #]
 
 # Alternatively, we can use a helper function to create them automatically
-names = DATASET_NAMES
+names = DATASET_NAMES[2:]
 names = LARGER_DATASETS_NAMES
 datasets = [UEADataset(path=DATA_PATH, name=name) for name in names]
 
@@ -99,44 +106,14 @@ strategies_ST_CV = [
                                 random_state=random_state),
         name="ST_CV_SFA_RFFS_l100"),
     TSCStrategy_proba(
-        SearchTechnique_CV_RFSF(discretization="SFA", n_words=200,
-                                max_window_length = .5, max_num_windows = 100,
-                                random_state=random_state),
-        name="ST_CV_SFA_RFFS_w100"),
-    TSCStrategy_proba(
-        SearchTechnique_CV_RFSF(discretization="SFA", n_words=200,
-                                max_window_length = 1., max_num_windows = 100,
-                                random_state=random_state),
-        name="ST_CV_SFA_RFFS_l100_w100"),
-    TSCStrategy_proba(
         SearchTechniqueCV(discretization="SFA", feature_selection=True,
                           n_words=200, scoring='accuracy',
                           max_window_length = 1, max_num_windows = 20,
                           random_state=random_state),
         name="ST_CV_SFA_FS_l100"),
-    TSCStrategy_proba(
-        SearchTechniqueCV(discretization="SFA", feature_selection=True,
-                          n_words=200, scoring='accuracy',
-                          max_window_length = .5, max_num_windows = 100,
-                          random_state=random_state),
-        name="ST_CV_SFA_FS_w100"),
-    TSCStrategy_proba(
-        SearchTechniqueCV(discretization="SFA", feature_selection=True,
-                          n_words=200, scoring='accuracy',
-                          max_window_length = 1, max_num_windows = 100,
-                          random_state=random_state),
-        name="ST_CV_SFA_FS_l100_w100"),
-    TSCStrategy_proba(
-        SearchTechniqueCV(discretization="SFA", feature_selection=True,
-                          n_words=200, scoring='accuracy',
-                          remove_repeat_words=True,
-                          random_state=random_state),
-        name="ST_CV_SFA_FS_RRW"),
 ]
 #strategies.append(strategies_ST_CV)
 #results_paths.append(RESULTS_PATH + "ST_V0")
-
-
 
 strategies_ST_SG= [
     TSCStrategy_proba(
@@ -173,13 +150,169 @@ strategies_ST_SG= [
         name="ST_SG_SFA_RR"),
     ]
 
+strategies_V1_clf = [
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '01',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RandomForest_MF40"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RandomForest"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=10,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RandomForest_nw10"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=200,
+                               random_selection=True,
+                               rand_words=10,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RandomForest_rand10"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               ending_selection=True,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_DS_RandomForest"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               max_num_windows = 50,
+                               n_words=None,
+                               total_n_words = 200,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RandomForest_w50"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '03',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RandomForest_Entropy"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '04',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RandomForest_Entropy_L2"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '10',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_SVC_rbf"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '11',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_SVC_poly3"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '12',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_SVC_poly5"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '13',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_SVC_sigmoid"),    
+    ]
+
+strategies_V1 = [
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=1, discretization="SFA", n_words_variable=False,
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K1_Equal"), 
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=2, discretization="SFA", n_words_variable=False,
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K2_Equal"), 
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=5, discretization="SFA", n_words_variable=False,
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K5_Equal"), 
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA", n_words_variable=False,
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K10_Equal"), 
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=20, discretization="SFA", n_words_variable=False,
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K20_Equal"),    
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA", ascending=False,
+                            n_words_variable=False,
+                            random_selection = True, random_state=random_state),
+        name="ST_KWS_K10_Equal_RS"), 
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA",
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K10_Declined"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=20, discretization="SFA",
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K20_Declined"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA", ascending=False,
+                            random_selection = True, random_state=random_state),
+        name="ST_KWS_K10_Declined_RS"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               discretization="SFA", 
+                               ending_selection=True,
+                               random_state=random_state),
+        name="ST_SG_EndingSelection"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               discretization="SFA", 
+                               random_selection=True,
+                               random_state=random_state),
+        name="ST_SG_RandomSelection"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=10,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_LowSelection_nw10"),  
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               max_num_windows=40,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_w40"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=10,
+                               max_num_windows=40,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_LowSelection_nw10_w40"),
+    ]
+
+
+
 strategy_ST_WS = [
     TSCStrategy_proba(
         SearchTechnique_WS(discretization="SFA", method='mean',
+                           n_best_windows = 1,
+                           random_state=random_state),
+        name="ST_SG_WS_RF_mean"),
+    TSCStrategy_proba(
+        SearchTechnique_WS(discretization="SFA", method='mean',
+                           n_best_windows = 1,
                            random_state=random_state),
         name="ST_SG_WS_mean"),
     TSCStrategy_proba(
         SearchTechnique_WS(discretization="SFA", method='max',
+                           n_best_windows = 1,
                            random_state=random_state),
         name="ST_SG_WS_max"),
     TSCStrategy_proba(
@@ -214,7 +347,271 @@ strategy_ST_WS = [
         name="ST_SG_2WS_nw100_max"),
 ]
 
-strategy = [
+# ST_V1_WS_Test
+strategies_WS_Test = [
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS"),
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS_full"),
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS_LRliblinear"),
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS_LRliblinear_balanced"),
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS_RF_est1000"),
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS_RFBalanced"),
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS_RFBalanced_est1000"),
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS_RFBalanced_maxF5"),
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS_RFBalanced_leaf2"),
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS_RFBalanced_maxf4_est1000"),
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS_SVC"),
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS_SVC_balanced"),
+    TSCStrategy_proba(
+        SearchTechnique_DWS(discretization="SFA", random_state=random_state),
+        name="ST_DWS_NuSVC"),
+    TSCStrategy_proba(
+        SearchTechnique_5WS(discretization="SFA", random_state=random_state),
+        name="ST_5WS"),
+    TSCStrategy_proba(
+        SearchTechnique_5WS(discretization="SFA", random_state=random_state),
+        name="ST_5WS_Equal"),
+    TSCStrategy_proba(
+        SearchTechnique_5WS(discretization="SFA", random_state=random_state),
+        name="ST_5WS_Rand"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA",
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K10_Declined"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA", n_words=200,
+                            ascending=False,
+                            random_state=random_state),
+        name="ST_KWS_nw200_K10_Declined"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA", n_words=100,
+                            ascending=False,
+                            random_state=random_state),
+        name="ST_KWS_nw100_K10_Declined"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA", n_words=100,
+                            ascending=False,
+                            random_state=random_state),
+        name="ST_KWS_nw100_K10_Declined_150"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA", n_words=200,
+                            ascending=True,
+                            random_state=random_state),
+        name="ST_KWS_nw200_K10_Ascending"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA", n_words=100,
+                            ascending=True,
+                            random_state=random_state),
+        name="ST_KWS_nw100_K10_Ascending"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=15, discretization="SFA",
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K15_Declined"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=20, discretization="SFA",
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K20_Declined"), 
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA", n_words_variable=False,
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K10_Equal"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=15, discretization="SFA", n_words_variable=False,
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K15_Equal"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=20, discretization="SFA", n_words_variable=False,
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K20_Equal"), 
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA", random_top_words = True,
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K10_RandDeclined"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=15, discretization="SFA", random_top_words = True,
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K15_RandDeclined"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=20, discretization="SFA", random_top_words = True,
+                            ascending=False,
+                            random_state=random_state),
+        name="ST_KWS_K20_RandDeclined"), 
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA", ascending=False,
+                            random_selection = True, random_state=random_state),
+        name="ST_KWS_K10_Declined_RF"),
+    ]
+
+'''hello'''
+# ST_V1_SG_Test
+strategies_SG_Test = [
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '01',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_MF40"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=5,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw5"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=10,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw10"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=200,
+                               random_selection=True,
+                               rand_words=10,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw200_rand10"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=200,
+                               random_selection=True,
+                               rand_words=20,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw200_rand20"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               max_num_windows = 50,
+                               n_words=None,
+                               total_n_words = 200,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw4_w50"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               max_num_windows = 20,
+                               n_words=None,
+                               total_n_words = 200,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw10_w20"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               max_num_windows = 30,
+                               n_words=None,
+                               total_n_words = 100,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw3_w30"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               max_num_windows = 20,
+                               n_words=None,
+                               total_n_words = 100,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw5_w10"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               max_num_windows = 100,
+                               n_words=None,
+                               total_n_words = 200,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw2_w100"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=10,
+                               discretization="SAX", 
+                               random_state=random_state),
+        name="ST_SG_RF_SAX_nw10"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=15,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw15"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=5,
+                               max_num_windows = 60,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw5_w60"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '03',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_Entropy"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '04',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_Entropy_Leaf2"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '10',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_SVC_rbf"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '11',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_SVC_poly3"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '12',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_SVC_poly5"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '13',
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_SVC_sigmoid"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '04',
+                               ending_selection=True,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_DS_RF_Entropy_Leaf2"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '04',
+                               ending_selection=True,
+                               random_selection=True,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_DRS_RF_Entropy_Leaf2")
+    ]
+
+# ST_V1_FULL
+strategies_V1_FULL = [
     TSCStrategy_proba(
         SearchTechnique_WS(discretization="SFA", random_state=random_state),
         name="ST_SG_SFA"),
@@ -222,11 +619,73 @@ strategy = [
         SearchTechnique_WS(discretization="SFA", method='mean',
                            random_state=random_state),
         name="ST_SG_WS_mean"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=10,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw10"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA",
+                            ascending=False, random_state=random_state),
+        name="ST_KWS_K10_Declined"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               max_num_windows = 20,
+                               n_words=None,
+                               total_n_words = 200,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_RF_nw10_Variable"),
 ]
 
 
-#strategy = strategies_ST_SG
-result_path = RESULTS_PATH + "ST_V1_FULL"
+# ST_V2
+strategies_MR = [
+    TSCStrategy_proba(
+        SearchTechnique_MR(random_state=random_state),
+        name="ST_MR"),
+    TSCStrategy_proba(
+        SearchTechnique_MR(random_state=random_state),
+        name="ST_MR_saxlimit"),
+    TSCStrategy_proba(
+        SearchTechnique_MR(total_n_words = 400, random_state=random_state),
+        name="ST_MR_saxlimit_tw400"),
+    TSCStrategy_proba(
+        SearchTechnique_MR(total_n_words = 800, random_state=random_state),
+        name="ST_MR_saxlimit_tw800"),
+    TSCStrategy_proba(
+        SearchTechnique_MR(random_selection = True, total_n_words = 800,
+                           random_state=random_state),
+        name="ST_MR_saxlimit_randselect_tw800"),
+    TSCStrategy_proba(
+        SearchTechnique_MR(max_sfa_windows = 40, max_sax_windows=4,
+                           random_state=random_state),
+        name="ST_MR_40_4"),
+    TSCStrategy_proba(
+        SearchTechnique_MR(max_sfa_windows = 40, max_sax_windows=4,
+                           total_n_words = 400,
+                           random_state=random_state),
+        name="ST_MR_40_4_tw400"),
+    TSCStrategy_proba(
+        SearchTechnique_MR(random_selection = True,
+                           random_state=random_state),
+        name="ST_MR_RandSelect"),
+    TSCStrategy_proba(
+        SearchTechnique_MR(randomize_best_words = True, total_n_words = 400,
+                           random_state=random_state),
+        name="ST_MR_RandWords_tw400"),
+    TSCStrategy_proba(
+        SearchTechnique_MR(max_sfa_windows = 40, max_sax_windows=4,
+                           randomize_best_words = True, total_n_words = 400,
+                           random_state=random_state),
+        name="ST_MR_40_4_RandWords_tw400"),
+    
+    
+    ]
+
+strategy = strategies_V1_FULL
+result_path = RESULTS_PATH + "ST_V1_Full"
 
 # Specify results object which manages the output of the benchmarking
 results = HDDResults(path=result_path)
@@ -246,10 +705,16 @@ evaluator = Evaluator(results)
 runtime = evaluator.fit_runtime().groupby('strategy_name').mean()
 print(runtime)
 
+scores = evaluator.get_all_datasets_scores('Accuracy', accuracy_score)
+print(scores.groupby('strategy_name').mean())
+#draw_cd_diagram(df_perf=scores, image_path=result_path, title='Accuracy', labels=True)
+#input('end?')
+
+
 #metrics = [PairwiseMetric(func=log_loss, name="Log Loss", proba=True, labels=True,)]
 metrics = [PairwiseMetric(func=accuracy_score, name="Accuracy")]
 #metrics += [PairwiseMetric(func=balanced_accuracy_score, name="Balanced Accuracy")]
-#metrics += [AggregateMetric(func=roc_auc_score, name="AUC ROC", proba=True, labels=True, multi_class='ovr',)]
+metrics += [AggregateMetric(func=roc_auc_score, name="AUC ROC", proba=True, labels=True, multi_class='ovr',)]
 #metrics += [AggregateMetric(func=f1_score, name="F1 Score", labels=True, average='micro')]
 for metric in metrics:
     metrics_by_strategy = evaluator.evaluate(metric=metric)
@@ -259,7 +724,7 @@ for metric in metrics:
     
 metrics_by_strategy = metrics_by_strategy.set_index('strategy')
 metrics_by_strategy = pd.concat([metrics_by_strategy, runtime], axis=1)
-print(metrics_by_strategy.iloc[:,[0,2]])
+print(metrics_by_strategy.iloc[:,[0,2,4]])
 
 fig, ax = plt.subplots(figsize=[8,6], dpi=200)
 
