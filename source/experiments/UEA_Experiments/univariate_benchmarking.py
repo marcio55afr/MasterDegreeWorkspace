@@ -36,10 +36,6 @@ from source.technique import (
     SearchTechnique_CV_RFSF,
     SearchTechnique_SG,
     SearchTechnique_SG_RR,
-    SearchTechnique_WS,
-    SearchTechnique_MR_WS,
-    SearchTechnique_DWS,
-    SearchTechnique_5WS,
     SearchTechnique_KWS,
     SearchTechnique_SG_CLF,
     SearchTechnique_MR
@@ -57,8 +53,8 @@ EVALUATION_FILE = RESULTS_PATH + "evaluation_v"
 #]
 
 # Alternatively, we can use a helper function to create them automatically
-names = DATASET_NAMES[2:]
 names = LARGER_DATASETS_NAMES
+names = DATASET_NAMES[2:]
 datasets = [UEADataset(path=DATA_PATH, name=name) for name in names]
 
 tasks = [TSCTask(target="target") for _ in range(len(datasets))]
@@ -182,14 +178,6 @@ strategies_V1_clf = [
                                random_state=random_state),
         name="ST_SG_DS_RandomForest"),
     TSCStrategy_proba(
-        SearchTechnique_SG_CLF(clf_name = '02',
-                               max_num_windows = 50,
-                               n_words=None,
-                               total_n_words = 200,
-                               discretization="SFA", 
-                               random_state=random_state),
-        name="ST_SG_RandomForest_w50"),
-    TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '03',
                                discretization="SFA", 
                                random_state=random_state),
@@ -198,7 +186,7 @@ strategies_V1_clf = [
         SearchTechnique_SG_CLF(clf_name = '04',
                                discretization="SFA", 
                                random_state=random_state),
-        name="ST_SG_RandomForest_Entropy_L2"),
+        name="ST_SG_RandomForest_L2"),
     TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '10',
                                discretization="SFA", 
@@ -210,6 +198,12 @@ strategies_V1_clf = [
                                random_state=random_state),
         name="ST_SG_SVC_poly3"),
     TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '11',
+                               discretization="SFA", 
+                               n_words = 10,
+                               random_state=random_state),
+        name="ST_SG_SVC_poly3_nw10"),
+    TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '12',
                                discretization="SFA", 
                                random_state=random_state),
@@ -218,7 +212,48 @@ strategies_V1_clf = [
         SearchTechnique_SG_CLF(clf_name = '13',
                                discretization="SFA", 
                                random_state=random_state),
-        name="ST_SG_SVC_sigmoid"),    
+        name="ST_SG_SVC_sigmoid"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '13',
+                               discretization="SFA", 
+                               n_words = 10,
+                               random_state=random_state),
+        name="ST_SG_SVC_sigmoid_nw10"),
+    ]
+
+strategies_V1_windows_words = [
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               max_num_windows=40,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_w40"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               max_num_windows=100,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_w100"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=5,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_nw5"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=10,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_nw10"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=20,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_nw20"),
+    
+    
     ]
 
 strategies_V1 = [
@@ -298,7 +333,7 @@ strategies_V1 = [
     ]
 
 
-
+'''
 strategy_ST_WS = [
     TSCStrategy_proba(
         SearchTechnique_WS(discretization="SFA", method='mean',
@@ -465,7 +500,6 @@ strategies_WS_Test = [
         name="ST_KWS_K10_Declined_RF"),
     ]
 
-'''hello'''
 # ST_V1_SG_Test
 strategies_SG_Test = [
     TSCStrategy_proba(
@@ -609,16 +643,9 @@ strategies_SG_Test = [
                                random_state=random_state),
         name="ST_SG_DRS_RF_Entropy_Leaf2")
     ]
-
+'''
 # ST_V1_FULL
 strategies_V1_FULL = [
-    TSCStrategy_proba(
-        SearchTechnique_WS(discretization="SFA", random_state=random_state),
-        name="ST_SG_SFA"),
-    TSCStrategy_proba(
-        SearchTechnique_WS(discretization="SFA", method='mean',
-                           random_state=random_state),
-        name="ST_SG_WS_mean"),
     TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '02',
                                n_words=10,
@@ -684,8 +711,8 @@ strategies_MR = [
     
     ]
 
-strategy = strategies_V1_FULL
-result_path = RESULTS_PATH + "ST_V1_Full"
+strategy = strategies_V1_windows_words
+result_path = RESULTS_PATH + "ST_V1_windows_words"
 
 # Specify results object which manages the output of the benchmarking
 results = HDDResults(path=result_path)
