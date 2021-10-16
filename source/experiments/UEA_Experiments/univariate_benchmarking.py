@@ -28,7 +28,7 @@ from sktime.classification.shapelet_based import (
 )
 from sktime.series_as_features.model_selection import PresplitFilesCV
 
-from source.utils.cd_diagram import draw_cd_diagram
+from source.utils import draw_cd_diagram
 from datasets.univariate.config import DATASET_NAMES, LARGER_DATASETS_NAMES
 from source.technique import (
     SearchTechnique,
