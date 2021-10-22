@@ -28,17 +28,13 @@ class SearchTechnique_KWS(BaseClassifier):
     
     def __init__(self,
                  K,
+                 method, # ['Declined', 'Equal']
                  word_length = 6,
                  alphabet_size = 4,
-                 #word_ranking_method = 'chi2',
-                 #word_selection = 'best n words', # ['p threshold', 'best n words']
-                 #p_threshold = 0.05,
                  discretization = 'SFA',
                  max_num_windows = 80,
-                 n_words = 100,
-                 method = 'mean',
-                 n_words_variable = True,
-                 ascending = True,
+                 n_words = 200,
+                 inclination = 1.8,
                  random_top_words = False,
                  random_selection = False,
                  verbose = False,
@@ -51,22 +47,20 @@ class SearchTechnique_KWS(BaseClassifier):
         self.word_length = word_length
         self.alphabet_size = alphabet_size
         self.max_num_windows = max_num_windows
+        self.n_words = n_words
         self.max_window_length = .5
         self.remove_repeat_words = False
         
         #self.p_threshold = p_threshold
         self.K = K
-        self.n_words = n_words
         self.method = method
-        self.ascending = ascending
-        self.n_words_variable = n_words_variable
+        self.inclination = inclination
         self.random_top_words = random_top_words
         self.random_selection = random_selection
         self.normalize = True
         self.verbose = verbose
-        
-        
         self.random_state = random_state
+        
         
         self.discretization = discretization
         self.discretizers = pd.Series()
@@ -87,13 +81,14 @@ class SearchTechnique_KWS(BaseClassifier):
                          nu = .05,
                          random_state=random_state)
         self.clf = LinearSVC(random_state=random_state)
-        '''
         
+        '''
         self.clf =  RandomForestClassifier(criterion="gini",
                                            n_estimators = 1000,
                                            class_weight='balanced_subsample',
                                            n_jobs=-1,
                                            random_state=random_state)
+        
         self.ts_length = None
         self.windows = None
         self.results = pd.DataFrame()
@@ -159,7 +154,7 @@ class SearchTechnique_KWS(BaseClassifier):
             self.discretizers.loc[window] = disc
         
         bag_of_bags = self._extract_features(data, labels)
-        bag_of_bags = self._window_selection(bag_of_bags, labels, self.n_words)
+        bag_of_bags = self._window_selection(bag_of_bags, labels)
         self.selected_words = bag_of_bags.columns.values
         self.clf.fit(bag_of_bags, labels)
         self._is_fitted = True
@@ -204,7 +199,7 @@ class SearchTechnique_KWS(BaseClassifier):
             if labels is None:
                 bag_of_words = self._feature_filtering(bag_of_words)
             else:
-                bag_of_words = self._feature_selection(bag_of_words, labels, self.n_words)
+                bag_of_words = self._feature_selection(bag_of_words, labels, 200)
 
             bob = pd.concat([bob, bag_of_words], axis=1)
             self.windows_index.append((window, bag_of_words.shape[1]))
@@ -229,8 +224,11 @@ class SearchTechnique_KWS(BaseClassifier):
         
         return bag_of_words[best_words]
     
-    def _window_selection(self, bag_of_words, labels, n_words):
+    def _window_selection(self, bag_of_words, labels):
         
+        if self.method == 'Equal':
+            self.n_words = self.n_words//self.K
+
         rank_value, p = chi2(bag_of_words, labels)
         word_rank = pd.DataFrame(index = bag_of_words.columns)
         word_rank['rank'] = rank_value
@@ -239,41 +237,31 @@ class SearchTechnique_KWS(BaseClassifier):
         for window, qnt in self.windows_index:
             windows_index += [window]*qnt
         word_rank['window'] = windows_index
-        
-        best_windows = None
-        if self.ascending:
-            best_windows = (
-                word_rank
-                .groupby('window')
-                .mean()
-                .sort_values('rank')
-                .index[-self.K:]
-            )
-        else:
-            best_windows = (
-                word_rank
-                .groupby('window')
-                .mean()
-                .sort_values('rank', ascending=False)
-                .index[:self.K]
-            )
+                
+        best_windows = (
+            word_rank
+            .groupby('window')
+            .mean()
+            .sort_values('rank', ascending=False)
+            .index[:self.K]
+        )
             
         self.windows = best_windows
+        n_words = self.n_words
         best_words = []
         for bw in best_windows:
-            if self.n_words_variable:
-                n_words = np.int32(n_words/1.8)
-            else:
-                n_words = 10
-            if not self.random_top_words:
+            if self.method == 'Declined':
+                n_words = np.int32(n_words/self.inclination)
+                
+            if self.random_top_words:
                 best_words.append(word_rank[word_rank['window'] == bw]
-                                  .sort_values('rank', ascending=False)
-                                  .iloc[:n_words]
+                                  .sample(n_words)
                                   .index
                                   .values)
             else:
                 best_words.append(word_rank[word_rank['window'] == bw]
-                                  .sample(n_words)
+                                  .sort_values('rank', ascending=False)
+                                  .iloc[:n_words]
                                   .index
                                   .values)
             

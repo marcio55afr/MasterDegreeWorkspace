@@ -78,7 +78,6 @@ class SearchTechnique_SG_CLF(BaseClassifier):
         if self.clf_name == '02':
             self.clf =  RandomForestClassifier(criterion="gini",
                                                n_estimators = 1000,
-                                               #max_features = .4,
                                                class_weight='balanced_subsample',
                                                n_jobs=-1,
                                                random_state=random_state)
@@ -89,8 +88,7 @@ class SearchTechnique_SG_CLF(BaseClassifier):
                                                n_jobs=-1,
                                                random_state=random_state)
         if self.clf_name == '04':
-            self.clf =  RandomForestClassifier(criterion="entropy",
-                                               min_samples_leaf = 2,
+            self.clf =  RandomForestClassifier(min_samples_leaf = 2,
                                                n_estimators = 1000,
                                                class_weight='balanced_subsample',
                                                n_jobs=-1,
@@ -116,13 +114,13 @@ class SearchTechnique_SG_CLF(BaseClassifier):
                            random_state=random_state)
         
             
-        if self.clf_name == '30':
+        if self.clf_name == '20':
             self.clf = LogisticRegression(max_iter=5000,
                                       solver="liblinear",
                                       dual=True,
                                       class_weight="balanced",
                                       random_state=random_state)
-        if self.clf_name == '31':
+        if self.clf_name == '21':
             self.clf = LogisticRegression(max_iter=5000,
                                       random_state=random_state)
         

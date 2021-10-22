@@ -29,6 +29,9 @@ class SearchTechnique_MR(BaseClassifier):
                  max_sfa_windows = 20,
                  max_sax_windows = 2,
                  total_n_words = 200,
+                 fixed_words = False,
+                 n_sfa_words = 10,
+                 n_sax_words = 20,
                  random_selection = False,
                  randomize_best_words = False,
                  normalize = True,
@@ -48,6 +51,7 @@ class SearchTechnique_MR(BaseClassifier):
         
         #self.p_threshold = p_threshold
         self.total_n_words = total_n_words
+        self.fixed_words = fixed_words
         self.random_selection = random_selection
         self.randomize_best_words = randomize_best_words
         self.normalize = normalize
@@ -100,11 +104,14 @@ class SearchTechnique_MR(BaseClassifier):
                                             self.max_sfa_windows).matrix.columns.values
         self.sax_windows = ResolutionMatrix(self.ts_length,
                                             self.word_length,
-                                            self.max_window_length/2,
+                                            self.max_window_length,
                                             self.max_sax_windows).matrix.columns.values
         
         self.n_sfa_words = int(self.total_n_words / self.sfa_windows.size)
         self.n_sax_words = int((self.total_n_words/5) / self.sax_windows.size)
+        if self.fixed_words:
+            self.n_sfa_words = 10
+            self.n_sax_words = 20
         
         if (self.n_sfa_words<=0) or (self.n_sax_words<=0) :
             raise ValueError('the number of words per window (n_words) must be'
