@@ -34,7 +34,7 @@ class SearchTechnique_SG_CLF(BaseClassifier):
                  early_selection = True,
                  ending_selection = False,
                  random_selection = False,
-                 rand_words = 100,
+                 rand_words = 0,
                  normalize = True,
                  verbose = False,
                  random_state = None):
@@ -111,6 +111,11 @@ class SearchTechnique_SG_CLF(BaseClassifier):
         if self.clf_name == '13':
             self.clf = SVC(probability = True,
                            kernel = 'sigmoid',
+                           random_state=random_state)
+        if self.clf_name == '14':
+            self.clf = SVC(probability = True,
+                           class_weight = 'balanced',
+                           kernel = 'rbf',
                            random_state=random_state)
         
             
@@ -199,7 +204,7 @@ class SearchTechnique_SG_CLF(BaseClassifier):
         if self.ending_selection:
             bag_of_bags = self._feature_selection(bag_of_bags, labels, self.n_words)
         elif self.random_selection:
-            bag_of_bags = bag_of_bags.sample(self.n_words, axis=1)
+            bag_of_bags = bag_of_bags.sample(frac=.5, axis=1)
             
             
             
@@ -248,6 +253,9 @@ class SearchTechnique_SG_CLF(BaseClassifier):
                 bag_of_words = self._feature_filtering(bag_of_words)
             elif self.early_selection:
                 bag_of_words = self._feature_selection(bag_of_words, labels, self.n_words)
+                if self.rand_words > 0:
+                    n_words = min(bag_of_words.shape[1], self.rand_words)
+                    bag_of_words = bag_of_words.sample(n_words, axis=1)
             bob = pd.concat([bob, bag_of_words], axis=1)
         
         return bob

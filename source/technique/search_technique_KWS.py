@@ -28,12 +28,13 @@ class SearchTechnique_KWS(BaseClassifier):
     
     def __init__(self,
                  K,
-                 method, # ['Declined', 'Equal']
+                 method = 'Equal', # ['Declined', 'Equal']
+                 func = 'max',
                  word_length = 6,
                  alphabet_size = 4,
                  discretization = 'SFA',
-                 max_num_windows = 80,
-                 n_words = 200,
+                 max_num_windows = 40,
+                 n_words = 10,
                  inclination = 1.8,
                  random_top_words = False,
                  random_selection = False,
@@ -54,6 +55,7 @@ class SearchTechnique_KWS(BaseClassifier):
         #self.p_threshold = p_threshold
         self.K = K
         self.method = method
+        self.func = func
         self.inclination = inclination
         self.random_top_words = random_top_words
         self.random_selection = random_selection
@@ -88,7 +90,7 @@ class SearchTechnique_KWS(BaseClassifier):
                                            class_weight='balanced_subsample',
                                            n_jobs=-1,
                                            random_state=random_state)
-        
+    
         self.ts_length = None
         self.windows = None
         self.results = pd.DataFrame()
@@ -199,7 +201,7 @@ class SearchTechnique_KWS(BaseClassifier):
             if labels is None:
                 bag_of_words = self._feature_filtering(bag_of_words)
             else:
-                bag_of_words = self._feature_selection(bag_of_words, labels, 200)
+                bag_of_words = self._feature_selection(bag_of_words, labels, self.n_words)
 
             bob = pd.concat([bob, bag_of_words], axis=1)
             self.windows_index.append((window, bag_of_words.shape[1]))
@@ -226,8 +228,8 @@ class SearchTechnique_KWS(BaseClassifier):
     
     def _window_selection(self, bag_of_words, labels):
         
-        if self.method == 'Equal':
-            self.n_words = self.n_words//self.K
+        #if self.method == 'Equal':
+        #    self.n_words = self.n_words//self.K
 
         rank_value, p = chi2(bag_of_words, labels)
         word_rank = pd.DataFrame(index = bag_of_words.columns)
@@ -237,15 +239,26 @@ class SearchTechnique_KWS(BaseClassifier):
         for window, qnt in self.windows_index:
             windows_index += [window]*qnt
         word_rank['window'] = windows_index
-                
-        best_windows = (
-            word_rank
-            .groupby('window')
-            .mean()
-            .sort_values('rank', ascending=False)
-            .index[:self.K]
-        )
+        
+        best_windows = None
+        if self.func == "max":
+            best_windows = (
+                word_rank
+                .groupby('window')
+                .max()
+                .sort_values('rank', ascending=False)
+                .index[:self.K]
+            )
+        else:
+            best_windows = (
+                word_rank
+                .groupby('window')
+                .mean()
+                .sort_values('rank', ascending=False)
+                .index[:self.K]
+            )
             
+        
         self.windows = best_windows
         n_words = self.n_words
         best_words = []
@@ -255,7 +268,7 @@ class SearchTechnique_KWS(BaseClassifier):
                 
             if self.random_top_words:
                 best_words.append(word_rank[word_rank['window'] == bw]
-                                  .sample(n_words)
+                                  .sample(frac=.5)
                                   .index
                                   .values)
             else:

@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from sktime.classification.base import BaseClassifier
 from sklearn.feature_extraction import DictVectorizer
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 from source.utils import ResolutionHandler, ResolutionMatrix, NgramExtractor
@@ -33,10 +34,10 @@ class SearchTechnique(BaseClassifier):
                  word_selection = 'best n words', # ['p threshold', 'best n words']
                  p_threshold = 0.05,
                  n_words = 120,
-                 num_windows = None,
-                 max_window_length = None,
+                 num_windows = 20,
+                 max_window_length = .5,
                  normalize = True,
-                 verbose = True,
+                 verbose = False,
                  random_state = None):
         
         
@@ -58,8 +59,12 @@ class SearchTechnique(BaseClassifier):
         
         self.discretization = "SFA"        
         self.random_state = random_state
-        self.clf = LogisticRegression(max_iter=5000,
-                                      random_state=self.random_state)
+        
+        self.clf =  RandomForestClassifier(criterion="gini",
+                                           n_estimators = 1000,
+                                           class_weight='balanced_subsample',
+                                           n_jobs=-1,
+                                           random_state=random_state)
         
         self.ts_length = None
         self.resolution_matrix = None
@@ -96,8 +101,8 @@ class SearchTechnique(BaseClassifier):
         # no need for this ResolutionMatrix class
         self.resolution_matrix = ResolutionMatrix(self.ts_length,
                                                   self.word_length,
-                                                  self.num_windows,
-                                                  self.max_window_length)
+                                                  self.max_window_length,
+                                                  self.num_windows)
         
         self.framework = MultiresolutionFramework(self.resolution_matrix.matrix,
                                                   word_len=self.word_length,
@@ -168,7 +173,8 @@ class SearchTechnique(BaseClassifier):
         s = time.time()
         self.clf.fit(feature_vec, labels)
         spend = time.time() - s
-        print('LR training time: {}'.format(spend))
+        if self.verbose:
+            print('LR training time: {}'.format(spend))
         
         self._is_fitted = True
     
@@ -218,7 +224,8 @@ class SearchTechnique(BaseClassifier):
             else:
                 feature_vec[self.selected_words[i]] = 0
         
-        print('Intersecting words: {}'.format( len(intersecting_words)) )
+        if self.verbose:
+            print('Intersecting words: {}'.format( len(intersecting_words)) )
         
         #all_samples = set(bob['sample'].unique())
         #filtered_samples = set(filtered_bob['sample'].unique())
@@ -256,13 +263,18 @@ class SearchTechnique(BaseClassifier):
             else:
                 feature_vec[self.selected_words[i]] = 0
         
-        print('Intersecting words: {}'.format( len(intersecting_words)) )
+        if self.verbose:
+            print('Intersecting words: {}'.format( len(intersecting_words)) )
+        
+        return self.clf.predict_proba(feature_vec)
     
     def _extract_bob_from(self, data, labels=None):        
         
         word_sequences = self.framework.transform(data) if labels is None \
             else self.framework.fit_transform(data, labels)
-        bag_of_bags, samples_id, words = NgramExtractor.get_bob(word_sequences, self.resolution_matrix.matrix)
+        bag_of_bags, samples_id, words = NgramExtractor.get_bob(word_sequences,
+                                                                self.resolution_matrix.matrix,
+                                                                self.verbose)
         return bag_of_bags, samples_id, words
         #bag_of_bags = NgramExtractor.get_bob(word_sequences, self.resolution_matrix.matrix)
         #return bag_of_bags

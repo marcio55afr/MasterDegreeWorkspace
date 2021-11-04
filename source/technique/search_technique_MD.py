@@ -17,9 +17,10 @@ from sklearn.feature_selection import chi2
 
 
 
-class SearchTechnique_MR(BaseClassifier):
+class SearchTechnique_MD(BaseClassifier):
     """
-        Multiresolution approach with the Shotgun using Random Forest as clf
+        Multidomain approach with the Shotgun using Support Vector Machina
+        as clf
     
     """
     
@@ -28,8 +29,6 @@ class SearchTechnique_MR(BaseClassifier):
                  alphabet_size = 4,
                  max_sfa_windows = 20,
                  max_sax_windows = 2,
-                 total_n_words = 200,
-                 fixed_words = False,
                  n_sfa_words = 10,
                  n_sax_words = 20,
                  random_selection = False,
@@ -50,8 +49,8 @@ class SearchTechnique_MR(BaseClassifier):
         self.remove_repeat_words = False
         
         #self.p_threshold = p_threshold
-        self.total_n_words = total_n_words
-        self.fixed_words = fixed_words
+        self.n_sfa_words = n_sfa_words
+        self.n_sax_words = n_sax_words
         self.random_selection = random_selection
         self.randomize_best_words = randomize_best_words
         self.normalize = normalize
@@ -62,12 +61,9 @@ class SearchTechnique_MR(BaseClassifier):
         self.sfa_discretizers = pd.Series()
         self.sax_discretizers = pd.Series()        
         
-        self.clf =  RandomForestClassifier(criterion="gini",
-                                               n_estimators = 1000,
-                                               #max_features = .4,
-                                               class_weight='balanced_subsample',
-                                               n_jobs=-1,
-                                               random_state=random_state)
+        self.clf = SVC(probability = True,
+                       kernel = 'rbf',
+                       random_state=random_state)
         
         # Internal Variables
         self.ts_length = None
@@ -76,8 +72,6 @@ class SearchTechnique_MR(BaseClassifier):
         self.selected_words = set()    
         self.sfa_id = 0
         self.sax_id = 1
-        self.n_sfa_words = None
-        self.n_sax_words = None
     
     def fit(self, data, labels):
         
@@ -106,12 +100,6 @@ class SearchTechnique_MR(BaseClassifier):
                                             self.word_length,
                                             self.max_window_length,
                                             self.max_sax_windows).matrix.columns.values
-        
-        self.n_sfa_words = int(self.total_n_words / self.sfa_windows.size)
-        self.n_sax_words = int((self.total_n_words/5) / self.sax_windows.size)
-        if self.fixed_words:
-            self.n_sfa_words = 10
-            self.n_sax_words = 20
         
         if (self.n_sfa_words<=0) or (self.n_sax_words<=0) :
             raise ValueError('the number of words per window (n_words) must be'

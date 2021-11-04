@@ -40,7 +40,6 @@ class SearchTechniqueCV(BaseClassifier):
                  remove_repeat_words = False,
                  feature_selection=False,
                  n_words = None,
-                 scoring=None,
                  normalize = True,
                  verbose = False,
                  random_state = None):
@@ -60,7 +59,7 @@ class SearchTechniqueCV(BaseClassifier):
         self.feature_selection = feature_selection
         self.normalize = normalize
         self.verbose = verbose
-        self.scoring = scoring
+        self.scoring = 'accuracy'
         
         self.random_state = random_state
         
