@@ -99,7 +99,6 @@ class AdaptedSAX(_PanelToPanelTransformer):
         breakpoints = self._generate_breakpoints()
         n_instances, series_length = X.shape
 
-        bags = pd.DataFrame()
         #TODO test dim as a pandas Series
         dim = []
 
@@ -133,6 +132,7 @@ class AdaptedSAX(_PanelToPanelTransformer):
 
             dim.append(pd.Series(word_sequence) if self.return_pandas_data_series else word_sequence)
 
+        bags = pd.DataFrame() if self.return_pandas_data_series else [None]
         bags[0] = dim
 
         return bags

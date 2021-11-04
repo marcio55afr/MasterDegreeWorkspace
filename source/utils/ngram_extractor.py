@@ -65,7 +65,7 @@ class NgramExtractor(object):
         # Loop for processing all sequences of each sample
         bag_of_bags = pd.DataFrame()
         for sample in samples:
-            sample_sequences = word_sequences.loc[sample]
+            sample_sequences = word_sequences.loc[[sample]]
             
             bag_of_ngrams = []
             for i in range(sample_sequences.shape[0]):
@@ -102,7 +102,8 @@ class NgramExtractor(object):
         
         #return bag_of_bags
         bag_of_bags = bag_of_bags.reset_index()
-        print('Creating the feature sparse matrix...')
+        if verbose:
+            print('Creating the feature sparse matrix...')
         
         samples_ordered = sorted(bag_of_bags['sample'].unique())
         ngram_words_ordered = sorted(bag_of_bags['index'].unique())

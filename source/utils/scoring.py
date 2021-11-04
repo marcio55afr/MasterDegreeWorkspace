@@ -6,9 +6,9 @@ import pandas as pd
 
     
 def exponential(x):
-    if x >= 3:
-        return 2**(x/4)
-    return 0
+    
+    return 2**(x/4)
+    #return 0
 
 def scale(efficiency):    
     scaled_efficiency = [np.log(e) if e>=1 else 0 for e in efficiency]
@@ -32,7 +32,7 @@ def calculate_efficiency(results: pd.DataFrame, lowest_score: float = 0.5):
     #predict_rate = scores.apply(almost_exponential)/predict_runtime
     #efficiency = 4*fit_rate + predict_rate
     
-    return np.around(efficiency).astype(np.int32)
+    return efficiency#np.around(efficiency).astype(np.int32)
     
 def get_effiency_table():
         
