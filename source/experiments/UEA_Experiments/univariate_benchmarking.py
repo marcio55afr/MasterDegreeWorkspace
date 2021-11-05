@@ -33,7 +33,7 @@ from sktime.series_as_features.model_selection import PresplitFilesCV
 from source.experiments.sktime_changes import Evaluator, HDDResults,TSCStrategy_proba
 
 from source.utils import draw_cd_diagram, calculate_efficiency
-from source.datasets.config import DATASET_NAMES, LARGER_DATASETS_NAMES
+from source.experiments.UEA_Experiments.datasets import DATASET_NAMES, LARGER_DATASETS_NAMES
 from source.technique import (
     RandomClassifier,
     SearchTechnique,
