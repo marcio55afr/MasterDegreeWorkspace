@@ -49,11 +49,11 @@ from source.technique import (
 warnings.simplefilter(action='ignore', category=UserWarning)
 
 # set up paths to data and results folder
-DATA_PATH = os.path.join(os.path.abspath(os.getcwd()), "datasets/Univariate_ts/")
 actual_path = os.path.dirname(os.path.abspath(__file__))
+DATA_PATH = os.path.join(actual_path, "datasets/Univariate_ts/")
 
 SCORE_PATH =  "scores/"
-RESULT_PATH = actual_path + "/results/"
+RESULT_PATH = os.path.join(actual_path, "results/")
 
 #datasets = [
 #    UEADataset(path=DATA_PATH, name="PenDigits")
@@ -717,7 +717,7 @@ score_results = score_results.sort_values('ROC AUC mean')
 score_results = score_results.round(3)
 score_results.to_csv(result_strategy_path+'scores.csv')
 print(score_results.iloc[:,:2])
-score_results = score_results.sort_values('ROC AUC efficency')
+score_results = score_results.sort_values('ROC AUC efficency')cd 
 print(score_results.iloc[:,-2:])
 
 fig, ax = plt.subplots(figsize=[8,6], dpi=200)
