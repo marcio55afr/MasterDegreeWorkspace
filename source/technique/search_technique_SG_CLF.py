@@ -295,7 +295,7 @@ class SearchTechnique_SG_CLF(BaseClassifier):
         
         if self.verbose:
             print('Intersecting words: {}'.format( mask.sum()) )
-        return bag_of_bags            
+        return bag_of_bags[self.selected_words]            
     
     def _get_feature_matrix(self, word_sequence):
         

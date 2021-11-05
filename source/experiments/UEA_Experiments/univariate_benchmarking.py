@@ -519,6 +519,13 @@ strategies_V2 = [
                            n_sfa_words = 10,
                            n_sax_words = 40),
         name="ST_MD_w20_4_nw10_40"),
+    TSCStrategy_proba(
+        SearchTechnique_MD(random_state=random_state,
+                           max_sfa_windows = 16,
+                           max_sax_windows = 4,
+                           n_sfa_words = 10,
+                           n_sax_words = 20),
+        name="ST_MD_w16_4_nw10_20"),
     ]
 '''
     TSCStrategy_proba(
@@ -667,8 +674,8 @@ strategies_V4 = [
     ]
 
 strategy = strategies_V1_clf
-
 variant = "ST_V1_clf/"
+
 score_strategy_path = SCORE_PATH + variant
 
 # Specify results object which manages the output of the benchmarking
@@ -717,7 +724,7 @@ score_results = score_results.sort_values('ROC AUC mean')
 score_results = score_results.round(3)
 score_results.to_csv(result_strategy_path+'scores.csv')
 print(score_results.iloc[:,:2])
-score_results = score_results.sort_values('ROC AUC efficency')cd 
+score_results = score_results.sort_values('ROC AUC efficency')
 print(score_results.iloc[:,-2:])
 
 fig, ax = plt.subplots(figsize=[8,6], dpi=200)
