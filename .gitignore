@@ -12,7 +12,7 @@ source/experiments/database/hdf/
 source/experiments/database/bob/
 
 # datasets
-source/experiments/UEA_Experiments/datasets/univariate/
+source/experiments/UEA_Experiments/datasets/Univariate_ts/
 
 # score files
 source/experiments/UEA_Experiments/official_UEA_results
