@@ -26,7 +26,7 @@ def extract_benchmark_summary():
         times.loc[clf_name] = time
     
     
-    auroc_path = "repository_results\\MegaComparison\\AUROC\\TEST\\TESTFOLDAUROCS\\"
+    auroc_path = "official_UEA_results\\MegaComparison\\AUROC\\TEST\\TESTFOLDAUROCS\\"
     benchmark_strategies = os.listdir(auroc_path)
         
     scores = pd.Series(dtype=np.float32)
@@ -42,14 +42,14 @@ def extract_benchmark_summary():
     df.index.name = 'strategy'
     df['auroc'] = scores
     df['runtime'] = times
-    df.to_csv('repository_results/selected_benchmark_summary.csv')
+    df.to_csv('selected_benchmark_summary.csv')
 
 
 
 
 def plot_eficiency():
 
-    summary_file = "repository_results/selected_benchmark_summary.csv"
+    summary_file = "selected_benchmark_summary.csv"
     if not os.path.isfile(summary_file):
         extract_benchmark_summary()
     df = pd.read_csv(summary_file, index_col=0)

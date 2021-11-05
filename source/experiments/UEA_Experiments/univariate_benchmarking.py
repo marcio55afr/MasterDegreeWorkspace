@@ -29,7 +29,7 @@ from sktime.classification.shapelet_based import (
 from sktime.series_as_features.model_selection import PresplitFilesCV
 
 from source.utils import draw_cd_diagram, calculate_efficiency
-from datasets.univariate.config import DATASET_NAMES, LARGER_DATASETS_NAMES
+from datasets.config import DATASET_NAMES, LARGER_DATASETS_NAMES
 from source.technique import (
     RandomClassifier,
     SearchTechnique,
@@ -54,8 +54,8 @@ EVALUATION_FILE = RESULTS_PATH + "evaluation_v"
 #]
 
 # Alternatively, we can use a helper function to create them automatically
-names = LARGER_DATASETS_NAMES
 names = DATASET_NAMES
+names = LARGER_DATASETS_NAMES
 datasets = [UEADataset(path=DATA_PATH, name=name) for name in names]
 
 tasks = [TSCTask(target="target") for _ in range(len(datasets))]
@@ -442,8 +442,6 @@ strategies_V1_kws = [
                             inclination = 1.10,
                             random_state=random_state),
         name="ST_KWS_K30_Declined_max"),
-    ]
-'''
     TSCStrategy_proba(
         SearchTechnique_KWS(K=10, discretization="SFA",
                             n_words=20,
@@ -472,7 +470,8 @@ strategies_V1_kws = [
                             random_state=random_state),
         name="ST_KWS_K30_Declined_RS"),
     ]
-'''
+
+
 # ST_V1_FULL
 strategies_V1_FULL = [
     TSCStrategy_proba(
@@ -482,9 +481,10 @@ strategies_V1_FULL = [
                                random_state=random_state),
         name="ST_SG_nw10_w20"),
     TSCStrategy_proba(
-        SearchTechnique_KWS(K=10, discretization="SFA",
+        SearchTechnique_KWS(K=30, discretization="SFA",
+                            func = "mean",
                             random_state=random_state),
-        name="ST_KWS_K10_Equal_max"),
+        name="ST_KWS_K30_Equal"),
 ]
 
 
@@ -656,8 +656,8 @@ strategies_V4 = [
         name="ST_MR"),    
     ]
 
-strategy = strategies_V1_kws
-result_path = RESULTS_PATH + "ST_V1_kws/"
+strategy = strategies_V1_FULL
+result_path = RESULTS_PATH + "ST_V1_FULL/"
 
 
 # Specify results object which manages the output of the benchmarking

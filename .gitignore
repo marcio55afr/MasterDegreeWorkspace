@@ -12,7 +12,13 @@ source/experiments/database/hdf/
 source/experiments/database/bob/
 
 # datasets
-source/experiments/UEA_Experiments/datasets/
+source/experiments/UEA_Experiments/datasets/univariate/
+
+# score files
+source/experiments/UEA_Experiments/official_UEA_results
+source/experiments/UEA_Experiments/results/
+source/experiments/UEA_Experiments/results/
+
 
 # vscode or spyder files
 .vscode

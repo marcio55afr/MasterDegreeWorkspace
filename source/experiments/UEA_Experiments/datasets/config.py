@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+
+import pandas as pd
+
+DATASET_NAMES = [
+                'SmoothSubspace',
+                'Chinatown',
+                'ItalyPowerDemand',
+                'SyntheticControl',
+                'SonyAIBORobotSurface1',
+                'DistalPhalanxOutlineAgeGroup',
+                'DistalPhalanxOutlineCorrect',
+                'DistalPhalanxTW',
+                'MiddlePhalanxOutlineAgeGroup',
+                'MiddlePhalanxOutlineCorrect',
+                'MiddlePhalanxTW',
+                'PhalangesOutlinesCorrect',
+                'ProximalPhalanxOutlineAgeGroup',
+                'ProximalPhalanxOutlineCorrect',
+                'ProximalPhalanxTW',
+                'TwoLeadECG',
+                'MoteStrain',
+                'ECG200',
+                'MedicalImages']
+
+LARGER_DATASETS_NAMES = ['ACSF1', 'Adiac', 'ChlorineConcentration', 'Computers',
+       'CricketX', 'CricketY', 'CricketZ', 'Crop', 'DistalPhalanxOutlineAgeGroup',
+       'DistalPhalanxOutlineCorrect', 'DistalPhalanxTW', 'ECG200',
+       'ECG5000', 'EOGHorizontalSignal', 'EOGVerticalSignal',
+       'Earthquakes', 'ElectricDevices', 'EthanolLevel', 'FaceAll',
+       'FacesUCR', 'FiftyWords', 'Fish', 'FordA',
+       'FreezerRegularTrain', 'GunPointAgeSpan',
+       'GunPointMaleVersusFemale', 'GunPointOldVersusYoung', 'Ham',
+       'Haptics', 'InlineSkate', 'InsectWingbeatSound',
+       'LargeKitchenAppliances', 'MedicalImages',
+       'MiddlePhalanxOutlineAgeGroup', 'MiddlePhalanxOutlineCorrect',
+       'MiddlePhalanxTW', 'MixedShapesRegularTrain',
+       'MixedShapesSmallTrain', 'OSULeaf', 'PhalangesOutlinesCorrect',
+       'Phoneme', 'PigAirwayPressure', 'PigArtPressure', 'PigCVP',
+       'Plane', 'PowerCons', 'ProximalPhalanxOutlineAgeGroup',
+       'ProximalPhalanxOutlineCorrect', 'ProximalPhalanxTW',
+       'RefrigerationDevices', 'ScreenType', 'SemgHandGenderCh2',
+       'SemgHandMovementCh2', 'SemgHandSubjectCh2', 'ShapesAll',
+       'SmallKitchenAppliances', 'SmoothSubspace', 'Strawberry',
+       'SwedishLeaf', 'SyntheticControl', 'Trace', 'TwoPatterns',
+       'UWaveGestureLibraryAll', 'UWaveGestureLibraryX',
+       'UWaveGestureLibraryY', 'UWaveGestureLibraryZ', 'Wafer',
+       'WordSynonyms', 'Worms', 'WormsTwoClass','Yoga']
