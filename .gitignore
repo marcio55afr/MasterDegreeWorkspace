@@ -16,7 +16,7 @@ source/experiments/UEA_Experiments/datasets/Univariate_ts/
 
 # score files
 source/experiments/UEA_Experiments/official_UEA_results
-source/experiments/UEA_Experiments/results/
+source/experiments/UEA_Experiments/scores/
 
 
 # vscode or spyder files

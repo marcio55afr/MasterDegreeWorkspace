@@ -49,8 +49,8 @@ warnings.simplefilter(action='ignore', category=UserWarning)
 
 # set up paths to data and results folder
 DATA_PATH = os.path.join(os.path.abspath(os.getcwd()), "datasets/univariate/")
-RESULTS_PATH = "results/"
-EVALUATION_FILE = RESULTS_PATH + "evaluation_v"
+SCORE_PATH = "scores/"
+RESULT_PATH = "results/"
 
 #datasets = [
 #    UEADataset(path=DATA_PATH, name="PenDigits")
@@ -664,11 +664,17 @@ strategies_V4 = [
     ]
 
 strategy = strategies_V0_FULL
-result_path = RESULTS_PATH + "ST_V0_FULL/"
+
+variant = "ST_V0_FULL/"
+score_strategy_path = SCORE_PATH + variant
+result_strategy_path = RESULT_PATH + variant
+
+if not os.path.isdir(result_strategy_path):
+    os.mkdir(result_strategy_path)
 
 
 # Specify results object which manages the output of the benchmarking
-results = HDDResults(path=result_path)
+results = HDDResults(path=score_strategy_path)
 
 # run orchestrator
 orchestrator = Orchestrator(
@@ -704,7 +710,7 @@ score_results['ROC AUC efficency'] = calculate_efficiency(score_results.iloc[:,[
                                                           RANDOM_CLF_ROC_AUC_mean)
 score_results = score_results.sort_values('ROC AUC mean')
 score_results = score_results.round(3)
-score_results.to_csv(result_path+'scores.csv')
+score_results.to_csv(result_strategy_path+'scores.csv')
 print(score_results.iloc[:,:2])
 score_results = score_results.sort_values('ROC AUC efficency')
 print(score_results.iloc[:,-2:])
@@ -731,7 +737,7 @@ ax.set_ylabel('accuracy mean')
 ax.add_artist(legend1)
 ax.grid(True)
 
-plt.savefig(result_path+'acc_eficiency')
+plt.savefig(result_strategy_path+'acc_eficiency')
 
 
 fig, ax = plt.subplots(figsize=[8,6], dpi=200)
@@ -756,7 +762,7 @@ ax.set_ylabel('roc auc mean')
 ax.add_artist(legend1)
 ax.grid(True)
 
-plt.savefig(result_path+'roc_eficiency')
+plt.savefig(result_strategy_path+'roc_eficiency')
 
 
 
