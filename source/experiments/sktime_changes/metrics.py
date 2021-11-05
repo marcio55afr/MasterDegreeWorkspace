@@ -1,5 +1,5 @@
 __all__ = ["PairwiseMetric", "AggregateMetric"]
-__author__ = ["Viktor Kazakov", "Markus LÃ¶ning"]
+__author__ = ["Viktor Kazakov", "Markus Löning"]
 
 import numpy as np
 
@@ -16,30 +16,28 @@ class PairwiseMetric(BaseMetric):
         super(PairwiseMetric, self).__init__(name=name, **kwargs)
 
     def compute(self, y_true, y_pred):
-        # compute mean
-        mean = self.func(y_true, y_pred)
-        
-        if(self.labels):
-            labels = np.unique(y_true)
 
-        # compute stderr based on pairwise metrics
         n_instances = len(y_true)
-        labels = np.unique(y_true)
-        if(self.proba):
+        if(self.labels):
+            # get labels
+            labels = np.unique(y_true)
+                
             pointwise_metrics = np.array(
                 [self.func([y_true[i]],
-                           [y_pred[i]],
-                           labels=labels) for i in range(n_instances)])
+                           [y_pred.iloc[i]],
+                           labels=labels,
+                           **self.kwargs) for i in range(n_instances)])
+            # compute mean with labels   
+            mean = self.func(y_true, y_pred, labels=labels, **self.kwargs)
+
         else:
-            if(self.labels):
-                pointwise_metrics = np.array(
-                    [self.func([y_true[i]],
-                               [y_pred[i]],
-                               labels=labels) for i in range(n_instances)])
-            else:
-                pointwise_metrics = np.array(
-                    [self.func([y_true[i]], [y_pred[i]]) for i in range(n_instances)])
-        
+            # compute mean
+            mean = self.func(y_true, y_pred, **self.kwargs)
+            pointwise_metrics = np.array([self.func([y_true[i]],
+                                         [y_pred[i]],
+                                         **self.kwargs) for i in range(n_instances)])
+
+        # compute stderr based on pairwise metrics
         stderr = np.std(pointwise_metrics) / np.sqrt(n_instances - 1)  # sample standard error of the mean
 
         return mean, stderr
@@ -84,7 +82,12 @@ class AggregateMetric(BaseMetric):
         labels = np.unique(y_true)
         
         # compute aggregate metric
-        mean = self.func(y_true, y_pred, labels=labels, **self.kwargs)
+        if ( self.name == 'AUC ROC') and ( labels.size == 2 ):
+            mean = self.func(y_true, y_pred.iloc[:,1])
+        else:
+            mean = self.func(y_true, y_pred, labels=labels, **self.kwargs)
+
+        return mean, None
 
         # compute stderr based on jackknifed metrics
         n_instances = len(y_true)
@@ -94,9 +97,21 @@ class AggregateMetric(BaseMetric):
         jack_idx = self._jackknife_resampling(index)
 
         # compute metrics on jackknife samples
-        jack_pointwise_metric = np.array(
-            [self.func(y_true[idx], y_pred[idx],labels=labels, **self.kwargs)
-             for idx in jack_idx])
+        if self.name == 'AUC ROC':
+        
+            if  labels.size == 2 :
+                jack_pointwise_metric = np.array(
+                    [self.func(y_true[idx], y_pred.iloc[idx,1])
+                     for idx in jack_idx])
+            else:
+                jack_pointwise_metric = np.array(
+                [self.func(y_true[idx], y_pred.iloc[idx],labels=labels, **self.kwargs)
+                 for idx in jack_idx])
+                
+        else:
+            jack_pointwise_metric = np.array(
+                [self.func(y_true[idx], y_pred[idx],labels=labels, **self.kwargs)
+                 for idx in jack_idx])
 
         # compute standard error over jackknifed metrics
         jack_stderr = self._compute_jackknife_stderr(jack_pointwise_metric)

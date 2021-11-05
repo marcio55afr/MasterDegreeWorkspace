@@ -93,7 +93,7 @@ class SearchTechniqueCV(BaseClassifier):
                 raise RuntimeError("The samples indices must be the equal to "
                                    "the labels indices")
         
-        
+        classes = np.unique(labels)
         self.ts_length = data.iloc[0,0].size
         self.windows = ResolutionMatrix(self.ts_length,
                                         self.word_length,
@@ -147,11 +147,14 @@ class SearchTechniqueCV(BaseClassifier):
                                      'the n_words must be a positive number.')
                 bag_of_words = self._add_identifier(bag_of_words, window)
                 bag_of_words = self._feature_selection(bag_of_words, labels)
-
+            
+            cv = 10
+            if classes.size > 50:
+                cv = 2
             results = cross_validate(self.clf,
                                      bag_of_words,
                                      labels,
-                                     cv=10,
+                                     cv=cv,
                                      scoring=[self.scoring]
                                      )
             for score in results.keys():

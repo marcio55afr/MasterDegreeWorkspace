@@ -61,9 +61,11 @@ class SearchTechnique_MD(BaseClassifier):
         self.sfa_discretizers = pd.Series()
         self.sax_discretizers = pd.Series()        
         
-        self.clf = SVC(probability = True,
-                       kernel = 'rbf',
-                       random_state=random_state)
+        self.clf =  RandomForestClassifier(criterion="gini",
+                                           n_estimators = 1000,
+                                           class_weight='balanced_subsample',
+                                           n_jobs=-1,
+                                           random_state=random_state)
         
         # Internal Variables
         self.ts_length = None

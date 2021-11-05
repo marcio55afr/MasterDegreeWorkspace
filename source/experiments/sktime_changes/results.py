@@ -173,10 +173,10 @@ class HDDResults(HDDBaseResults):
                 "predict_estimator_end_time": predict_estimator_end_time,
             }
         )
-        probabilities = pd.DataFrame(y_proba, columns=y_true.unique())
-
+        
         results.to_csv(key, index=False, header=True)
-        probabilities.to_csv(key_y_proba, index=False, header=True)
+        y_proba = pd.DataFrame(y_proba)
+        y_proba.to_csv(key_y_proba, index=False, header=False)
         self._append_key(strategy_name, dataset_name)
 
     def load_predictions(self, cv_fold, train_or_test):
@@ -198,8 +198,7 @@ class HDDResults(HDDBaseResults):
             index = results.loc[:, "index"].values
             y_true = results.loc[:, "y_true"].values
             y_pred = results.loc[:, "y_pred"].values
-            probabilities = pd.read_csv(key_y_proba, header=0)
-            y_proba = probabilities.values
+            y_proba = pd.read_csv(key_y_proba, header=None)
             fit_estimator_start_time = results.loc[0, "fit_estimator_start_time"]
             fit_estimator_end_time = results.loc[0, "fit_estimator_end_time"]
             predict_estimator_start_time = results.loc[

@@ -13,11 +13,11 @@ import matplotlib.pyplot as plt
 
 from sklearn.metrics import accuracy_score, roc_auc_score#f1_score, log_loss, balanced_accuracy_score, 
 from sktime.benchmarking.data import UEADataset, make_datasets
-from sktime.benchmarking.evaluation import Evaluator
-from sktime.benchmarking.metrics import PairwiseMetric, AggregateMetric
+#from sktime.benchmarking.evaluation import Evaluator
+#from sktime.benchmarking.metrics import PairwiseMetric, AggregateMetric
 from sktime.benchmarking.orchestration import Orchestrator
-from sktime.benchmarking.results import HDDResults
-from sktime.benchmarking.strategies import TSCStrategy, TSCStrategy_proba
+#from sktime.benchmarking.results import HDDResults
+#from sktime.benchmarking.strategies import TSCStrategy, TSCStrategy_proba
 from sktime.benchmarking.tasks import TSCTask
 from sktime.classification.dictionary_based import (
     ContractableBOSS,
@@ -27,6 +27,9 @@ from sktime.classification.shapelet_based import (
     MrSEQLClassifier
 )
 from sktime.series_as_features.model_selection import PresplitFilesCV
+
+#from sktime_changes import PairwiseMetric, AggregateMetric
+from source.experiments.sktime_changes import Evaluator, HDDResults,TSCStrategy_proba
 
 from source.utils import draw_cd_diagram, calculate_efficiency
 from datasets.config import DATASET_NAMES, LARGER_DATASETS_NAMES
@@ -148,12 +151,7 @@ strategies_V0_FULL = [
         SearchTechniqueCV(discretization="SFA", feature_selection=True,
                           n_words=100,
                           random_state=random_state),
-        name="ST_CV_SFA_FS_nw100"),
-    TSCStrategy_proba(
-        SearchTechniqueCV(discretization="SAX", feature_selection=True,
-                          n_words=200,
-                          random_state=random_state),
-        name="ST_CV_SAX_FS"),
+        name="ST_CV_SFA_FS_nw100")
     ]
 
 strategies_V1_clf = [
@@ -494,44 +492,53 @@ strategies_V2 = [
         SearchTechnique_MD(random_state=random_state,
                            max_sfa_windows = 20,
                            max_sax_windows = 2,
-                           n_sfa_words = 20,
+                           n_sfa_words = 10,
                            n_sax_words = 20),
-        name="ST_MR_w20_2_nw20_20"),
-    TSCStrategy_proba(
-        SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 16,
-                           max_sax_windows = 4,
-                           n_sfa_words = 20,
-                           n_sax_words = 40),
-        name="ST_MR_w16_4_nw20_40"),
+        name="ST_MD_w20_2_nw10_20"),
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
                            max_sfa_windows = 20,
                            max_sax_windows = 2,
                            n_sfa_words = 10,
+                           n_sax_words = 40),
+        name="ST_MD_w20_2_nw10_40"),
+    TSCStrategy_proba(
+        SearchTechnique_MD(random_state=random_state,
+                           max_sfa_windows = 20,
+                           max_sax_windows = 4,
+                           n_sfa_words = 10,
                            n_sax_words = 20),
-        name="ST_MR_w20_2_nw10_20"),
+        name="ST_MD_w20_4_nw10_20"),
+    TSCStrategy_proba(
+        SearchTechnique_MD(random_state=random_state,
+                           max_sfa_windows = 20,
+                           max_sax_windows = 4,
+                           n_sfa_words = 10,
+                           n_sax_words = 40),
+        name="ST_MD_w20_4_nw10_40"),
+    ]
+'''
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
                            max_sfa_windows = 16,
                            max_sax_windows = 4,
                            n_sfa_words = 10,
                            n_sax_words = 40),
-        name="ST_MR_w16_4_nw10_40"),
+        name="ST_MD_w16_4_nw10_40"),
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
                            max_sfa_windows = 16,
                            max_sax_windows = 2,
                            n_sfa_words = 20,
                            n_sax_words = 40),
-        name="ST_MR_w16_2_nw10_40"),
+        name="ST_MD_w16_2_nw10_40"),
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
                            max_sfa_windows = 20,
                            max_sax_windows = 1,
                            n_sfa_words = 20,
                            n_sax_words = 40),
-        name="ST_MR_w20_1_nw20_40"),
+        name="ST_MD_w20_1_nw20_40"),
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
                            randomize_best_words = True,
@@ -539,7 +546,7 @@ strategies_V2 = [
                            max_sax_windows = 1,
                            n_sfa_words = 20,
                            n_sax_words = 40),
-        name="ST_MR_RandWords_w20_1_nw20_40"),
+        name="ST_MD_RandWords_w20_1_nw20_40"),
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
                            randomize_best_words = True,
@@ -547,7 +554,7 @@ strategies_V2 = [
                            max_sax_windows = 1,
                            n_sfa_words = 40,
                            n_sax_words = 80),
-        name="ST_MR_RandWords_w20_1_nw40_80"),
+        name="ST_MD_RandWords_w20_1_nw40_80"),
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
                            random_selection = True,
@@ -555,7 +562,7 @@ strategies_V2 = [
                            max_sax_windows = 1,
                            n_sfa_words = 20,
                            n_sax_words = 40),
-        name="ST_MR_RandSelect_w20_1_nw20_40"),
+        name="ST_MD_RandSelect_w20_1_nw20_40"),
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
                            max_sfa_windows = 20,
@@ -569,16 +576,16 @@ strategies_V2 = [
                            max_sax_windows = 1,
                            n_sfa_words = 10,
                            n_sax_words = 20),
-        name="ST_MR_w20_1_nw10_20"),
+        name="ST_MD_w20_1_nw10_20"),
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
                            max_sfa_windows = 20,
                            max_sax_windows = 1,
                            n_sfa_words = 20,
                            n_sax_words = 20),
-        name="ST_MR_w20_1_nw20_20"),
+        name="ST_MD_w20_1_nw20_20"),
 ]
-
+'''
 
 strategies_V2_FULL = [
     TSCStrategy_proba(
@@ -656,8 +663,8 @@ strategies_V4 = [
         name="ST_MR"),    
     ]
 
-strategy = strategies_V1_FULL
-result_path = RESULTS_PATH + "ST_V1_FULL/"
+strategy = strategies_V0_FULL
+result_path = RESULTS_PATH + "ST_V0_FULL/"
 
 
 # Specify results object which manages the output of the benchmarking

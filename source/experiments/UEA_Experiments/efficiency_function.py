@@ -4,7 +4,7 @@ import os
 import sys
 sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace')
 from source.utils import calculate_efficiency
-from datasets.univariate.config import LARGER_DATASETS_NAMES
+from datasets.config import LARGER_DATASETS_NAMES
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 def extract_benchmark_summary():
 
-    time_path = "repository_results\\MegaComparison\\TimingsRAW\\TRAIN\\TRAINFOLDTrainTimesS\\"
+    time_path = "official_UEA_results\\MegaComparison\\TimingsRAW\\TRAIN\\TRAINFOLDTrainTimesS\\"
     benchmark_strategies = os.listdir(time_path)
     
     times = pd.Series(dtype=np.float64)

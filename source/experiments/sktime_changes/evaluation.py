@@ -93,7 +93,8 @@ class Evaluator:
                 y_pred = result.y_pred
                 if(metric.proba):
                     y_pred = result.y_proba
-
+                #print(f'{strategy_name} {dataset_name}' )
+                
                 # compute metric
                 mean, stderr = metric.compute(y_true, y_pred)
 
@@ -134,6 +135,48 @@ class Evaluator:
 
         # return aggregated results
         return self._metrics_by_strategy
+    
+    def get_all_datasets_scores(self, score_name, func, probabilties=False, labels=False, **kwargs):
+        
+        scores = pd.DataFrame(
+            columns = [
+                'strategy_name',
+                'dataset_name',
+                score_name
+            ])
+        # load all predictions
+        for result in self.results.load_predictions(
+            cv_fold=0, train_or_test="test"
+        ):
+            y_true = result.y_true
+            y_pred = result.y_pred
+            if probabilties:
+                y_pred = result.y_proba
+            
+            score=None
+            if labels:
+                labels_ = np.unique(y_true)
+                if labels_.size == 2:
+                    score = func(y_true, y_pred.iloc[:,1])
+                else:
+                    score = func(y_true, y_pred, labels=labels_, **kwargs)
+            else:
+                score = func(y_true, y_pred, **kwargs)
+            
+            # unwrap result object
+            unwrap_score = pd.DataFrame(
+                {
+                    'strategy_name': result.strategy_name,
+                    'dataset_name': result.dataset_name,
+                    score_name: score                    
+                },index = [0])
+            
+            # concatinating the scores
+            scores = pd.concat([scores, unwrap_score], ignore_index=True)
+        
+        return scores
+
+        
 
     def plot_boxplots(self, metric_name=None, **kwargs):
         """Box plot of metric"""
