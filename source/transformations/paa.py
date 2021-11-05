@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 from sktime.transformations.base import _PanelToPanelTransformer
-from sktime.utils.data_processing import from_nested_to_2d_array
+from sktime.datatypes._panel._convert import from_nested_to_2d_array
 from sktime.utils.validation.panel import check_X
 
 __author__ = "Matthew Middlehurst"

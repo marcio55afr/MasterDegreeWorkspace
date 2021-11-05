@@ -49,17 +49,19 @@ from source.technique import (
 warnings.simplefilter(action='ignore', category=UserWarning)
 
 # set up paths to data and results folder
-DATA_PATH = os.path.join(os.path.abspath(os.getcwd()), "datasets/univariate/")
-SCORE_PATH = "scores/"
-RESULT_PATH = "results/"
+DATA_PATH = os.path.join(os.path.abspath(os.getcwd()), "datasets/Univariate_ts/")
+actual_path = os.path.dirname(os.path.abspath(__file__))
+
+SCORE_PATH =  "scores/"
+RESULT_PATH = actual_path + "/results/"
 
 #datasets = [
 #    UEADataset(path=DATA_PATH, name="PenDigits")
 #]
 
 # Alternatively, we can use a helper function to create them automatically
-names = DATASET_NAMES
 names = LARGER_DATASETS_NAMES
+names = DATASET_NAMES
 datasets = [UEADataset(path=DATA_PATH, name=name) for name in names]
 
 tasks = [TSCTask(target="target") for _ in range(len(datasets))]
@@ -664,15 +666,10 @@ strategies_V4 = [
         name="ST_MR"),    
     ]
 
-strategy = strategies_V0_FULL
+strategy = strategies_V1_clf
 
-variant = "ST_V0_FULL/"
+variant = "ST_V1_clf/"
 score_strategy_path = SCORE_PATH + variant
-result_strategy_path = RESULT_PATH + variant
-
-if not os.path.isdir(result_strategy_path):
-    os.mkdir(result_strategy_path)
-
 
 # Specify results object which manages the output of the benchmarking
 results = HDDResults(path=score_strategy_path)
@@ -696,6 +693,13 @@ print(runtime)
 
 acc_scores = evaluator.get_all_datasets_scores('Accuracy', accuracy_score)
 roc_scores = evaluator.get_all_datasets_scores('ROC AUC', roc_auc_score, probabilties=True, labels=True, multi_class='ovr')
+
+
+result_strategy_path = RESULT_PATH + variant
+if not os.path.isdir(result_strategy_path):
+    os.mkdir(result_strategy_path)
+
+
 #draw_cd_diagram(df_perf=acc_scores, image_path=result_path, title='Accuracy', labels=True)
 
 acc_scores = acc_scores.groupby('strategy_name').mean()*100
