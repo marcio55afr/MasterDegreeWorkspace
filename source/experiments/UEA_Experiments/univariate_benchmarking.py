@@ -52,7 +52,7 @@ warnings.simplefilter(action='ignore', category=UserWarning)
 actual_path = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(actual_path, "datasets/Univariate_ts/")
 
-SCORE_PATH =  "scores/"
+SCORE_PATH =  os.path.join(actual_path, "scores/")
 RESULT_PATH = os.path.join(actual_path, "results/")
 
 #datasets = [
