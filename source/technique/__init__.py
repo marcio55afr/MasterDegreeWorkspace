@@ -16,7 +16,7 @@ __all__ = ['RandomClassifier',
 from source.technique.random_classifier import RandomClassifier
 from source.technique.search_technique import SearchTechnique
 from source.technique.search_technique_CV import SearchTechniqueCV
-from source.technique.search_technique_CV_RFSF import SearchTechnique_CV_RSFS
+from source.technique.search_technique_CV_RSFS import SearchTechnique_CV_RSFS
 from source.technique.search_technique_KWS import SearchTechnique_KWS
 from source.technique.search_technique_SG_CLF import SearchTechnique_SG_CLF
 from source.technique.search_technique_MD import SearchTechnique_MD
