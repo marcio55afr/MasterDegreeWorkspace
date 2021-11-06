@@ -203,8 +203,6 @@ class SearchTechnique_SG_CLF(BaseClassifier):
         bag_of_bags = self._extract_features(data, labels)
         if self.ending_selection:
             bag_of_bags = self._feature_selection(bag_of_bags, labels, self.n_words)
-        elif self.random_selection:
-            bag_of_bags = bag_of_bags.sample(frac=.5, axis=1)
             
             
             
@@ -268,8 +266,8 @@ class SearchTechnique_SG_CLF(BaseClassifier):
 
     def _feature_selection(self, bag_of_words, labels, n_words):
         
-        #if self.random_selection:
-        #    bag_of_words = bag_of_words.sample(frac=.5, axis=1)
+        if self.random_selection:
+            bag_of_words = bag_of_words.sample(frac=.5, axis=1)
         rank_value, p = chi2(bag_of_words, labels)
         word_rank = pd.DataFrame(index = bag_of_words.columns)
         word_rank['rank'] = rank_value

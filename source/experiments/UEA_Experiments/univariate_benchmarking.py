@@ -151,10 +151,9 @@ strategies_V0 = [
 
 strategies_V0_FULL = [
     TSCStrategy_proba(
-        SearchTechniqueCV(discretization="SFA", feature_selection=True,
-                          n_words=100,
-                          random_state=random_state),
-        name="ST_CV_SFA_FS_nw100")
+        SearchTechnique_CV_RSFS(discretization="SFA", n_words=100,
+                                random_state=random_state),
+        name="ST_CV_SFA_RFFS_nw100"),
     ]
 
 strategies_V1_clf = [
@@ -170,25 +169,13 @@ strategies_V1_clf = [
                                random_selection=True,
                                discretization="SFA", 
                                random_state=random_state),
-        name="ST_SG_RES_LogisticRegression"),
-    TSCStrategy_proba(
-        SearchTechnique_SG_CLF(clf_name = '20',
-                               n_words=10,
-                               discretization="SFA", 
-                               random_state=random_state),
-        name="ST_SG_LogisticRegression_nw10"),
+        name="ST_SG_RSFS_LogisticRegression"),
     TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '21',
                                n_words=100,
                                discretization="SFA", 
                                random_state=random_state),
         name="ST_SG_LogisticRegression_lib"),
-    TSCStrategy_proba(
-        SearchTechnique_SG_CLF(clf_name = '21',
-                               n_words=10,
-                               discretization="SFA", 
-                               random_state=random_state),
-        name="ST_SG_LogisticRegression_lib_nw10"),
     TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '01',
                                n_words=100,
@@ -203,24 +190,11 @@ strategies_V1_clf = [
         name="ST_SG_RandomForest"),
     TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '02',
-                               n_words=10,
-                               discretization="SFA", 
-                               random_state=random_state),
-        name="ST_SG_RandomForest_nw10"),
-    TSCStrategy_proba(
-        SearchTechnique_SG_CLF(clf_name = '02',
                                n_words=100,
-                               rand_words=10,
+                               random_selection = True,
                                discretization="SFA", 
                                random_state=random_state),
-        name="ST_SG_RandomForest_rand10"),
-    TSCStrategy_proba(
-        SearchTechnique_SG_CLF(clf_name = '02',
-                               n_words=100,
-                               random_selection=True,
-                               discretization="SFA", 
-                               random_state=random_state),
-        name="ST_SG_RES_RandomForest"),
+        name="ST_SG_RSFS_RandomForest"),
     TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '02',
                                n_words=100,
@@ -252,13 +226,7 @@ strategies_V1_clf = [
                                random_selection=True,
                                discretization="SFA", 
                                random_state=random_state),
-        name="ST_SG_RES_SVC_rbf"),
-    TSCStrategy_proba(
-        SearchTechnique_SG_CLF(clf_name = '10',
-                               n_words=10,
-                               discretization="SFA", 
-                               random_state=random_state),
-        name="ST_SG_SVC_rbf_nw10"),
+        name="ST_SG_RSFS_SVC_rbf"),
     TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '14',
                                n_words=100,
@@ -266,23 +234,11 @@ strategies_V1_clf = [
                                random_state=random_state),
         name="ST_SG_SVC_rbf_balanced"),
     TSCStrategy_proba(
-        SearchTechnique_SG_CLF(clf_name = '14',
-                               n_words=10,
-                               discretization="SFA", 
-                               random_state=random_state),
-        name="ST_SG_SVC_rbf_balanced_nw10"),
-    TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '11',
                                n_words=100,
                                discretization="SFA", 
                                random_state=random_state),
         name="ST_SG_SVC_poly3"),
-    TSCStrategy_proba(
-        SearchTechnique_SG_CLF(clf_name = '11',
-                               discretization="SFA", 
-                               n_words = 10,
-                               random_state=random_state),
-        name="ST_SG_SVC_poly3_nw10"),
     TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '12',
                                n_words=100,
@@ -295,12 +251,6 @@ strategies_V1_clf = [
                                discretization="SFA", 
                                random_state=random_state),
         name="ST_SG_SVC_sigmoid"),
-    TSCStrategy_proba(
-        SearchTechnique_SG_CLF(clf_name = '13',
-                               n_words = 10,
-                               discretization="SFA", 
-                               random_state=random_state),
-        name="ST_SG_SVC_sigmoid_nw10"),
     ]
 
 
@@ -670,11 +620,11 @@ strategies_V3 = [
 strategies_V4 = [
     TSCStrategy_proba(
         SearchTechnique(random_state=random_state),
-        name="ST_MR"),    
+        name="ST"),    
     ]
 
 strategy = strategies_V0
-variant = "ST_V0/"
+variant = "ST_V0"
 
 score_strategy_path = SCORE_PATH + variant
 
@@ -702,7 +652,7 @@ acc_scores = evaluator.get_all_datasets_scores('Accuracy', accuracy_score)
 roc_scores = evaluator.get_all_datasets_scores('ROC AUC', roc_auc_score, probabilties=True, labels=True, multi_class='ovr')
 
 
-result_strategy_path = RESULT_PATH + variant
+result_strategy_path = RESULT_PATH + variant + '/'
 if not os.path.isdir(result_strategy_path):
     os.mkdir(result_strategy_path)
 
@@ -722,7 +672,7 @@ score_results['ROC AUC efficency'] = calculate_efficiency(score_results.iloc[:,[
                                                           RANDOM_CLF_ROC_AUC_mean)
 score_results = score_results.sort_values('ROC AUC mean')
 score_results = score_results.round(3)
-score_results.to_csv(result_strategy_path+'scores.csv')
+score_results.to_csv(result_strategy_path+'results.csv')
 print(score_results.iloc[:,:2])
 score_results = score_results.sort_values('ROC AUC efficency')
 print(score_results.iloc[:,-2:])

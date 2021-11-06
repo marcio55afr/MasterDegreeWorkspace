@@ -1,5 +1,0 @@
-strategy_name,Accuracy mean,ROC AUC mean,fit runtime mean,predict runtime mean,Accuracy efficency,ROC AUC efficency
-ST_MD_w20_4_nw10_20,74.629,86.173,36.997,36.186,9.912,15.339
-ST_MD_w20_4_nw10_40,75.189,86.24,36.905,36.362,10.949,15.555
-ST_MD_w20_2_nw10_40,75.232,86.361,23.563,21.235,17.278,24.882
-ST_MD_w20_2_nw10_20,75.31,86.604,23.6,21.358,17.487,25.909
