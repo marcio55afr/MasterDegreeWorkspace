@@ -22,7 +22,7 @@ from source.technique.resolution_selector import ResolutionSelector
 from source.experiments.database import read_bob, write_bob
 
 
-class SearchTechnique_CV_RFSF(BaseClassifier):
+class SearchTechnique_CV_RSFS(BaseClassifier):
     """
         Cross-validation approach with Random Selection before the 
         Feature Selection

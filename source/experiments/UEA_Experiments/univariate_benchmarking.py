@@ -38,7 +38,7 @@ from source.technique import (
     RandomClassifier,
     SearchTechnique,
     SearchTechniqueCV,
-    SearchTechnique_CV_RFSF,
+    SearchTechnique_CV_RSFS,
     SearchTechnique_KWS,
     SearchTechnique_SG_CLF,
     SearchTechnique_MD,
@@ -100,7 +100,7 @@ strategies_V0 = [
                           random_state=random_state),
         name="ST_CV_SFA_FS"),
     TSCStrategy_proba(
-        SearchTechnique_CV_RFSF(discretization="SFA", n_words=200,
+        SearchTechnique_CV_RSFS(discretization="SFA", n_words=200,
                                 random_state=random_state),
         name="ST_CV_SFA_RFFS"),
     TSCStrategy_proba(
@@ -114,7 +114,7 @@ strategies_V0 = [
                           random_state=random_state),
         name="ST_CV_SFA_FS_nw500"),
     TSCStrategy_proba(
-        SearchTechnique_CV_RFSF(discretization="SFA", n_words=100,
+        SearchTechnique_CV_RSFS(discretization="SFA", n_words=100,
                                 random_state=random_state),
         name="ST_CV_SFA_RFFS_nw100"),
     TSCStrategy_proba(
@@ -130,12 +130,12 @@ strategies_V0 = [
                           random_state=random_state),
         name="ST_CV_SAX_FS"),
     TSCStrategy_proba(
-        SearchTechnique_CV_RFSF(discretization="SAX", n_words=200,
+        SearchTechnique_CV_RSFS(discretization="SAX", n_words=200,
                                 random_state=random_state),
         name="ST_CV_SAX_RFFS"),
     TSCStrategy_proba(
         SearchTechniqueCV(discretization="SAX", feature_selection=True,
-                          n_words=200,
+                          n_words=100,
                           random_state=random_state),
         name="ST_CV_SAX_FS_nw100"),
     TSCStrategy_proba(
@@ -144,7 +144,7 @@ strategies_V0 = [
                           random_state=random_state),
         name="ST_CV_SAX_FS_nw500"),
     TSCStrategy_proba(
-        SearchTechnique_CV_RFSF(discretization="SAX", n_words=200,
+        SearchTechnique_CV_RSFS(discretization="SAX", n_words=100,
                                 random_state=random_state),
         name="ST_CV_SAX_RFFS_nw100"),
 ]
