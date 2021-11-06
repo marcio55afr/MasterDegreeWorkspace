@@ -673,8 +673,8 @@ strategies_V4 = [
         name="ST_MR"),    
     ]
 
-strategy = strategies_V1_clf
-variant = "ST_V1_clf/"
+strategy = strategies_V0
+variant = "ST_V0/"
 
 score_strategy_path = SCORE_PATH + variant
 

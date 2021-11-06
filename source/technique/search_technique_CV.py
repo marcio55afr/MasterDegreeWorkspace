@@ -241,7 +241,7 @@ class SearchTechniqueCV(BaseClassifier):
         
         if self.verbose:
             print('Intersecting words: {}'.format( mask.sum()) )
-        return bag_of_words
+        return bag_of_words[self.selected_words]  
     
     def _get_feature_matrix(self, word_sequence):
         
