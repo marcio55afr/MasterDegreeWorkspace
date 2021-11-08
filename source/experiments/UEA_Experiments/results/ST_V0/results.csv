@@ -1,0 +1,5 @@
+strategy_name,Accuracy mean,ROC AUC mean,fit runtime mean,predict runtime mean,Accuracy efficency,ROC AUC efficency
+ST_CV_SAX_RFFS,51.184,57.978,268.335,14.638,0.024,0.016
+ST_CV_SAX_RFFS_nw100,51.184,57.978,259.273,14.07,0.024,0.017
+ST_CV_SAX_FS_nw100,49.342,58.723,437.844,14.286,0.01,0.011
+ST_CV_SAX_FS_nw500,49.342,58.723,435.95,13.971,0.011,0.011
