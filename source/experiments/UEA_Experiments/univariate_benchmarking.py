@@ -309,6 +309,20 @@ strategies_V1_sg = [
         name="ST_SG_nw200_w30"),
     TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=50,
+                               max_num_windows = 10,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_nw50_w10"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
+                               n_words=100,
+                               max_num_windows = 10,
+                               discretization="SFA", 
+                               random_state=random_state),
+        name="ST_SG_nw100_w10"),
+    TSCStrategy_proba(
+        SearchTechnique_SG_CLF(clf_name = '02',
                                n_words=200,
                                max_num_windows = 10,
                                discretization="SFA", 
@@ -422,6 +436,39 @@ strategies_V1_kws = [
                             max_num_windows = 30,
                             func = "max",
                             random_state=random_state),
+        name="ST_KWS_K10_w30_max"),  
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, method='Declined', discretization="SFA",
+                            func = "max",
+                            n_words=200,
+                            max_num_windows = 20,
+                            inclination = 1.3,
+                            random_state=random_state),
+        name="ST_KWS_K10_w20_max_Declined"), 
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA",
+                            max_num_windows = 20,
+                            func = "max",
+                            random_selection=True,
+                            random_state=random_state),
+        name="ST_KWS_RSFS_K10_w20_max"),
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, method='Declined', discretization="SFA",
+                            func = "max",
+                            n_words=200,
+                            max_num_windows = 20,
+                            inclination = 1.3,
+                            random_selection=True,
+                            random_state=random_state),
+        name="ST_KWS_RSFS_K10_w20_max_Declined"),
+    
+    ]
+'''
+    TSCStrategy_proba(
+        SearchTechnique_KWS(K=10, discretization="SFA",
+                            max_num_windows = 30,
+                            func = "max",
+                            random_state=random_state),
         name="ST_KWS_K10_w30_max"),    
     TSCStrategy_proba(
         SearchTechnique_KWS(K=10, method='Declined', discretization="SFA",
@@ -458,7 +505,7 @@ strategies_V1_kws = [
     
     
     ]
-
+'''
 # ST_V1_FULL
 strategies_V1_FULL = [
     TSCStrategy_proba(
@@ -469,13 +516,11 @@ strategies_V1_FULL = [
                                random_state=random_state),
         name="ST_SG_nw200_w10"),
     TSCStrategy_proba(
-        SearchTechnique_KWS(K=10, method='Declined', discretization="SFA",
-                            func = "max",
-                            n_words=60,
+        SearchTechnique_KWS(K=10, discretization="SFA",
                             max_num_windows = 20,
-                            inclination = 1.3,
+                            func = "max",
                             random_state=random_state),
-        name="ST_KWS_K10_w20_max_Declined"),
+        name="ST_KWS_K10_w20_max"),
 ]
 
 
@@ -485,9 +530,9 @@ strategies_V2 = [
         SearchTechnique_MD(random_state=random_state,
                            max_sfa_windows = 20,
                            max_sax_windows = 2,
-                           n_sfa_words = 10,
-                           n_sax_words = 20),
-        name="ST_MD_w20_2_nw10_20"),
+                           n_sfa_words = 200,
+                           n_sax_words = 200),
+        name="ST_MD_nw10_20_w20_2"),
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
                            max_sfa_windows = 20,

@@ -34,7 +34,7 @@ class SearchTechnique_KWS(BaseClassifier):
                  alphabet_size = 4,
                  discretization = 'SFA',
                  max_num_windows = 40,
-                 n_words = 10,
+                 n_words = 200,
                  inclination = 1.8,
                  random_top_words = False,
                  random_selection = False,
