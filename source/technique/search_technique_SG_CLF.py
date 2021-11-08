@@ -29,6 +29,7 @@ class SearchTechnique_SG_CLF(BaseClassifier):
                  discretization = 'SFA',
                  max_num_windows = 20,
                  n_words = 100,
+                 p_threshold = 0.05,
                  total_n_words = None,
                  clf_name = '01',
                  early_selection = True,
@@ -51,6 +52,7 @@ class SearchTechnique_SG_CLF(BaseClassifier):
         
         #self.p_threshold = p_threshold
         self.n_words = n_words
+        self.p_threshold = p_threshold
         self.total_n_words = total_n_words
         self.early_selection = early_selection
         self.ending_selection = ending_selection
@@ -166,10 +168,6 @@ class SearchTechnique_SG_CLF(BaseClassifier):
         if (self.n_words is None) or (self.total_n_words is not None):
             self.n_words = self.total_n_words // self.windows.size
         
-        if self.n_words<=0:
-            raise ValueError('When select_features is selected as True '
-                             'the n_words must be a positive number.')
-        
         if self.verbose:
             print('\nFitting the Classifier with data...')
         
@@ -271,9 +269,14 @@ class SearchTechnique_SG_CLF(BaseClassifier):
         rank_value, p = chi2(bag_of_words, labels)
         word_rank = pd.DataFrame(index = bag_of_words.columns)
         word_rank['rank'] = rank_value
-        word_rank = word_rank.sort_values('rank', ascending=False)
-        best_words = word_rank.iloc[0:n_words].index.values        
+        word_rank['p_value'] = p
         
+        best_words = []
+        if n_words <= 0:
+            best_words = word_rank[word_rank['p_value'] >= self.p_threshold].index.values    
+        else:
+            word_rank = word_rank.sort_values('rank', ascending=False)
+            best_words = word_rank.iloc[0:n_words].index.values
         return bag_of_words[best_words]    
 
     def _feature_filtering(self, bag_of_words):
