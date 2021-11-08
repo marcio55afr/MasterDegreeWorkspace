@@ -1,0 +1,5 @@
+strategy_name,Accuracy mean,ROC AUC mean,fit runtime mean,predict runtime mean,Accuracy efficency,ROC AUC efficency
+ST_MD_nw200_200_w8_2,76.052,88.646,18.724,17.803,25.065,46.519
+ST_MD_nw200_200_w10_4,76.366,88.877,33.503,33.852,14.792,27.063
+ST_MD_nw200_200_w10_2,76.251,88.932,20.107,18.491,24.158,45.522
+ST_MD_nw200_200_w12_2,76.673,88.986,20.34,19.11,25.692,45.427

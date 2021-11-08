@@ -29,8 +29,8 @@ class SearchTechnique_MD(BaseClassifier):
                  alphabet_size = 4,
                  max_sfa_windows = 20,
                  max_sax_windows = 2,
-                 n_sfa_words = 10,
-                 n_sax_words = 20,
+                 n_sfa_words = 200,
+                 n_sax_words = 200,
                  random_selection = False,
                  randomize_best_words = False,
                  normalize = True,
@@ -245,7 +245,7 @@ class SearchTechnique_MD(BaseClassifier):
         
         if self.verbose:
             print('Intersecting words: {}'.format( mask.sum()) )
-        return bag_of_bags            
+        return bag_of_bags[self.selected_words]         
     
     def _get_feature_matrix(self, word_sequence, disc_id):
         

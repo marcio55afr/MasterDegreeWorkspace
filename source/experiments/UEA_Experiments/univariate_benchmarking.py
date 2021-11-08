@@ -461,51 +461,10 @@ strategies_V1_kws = [
                             random_selection=True,
                             random_state=random_state),
         name="ST_KWS_RSFS_K10_w20_max_Declined"),
-    
     ]
-'''
-    TSCStrategy_proba(
-        SearchTechnique_KWS(K=10, discretization="SFA",
-                            max_num_windows = 30,
-                            func = "max",
-                            random_state=random_state),
-        name="ST_KWS_K10_w30_max"),    
-    TSCStrategy_proba(
-        SearchTechnique_KWS(K=10, method='Declined', discretization="SFA",
-                            func = "max",
-                            n_words=60,
-                            max_num_windows = 20,
-                            inclination = 1.3,
-                            random_state=random_state),
-        name="ST_KWS_K10_w20_max_Declined"),
-    TSCStrategy_proba(
-        SearchTechnique_KWS(K=20, method='Declined', discretization="SFA",
-                            func = "max",
-                            n_words=40,
-                            max_num_windows = 30,
-                            inclination = 1.15,
-                            random_state=random_state),
-        name="ST_KWS_K20_w30_max_Declined"),    
-    TSCStrategy_proba(
-        SearchTechnique_KWS(K=10, discretization="SFA",
-                            func = "max",
-                            max_num_windows = 20,
-                            random_selection=True,
-                            random_state=random_state),
-        name="ST_KWS_RSFS_K10_w20_max"),
-    TSCStrategy_proba(
-        SearchTechnique_KWS(K=10, method='Declined', discretization="SFA",
-                            func = "max",
-                            n_words=60,
-                            max_num_windows = 20,
-                            random_selection=True,
-                            inclination = 1.3,
-                            random_state=random_state),
-        name="ST_KWS_RSFS_K10_w20_max_Declined"),
-    
-    
-    ]
-'''
+
+
+
 # ST_V1_FULL
 strategies_V1_FULL = [
     TSCStrategy_proba(
@@ -528,118 +487,61 @@ strategies_V1_FULL = [
 strategies_V2 = [
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 20,
+                           max_sfa_windows = 10,
                            max_sax_windows = 2,
                            n_sfa_words = 200,
                            n_sax_words = 200),
-        name="ST_MD_nw10_20_w20_2"),
+        name="ST_MD_nw200_200_w10_2"),
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 20,
+                           max_sfa_windows = 10,
+                           max_sax_windows = 4,
+                           n_sfa_words = 200,
+                           n_sax_words = 200),
+        name="ST_MD_nw200_200_w10_4"),
+    TSCStrategy_proba(
+        SearchTechnique_MD(random_state=random_state,
+                           max_sfa_windows = 8,
                            max_sax_windows = 2,
-                           n_sfa_words = 10,
-                           n_sax_words = 40),
-        name="ST_MD_w20_2_nw10_40"),
+                           n_sfa_words = 200,
+                           n_sax_words = 200),
+        name="ST_MD_nw200_200_w8_2"),
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 20,
-                           max_sax_windows = 4,
-                           n_sfa_words = 10,
-                           n_sax_words = 20),
-        name="ST_MD_w20_4_nw10_20"),
-    TSCStrategy_proba(
-        SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 20,
-                           max_sax_windows = 4,
-                           n_sfa_words = 10,
-                           n_sax_words = 40),
-        name="ST_MD_w20_4_nw10_40"),
-    TSCStrategy_proba(
-        SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 16,
-                           max_sax_windows = 4,
-                           n_sfa_words = 10,
-                           n_sax_words = 20),
-        name="ST_MD_w16_4_nw10_20"),
-    ]
-'''
-    TSCStrategy_proba(
-        SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 16,
-                           max_sax_windows = 4,
-                           n_sfa_words = 10,
-                           n_sax_words = 40),
-        name="ST_MD_w16_4_nw10_40"),
-    TSCStrategy_proba(
-        SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 16,
+                           max_sfa_windows = 12,
                            max_sax_windows = 2,
-                           n_sfa_words = 20,
-                           n_sax_words = 40),
-        name="ST_MD_w16_2_nw10_40"),
+                           n_sfa_words = 200,
+                           n_sax_words = 200),
+        name="ST_MD_nw200_200_w12_2"),
+    
+    
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 20,
-                           max_sax_windows = 1,
-                           n_sfa_words = 20,
-                           n_sax_words = 40),
-        name="ST_MD_w20_1_nw20_40"),
-    TSCStrategy_proba(
-        SearchTechnique_MD(random_state=random_state,
-                           randomize_best_words = True,
-                           max_sfa_windows = 20,
-                           max_sax_windows = 1,
-                           n_sfa_words = 20,
-                           n_sax_words = 40),
-        name="ST_MD_RandWords_w20_1_nw20_40"),
-    TSCStrategy_proba(
-        SearchTechnique_MD(random_state=random_state,
-                           randomize_best_words = True,
-                           max_sfa_windows = 20,
-                           max_sax_windows = 1,
-                           n_sfa_words = 40,
-                           n_sax_words = 80),
-        name="ST_MD_RandWords_w20_1_nw40_80"),
-    TSCStrategy_proba(
-        SearchTechnique_MD(random_state=random_state,
+                           max_sfa_windows = 8,
+                           max_sax_windows = 2,
                            random_selection = True,
-                           max_sfa_windows = 20,
-                           max_sax_windows = 1,
-                           n_sfa_words = 20,
-                           n_sax_words = 40),
-        name="ST_MD_RandSelect_w20_1_nw20_40"),
+                           n_sfa_words = 200,
+                           n_sax_words = 200),
+        name="ST_MD_RSFS_nw200_200_w8_2"),
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 20,
-                           max_sax_windows = 1,
-                           n_sfa_words = 10,
-                           n_sax_words = 40),
-        name="ST_MR_w20_1_nw10_40"),
-    TSCStrategy_proba(
-        SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 20,
-                           max_sax_windows = 1,
-                           n_sfa_words = 10,
-                           n_sax_words = 20),
-        name="ST_MD_w20_1_nw10_20"),
-    TSCStrategy_proba(
-        SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 20,
-                           max_sax_windows = 1,
-                           n_sfa_words = 20,
-                           n_sax_words = 20),
-        name="ST_MD_w20_1_nw20_20"),
-]
-'''
+                           max_sfa_windows = 8,
+                           max_sax_windows = 2,
+                           randomize_best_words = True,
+                           n_sfa_words = 200,
+                           n_sax_words = 200),
+        name="ST_MD_FSRS_nw200_200_w8_2"),
+    ]
+
 
 strategies_V2_FULL = [
     TSCStrategy_proba(
         SearchTechnique_MD(random_state=random_state,
-                           max_sfa_windows = 20,
-                           max_sax_windows = 1,
-                           n_sfa_words = 10,
-                           n_sax_words = 20),
-        name="ST_MR_w20_1_nw10_20"),
+                           max_sfa_windows = 8,
+                           max_sax_windows = 2,
+                           n_sfa_words = 200,
+                           n_sax_words = 200),
+        name="ST_MD_nw200_200_w8_2"),
     ]
 
 strategies_V3 = [
@@ -708,8 +610,8 @@ strategies_V4 = [
         name="ST"),    
     ]
 
-strategy = strategies_V1_FULL
-variant = "ST_V1_FULL"
+strategy = strategies_V2_FULL
+variant = "ST_V2_FULL"
 
 score_strategy_path = SCORE_PATH + variant
 
