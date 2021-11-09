@@ -575,7 +575,6 @@ strategies_V3 = [
         name="ST_3gram_WL4_A2"),
     ]
 
-'''
 strategies_V3_reso = [
                   
     TSCStrategy_proba(
@@ -611,6 +610,7 @@ strategies_V3_reso = [
     ]
 
 
+'''
     TSCStrategy_proba(
         SearchTechnique_NgramResolution(N=5,
                               word_length=4,
@@ -725,8 +725,8 @@ strategies_V4 = [
         name="ST"),    
     ]
 
-strategy = strategies_V3
-variant = "ST_V3"
+strategy = strategies_V3_reso
+variant = "ST_V3_reso"
 
 score_strategy_path = SCORE_PATH + variant
 

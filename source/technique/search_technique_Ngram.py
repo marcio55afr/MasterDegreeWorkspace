@@ -28,7 +28,7 @@ class SearchTechnique_Ngram(BaseClassifier):
                  word_length = 6,
                  alphabet_size = 4,
                  max_window_length = .5,
-                 max_sfa_windows = 10,
+                 max_sfa_windows = 8,
                  max_sax_windows = 2,
                  n_sfa_words = 200,
                  n_sax_words = 200,
