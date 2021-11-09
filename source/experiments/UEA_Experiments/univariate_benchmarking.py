@@ -545,7 +545,7 @@ strategies_V2_FULL = [
     ]
 
 
-strategies_V3_md = [
+strategies_V3 = [
     
     TSCStrategy_proba(
         SearchTechnique_Ngram(N=5,
@@ -574,8 +574,6 @@ strategies_V3_md = [
                               random_state=random_state),
         name="ST_3gram_WL4_A2"),
     ]
-
-
 
 strategies_V3_reso = [
                   
@@ -727,8 +725,8 @@ strategies_V4 = [
         name="ST"),    
     ]
 
-strategy = strategies_V3_md
-variant = "ST_V3_md"
+strategy = strategies_V3
+variant = "ST_V3"
 
 score_strategy_path = SCORE_PATH + variant
 
