@@ -47,7 +47,7 @@ class SearchTechnique_SG_CLF(BaseClassifier):
         self.word_length = word_length
         self.alphabet_size = alphabet_size
         self.max_num_windows = max_num_windows
-        self.max_window_length = .5
+        self.max_window_length = 1
         self.remove_repeat_words = False
         
         #self.p_threshold = p_threshold

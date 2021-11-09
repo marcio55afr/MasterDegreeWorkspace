@@ -27,7 +27,7 @@ class SearchTechnique_MD(BaseClassifier):
     def __init__(self,
                  word_length = 6,
                  alphabet_size = 4,
-                 max_sfa_windows = 20,
+                 max_sfa_windows = 8,
                  max_sax_windows = 2,
                  n_sfa_words = 200,
                  n_sax_words = 200,

@@ -3,7 +3,7 @@
 
 import pandas as pd
 
-variant = "V2/"
+variant = "V2_FULL/"
 test = 'ST_'+variant
 file = 'results/'+test+'results.csv'
 

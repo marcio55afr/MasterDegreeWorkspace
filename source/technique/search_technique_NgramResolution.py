@@ -34,7 +34,7 @@ class SearchTechnique_NgramResolution(BaseClassifier):
                  word_length = 6,
                  alphabet_size = 4,
                  max_num_windows = 10,                 
-                 n_words = 10,
+                 n_words = 200,
                  normalize = True,
                  verbose = False,
                  random_state = None):
@@ -210,7 +210,7 @@ class SearchTechnique_NgramResolution(BaseClassifier):
         
         if self.verbose:
             print('Intersecting words: {}'.format( mask.sum()) )
-        return bag_of_bags            
+        return bag_of_bags[self.selected_words]      
     
     def _get_feature_matrix(self, ngram_sequences):
         

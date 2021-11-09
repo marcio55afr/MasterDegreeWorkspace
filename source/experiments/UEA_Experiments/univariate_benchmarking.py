@@ -60,8 +60,8 @@ RESULT_PATH = os.path.join(actual_path, "results/")
 #]
 
 # Alternatively, we can use a helper function to create them automatically
-names = DATASET_NAMES
 names = LARGER_DATASETS_NAMES
+names = DATASET_NAMES
 datasets = [UEADataset(path=DATA_PATH, name=name) for name in names]
 
 tasks = [TSCTask(target="target") for _ in range(len(datasets))]
@@ -544,7 +544,123 @@ strategies_V2_FULL = [
         name="ST_MD_nw200_200_w8_2"),
     ]
 
-strategies_V3 = [
+
+strategies_V3_md = [
+    
+    TSCStrategy_proba(
+        SearchTechnique_Ngram(N=5,
+                              random_state=random_state),
+        name="ST_5grams"),
+    TSCStrategy_proba(
+        SearchTechnique_Ngram(N=3,
+                              random_state=random_state),
+        name="ST_3grams"),
+    TSCStrategy_proba(
+        SearchTechnique_Ngram(N=5, word_length=4,
+                              random_state=random_state),
+        name="ST_5gram_WL4"),
+    TSCStrategy_proba(
+        SearchTechnique_Ngram(N=3, word_length=4,
+                              random_state=random_state),
+        name="ST_3gram_WL4"),
+    TSCStrategy_proba(
+        SearchTechnique_Ngram(N=5, word_length=4,
+                              alphabet_size=2,
+                              random_state=random_state),
+        name="ST_5gram_WL4_A2"),
+    TSCStrategy_proba(
+        SearchTechnique_Ngram(N=3, word_length=4,
+                              alphabet_size=2,
+                              random_state=random_state),
+        name="ST_3gram_WL4_A2"),
+    ]
+
+
+
+strategies_V3_reso = [
+                  
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=5,
+                                        n_words = 200,
+                                        random_state=random_state),
+        name="ST_5grams_reso"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=3,
+                                        n_words = 200,
+                                        random_state=random_state),
+        name="ST_3grams_reso"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=5,
+                                        n_words = 100,
+                                        random_state=random_state),
+        name="ST_5grams_reso_nw100"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=3,
+                                        n_words = 100,
+                                        random_state=random_state),
+        name="ST_3grams_reso_nw100"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=5,
+                                        n_words = 50,
+                                        random_state=random_state),
+        name="ST_5grams_reso_nw50"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=3,
+                                        n_words = 50,
+                                        random_state=random_state),
+        name="ST_3grams_reso_nw50"),
+    ]
+
+
+'''
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=5,
+                              word_length=4,
+                              random_state=random_state),
+        name="ST_5gram_WL4"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=3,
+                              word_length=4,
+                              random_state=random_state),
+        name="ST_3gram_WL4"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=5,
+                              word_length=4,
+                              alphabet_size=2,
+                              random_state=random_state),
+        name="ST_5gram_WL4_A2"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=3,
+                              word_length=4,
+                              alphabet_size=2,
+                              random_state=random_state),
+        name="ST_3gram_WL4_A2"),    
+    ]
+
+strategies_V3_sfabigram = [
+    
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=3, only_sfa=True,
+                              random_state=random_state),
+        name="ST_3grams"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=3, only_sfa=True,
+                              word_length=4,
+                              random_state=random_state),
+        name="ST_3gram_WL4"),
+    
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=3, only_sfa=True,
+                              word_length=4,
+                              alphabet_size=2,
+                              random_state=random_state),
+        name="ST_3gram_WL4_A2"),   
+    ]
+
+
+
+
+
     TSCStrategy_proba(
         SearchTechnique_SG_CLF(clf_name = '02',
                                n_words=10,
@@ -560,6 +676,7 @@ strategies_V3 = [
                                         word_length=4,
                                         random_state=random_state),
         name="ST_SFA_NgramResolution_wl4"),
+    
     TSCStrategy_proba(
         SearchTechnique_Ngram(only_sfa=True,
                               random_state=random_state),
@@ -603,15 +720,15 @@ strategies_V3 = [
                               random_state=random_state),
         name="ST_Ngram_50_100"),
     ]
-
+'''
 strategies_V4 = [
     TSCStrategy_proba(
         SearchTechnique(random_state=random_state),
         name="ST"),    
     ]
 
-strategy = strategies_V2_FULL
-variant = "ST_V2_FULL"
+strategy = strategies_V3_md
+variant = "ST_V3_md"
 
 score_strategy_path = SCORE_PATH + variant
 

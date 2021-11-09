@@ -27,15 +27,12 @@ class SearchTechnique_Ngram(BaseClassifier):
                  N = 5,
                  word_length = 6,
                  alphabet_size = 4,
-                 max_sfa_windows = 20,
+                 max_sfa_windows = 10,
                  max_sax_windows = 2,
-                 total_n_words = 200,
                  fixed_words = False,
                  n_sfa_words = 10,
-                 n_sax_words = 20,
+                 n_sax_words = 200,
                  only_sfa = False,
-                 random_selection = False,
-                 randomize_best_words = False,
                  normalize = True,
                  verbose = False,
                  random_state = None):
@@ -56,10 +53,7 @@ class SearchTechnique_Ngram(BaseClassifier):
         self.remove_repeat_words = False
         
         #self.p_threshold = p_threshold
-        self.total_n_words = total_n_words
         self.fixed_words = fixed_words
-        self.random_selection = random_selection
-        self.randomize_best_words = randomize_best_words
         self.normalize = normalize
         self.verbose = verbose
         
@@ -70,13 +64,9 @@ class SearchTechnique_Ngram(BaseClassifier):
         
         self.clf =  RandomForestClassifier(criterion="gini",
                                                n_estimators = 1000,
-                                               #max_features = .4,
                                                class_weight='balanced_subsample',
                                                n_jobs=-1,
                                                random_state=random_state)
-        self.clf = SVC(probability = True,
-                           kernel = 'rbf',
-                           random_state=random_state)
         
         # Internal Variables
         self.ts_length = None
@@ -150,8 +140,6 @@ class SearchTechnique_Ngram(BaseClassifier):
             self.sax_discretizers.loc[window] = sax        
         
         bag_of_bags = self._extract_features(data, labels)
-        if self.randomize_best_words:
-            bag_of_bags = bag_of_bags.sample(frac=.5, axis=1)
         self.selected_words = bag_of_bags.columns.values
         self.clf.fit(bag_of_bags, labels)
         self._is_fitted = True
@@ -232,8 +220,6 @@ class SearchTechnique_Ngram(BaseClassifier):
 
     def _feature_selection(self, bag_of_words, labels, n_words):
         
-        if self.random_selection:
-            bag_of_words = bag_of_words.sample(frac=.5, axis=1)
         rank_value, p = chi2(bag_of_words, labels)
         word_rank = pd.DataFrame(index = bag_of_words.columns)
         word_rank['rank'] = rank_value
@@ -259,21 +245,13 @@ class SearchTechnique_Ngram(BaseClassifier):
         
         if self.verbose:
             print('Intersecting words: {}'.format( mask.sum()) )
-        return bag_of_bags            
+        return bag_of_bags[self.selected_words]   
     
     def _get_feature_matrix(self, ngram_sequences, disc_id):
                 
         ngram_counts = list(map(pd.value_counts, ngram_sequences))
         bag_of_words = pd.concat(ngram_counts, axis=1).T  
         return bag_of_words.fillna(0).astype(np.int16)
-            
-        
-        if disc_id == 1:
-            word_counting = word_sequence[0].map( pd.value_counts )
-            feature_matrix = pd.concat(list(word_counting), axis=1).T.fillna(0).astype(np.int16)
-        else:
-            feature_matrix = pd.concat(word_sequence[0].tolist(), axis=1).T.fillna(0).astype(np.int16)
-        return feature_matrix
     
     def _extract_ngram_words(self, word_sequences):
         
