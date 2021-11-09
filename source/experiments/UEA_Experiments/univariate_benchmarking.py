@@ -723,9 +723,8 @@ strategies_V4 = [
         name="ST"),    
     ]
 
-strategy = strategies_V3_reso
-variant = "ST_V3_reso"
-
+strategy = strategies_V3
+variant = "ST_V3"
 score_strategy_path = SCORE_PATH + variant
 
 # Specify results object which manages the output of the benchmarking
