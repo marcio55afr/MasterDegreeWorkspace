@@ -27,10 +27,10 @@ class SearchTechnique_Ngram(BaseClassifier):
                  N = 5,
                  word_length = 6,
                  alphabet_size = 4,
+                 max_window_length = .5,
                  max_sfa_windows = 10,
                  max_sax_windows = 2,
-                 fixed_words = False,
-                 n_sfa_words = 10,
+                 n_sfa_words = 200,
                  n_sax_words = 200,
                  only_sfa = False,
                  normalize = True,
@@ -44,19 +44,16 @@ class SearchTechnique_Ngram(BaseClassifier):
         self.N = N
         self.word_length = word_length
         self.alphabet_size = alphabet_size
+        self.max_window_length = max_window_length
+
         self.max_sfa_windows = max_sfa_windows
-        self.only_sfa = only_sfa
         self.max_sax_windows = max_sax_windows
         self.n_sfa_words = n_sfa_words
         self.n_sax_words = n_sax_words
-        self.max_window_length = .5
-        self.remove_repeat_words = False
+        self.only_sfa = only_sfa
         
-        #self.p_threshold = p_threshold
-        self.fixed_words = fixed_words
         self.normalize = normalize
-        self.verbose = verbose
-        
+        self.verbose = verbose        
         self.random_state = random_state
         
         self.sfa_discretizers = pd.Series()
@@ -69,6 +66,7 @@ class SearchTechnique_Ngram(BaseClassifier):
                                                random_state=random_state)
         
         # Internal Variables
+        self.remove_repeat_words = False
         self.ts_length = None
         self.windows = None
         self.results = pd.DataFrame()

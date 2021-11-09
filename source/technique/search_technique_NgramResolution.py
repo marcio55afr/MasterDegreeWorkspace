@@ -33,8 +33,11 @@ class SearchTechnique_NgramResolution(BaseClassifier):
                  N = 5,
                  word_length = 6,
                  alphabet_size = 4,
-                 max_num_windows = 10,                 
-                 n_words = 200,
+                 max_window_length = .5,
+                 max_sfa_windows = 10,
+                 max_sax_windows = 2,
+                 n_sfa_words = 10,
+                 n_sax_words = 200,
                  normalize = True,
                  verbose = False,
                  random_state = None):
@@ -46,17 +49,19 @@ class SearchTechnique_NgramResolution(BaseClassifier):
         self.N = N
         self.word_length = word_length
         self.alphabet_size = alphabet_size
-        self.max_num_windows = max_num_windows
-        self.max_window_length = .5
-        self.remove_repeat_words = False
+        self.max_window_length = max_window_length
         
-        #self.p_threshold = p_threshold
-        self.n_words = n_words
+        self.max_sfa_windows = max_sfa_windows
+        self.max_sax_windows = max_sax_windows
+        self.n_sfa_words = n_sfa_words
+        self.n_sax_words = n_sax_words
+        
         self.normalize = normalize
         self.verbose = verbose
-        
         self.random_state = random_state
-        self.discretizers = pd.Series()        
+
+        self.sfa_discretizers = pd.Series()
+        self.sax_discretizers = pd.Series()        
         
         self.clf =  RandomForestClassifier(criterion="gini",
                                            n_estimators = 1000,
@@ -64,6 +69,7 @@ class SearchTechnique_NgramResolution(BaseClassifier):
                                            n_jobs=-1,
                                            random_state=random_state)
         
+        self.remove_repeat_words = False
         self.ts_length = None
         self.windows = None
         self.results = pd.DataFrame()
