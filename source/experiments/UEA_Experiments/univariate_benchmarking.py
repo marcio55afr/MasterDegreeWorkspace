@@ -575,7 +575,7 @@ strategies_V3 = [
         name="ST_3gram_WL4_A2"),
     ]
 
-'''
+
 strategies_V3_reso = [
                   
     TSCStrategy_proba(
@@ -588,26 +588,27 @@ strategies_V3_reso = [
         name="ST_3grams_reso"),
     TSCStrategy_proba(
         SearchTechnique_NgramResolution(N=5,
-                                        n_words = 100,
+                                        n_sfa_words=100, n_sax_words=100,
                                         random_state=random_state),
-        name="ST_5grams_reso_nw100"),
+        name="ST_5grams_reso_nw100_100"),
     TSCStrategy_proba(
         SearchTechnique_NgramResolution(N=3,
-                                        n_words = 100,
+                                        n_sfa_words=100, n_sax_words=100,
                                         random_state=random_state),
-        name="ST_3grams_reso_nw100"),
+        name="ST_3grams_reso_nw100_100"),
     TSCStrategy_proba(
         SearchTechnique_NgramResolution(N=5,
-                                        n_words = 50,
+                                        n_sfa_words=50, n_sax_words=50,
                                         random_state=random_state),
-        name="ST_5grams_reso_nw50"),
+        name="ST_5grams_reso_nw50_50"),
     TSCStrategy_proba(
         SearchTechnique_NgramResolution(N=3,
-                                        n_words = 50,
+                                        n_sfa_words=50, n_sax_words=50,
                                         random_state=random_state),
-        name="ST_3grams_reso_nw50"),
+        name="ST_3grams_reso_nw50_50"),
     ]
 
+'''
 
     TSCStrategy_proba(
         SearchTechnique_NgramResolution(N=5,
@@ -725,6 +726,7 @@ strategies_V4 = [
 
 strategy = strategies_V3
 variant = "ST_V3"
+
 score_strategy_path = SCORE_PATH + variant
 
 # Specify results object which manages the output of the benchmarking

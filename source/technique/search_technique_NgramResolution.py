@@ -73,7 +73,9 @@ class SearchTechnique_NgramResolution(BaseClassifier):
         self.ts_length = None
         self.windows = None
         self.results = pd.DataFrame()
-        self.selected_words = set()    
+        self.selected_words = set()
+        self.sfa_id = 0
+        self.sax_id = 1
     
     def fit(self, data, labels):
         
@@ -94,38 +96,50 @@ class SearchTechnique_NgramResolution(BaseClassifier):
                                    "the labels indices")
         
         self.ts_length = data.iloc[0,0].size
-        self.windows = ResolutionMatrix(self.ts_length,
-                                        self.word_length,
-                                        self.max_window_length,
-                                        self.max_num_windows).matrix.columns.values
-        
-        #if (self.n_words is None) or (self.total_n_words is not None):
-        #    self.n_words = self.total_n_words // self.windows.size
-        
-        if self.n_words<=0:
-            raise ValueError('When select_features is selected as True '
-                             'the n_words must be a positive number.')
+        self.sfa_windows = ResolutionMatrix(self.ts_length,
+                                            self.word_length,
+                                            self.max_window_length,
+                                            self.max_sfa_windows).matrix.columns.values
+
+        self.sax_windows = ResolutionMatrix(self.ts_length,
+                                            self.word_length,
+                                            self.max_window_length,
+                                            self.max_sax_windows).matrix.columns.values
         
         if self.verbose:
             print('\nFitting the Classifier with data...')
         
             print('\nFitting the transformers...')
-            for w in self.windows:
+            for w in self.sfa_windows:
+                print('_',end='')
+            for w in self.sax_windows:
                 print('_',end='')
             print('')
-        for window in self.windows:
+        
+        for window in self.sfa_windows:
             if self.verbose:
                 print('#', end='')
-                
-            disc = AdaptedSFA(window_size = window,
-                              word_length=self.word_length,
-                              alphabet_size=self.alphabet_size,
-                              norm=self.normalize,
-                              remove_repeat_words=self.remove_repeat_words,
-                              return_pandas_data_series=True,
-                              n_jobs=-1
-                              ).fit(data, labels)
-            self.discretizers.loc[window] = disc
+            sfa = AdaptedSFA(window_size = window,
+                             word_length=self.word_length,
+                             alphabet_size=self.alphabet_size,
+                             norm=self.normalize,
+                             remove_repeat_words=self.remove_repeat_words,
+                             return_pandas_data_series=False,
+                             n_jobs=-1
+                             ).fit(data, labels)
+            self.sfa_discretizers.loc[window] = sfa
+        
+        for window in self.sax_windows:
+            if self.verbose:
+                print('#', end='')
+            sax = AdaptedSAX(window_size = window,
+                             word_length=self.word_length,
+                             alphabet_size=self.alphabet_size,
+                             remove_repeat_words=self.remove_repeat_words,
+                             return_pandas_data_series=False
+                             ).fit(data, labels)                
+            self.sax_discretizers.loc[window] = sax
+        
         
         bag_of_bags = self._extract_features(data, labels)            
         self.selected_words = bag_of_bags.columns.values
@@ -161,36 +175,48 @@ class SearchTechnique_NgramResolution(BaseClassifier):
                 print('_',end='')
             print('')            
         bob = pd.DataFrame()
-        for window in self.windows:
+        for window in self.sfa_windows:
             if self.verbose:
                 print('#', end='')
             
             for n in range(self.N):
-                disc = self.discretizers[window]
+                disc = self.sfa_discretizers[window]
                 word_sequence = disc.transform(data, labels)
                 ngram_sequence = self._extract_ngram_words(n, word_sequence)
                 bag_of_words = self._get_feature_matrix(ngram_sequence)
-                bag_of_words = self._add_identifier(bag_of_words, window)
+                bag_of_words = self._add_identifier(bag_of_words, self.sfa_id, window)
                 if labels is None:
                     bag_of_words = self._feature_filtering(bag_of_words)
                 else:
-                    bag_of_words = self._feature_selection(bag_of_words, labels, self.n_words)
-                    #if self.rand_words > 0:
-                    #    bag_of_words = bag_of_words.sample(self.rand_words, axis=1)
+                    bag_of_words = self._feature_selection(bag_of_words, labels, self.n_sfa_words)
+                bob = pd.concat([bob, bag_of_words], axis=1)
+                
+        for window in self.sax_windows:
+            if self.verbose:
+                print('#', end='')
+            
+            for n in range(self.N):
+                disc = self.sax_discretizers[window]
+                word_sequence = disc.transform(data, labels)
+                ngram_sequence = self._extract_ngram_words(n, word_sequence)
+                bag_of_words = self._get_feature_matrix(ngram_sequence)
+                bag_of_words = self._add_identifier(bag_of_words, self.sax_id, window)
+                if labels is None:
+                    bag_of_words = self._feature_filtering(bag_of_words)
+                else:
+                    bag_of_words = self._feature_selection(bag_of_words, labels, self.n_sax_words)
                 bob = pd.concat([bob, bag_of_words], axis=1)
         
         return bob
 
-    def _add_identifier(self, bag_of_words, window):
+    def _add_identifier(self, bag_of_words, disc_id, window):
         
-        columns = bag_of_words.columns.map(lambda word: f'{window} {word}')
+        columns = bag_of_words.columns.map(lambda word: f'{disc_id} {window} {word}')
         bag_of_words.columns = columns
         return bag_of_words
 
     def _feature_selection(self, bag_of_words, labels, n_words):
         
-        #if self.random_selection:
-        #    bag_of_words = bag_of_words.sample(frac=.5, axis=1)
         rank_value, p = chi2(bag_of_words, labels)
         word_rank = pd.DataFrame(index = bag_of_words.columns)
         word_rank['rank'] = rank_value
@@ -222,7 +248,7 @@ class SearchTechnique_NgramResolution(BaseClassifier):
         
         ngram_counts = list(map(pd.value_counts, ngram_sequences))
         bag_of_words = pd.concat(ngram_counts, axis=1).T  
-        return bag_of_words.fillna(0).astype(np.int16)    
+        return bag_of_words.fillna(0).astype(np.int32)    
         
     def _extract_ngram_words(self, n, word_sequences):
         

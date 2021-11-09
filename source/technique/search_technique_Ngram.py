@@ -32,7 +32,6 @@ class SearchTechnique_Ngram(BaseClassifier):
                  max_sax_windows = 2,
                  n_sfa_words = 200,
                  n_sax_words = 200,
-                 only_sfa = False,
                  normalize = True,
                  verbose = False,
                  random_state = None):
@@ -50,7 +49,6 @@ class SearchTechnique_Ngram(BaseClassifier):
         self.max_sax_windows = max_sax_windows
         self.n_sfa_words = n_sfa_words
         self.n_sax_words = n_sax_words
-        self.only_sfa = only_sfa
         
         self.normalize = normalize
         self.verbose = verbose        
@@ -97,12 +95,11 @@ class SearchTechnique_Ngram(BaseClassifier):
                                             self.word_length,
                                             self.max_window_length,
                                             self.max_sfa_windows).matrix.columns.values
-        self.sax_windows = []
-        if not self.only_sfa:
-            self.sax_windows = ResolutionMatrix(self.ts_length,
-                                                self.word_length,
-                                                self.max_window_length,
-                                                self.max_sax_windows).matrix.columns.values
+
+        self.sax_windows = ResolutionMatrix(self.ts_length,
+                                            self.word_length,
+                                            self.max_window_length,
+                                            self.max_sax_windows).matrix.columns.values
         
         if self.verbose:
             print('\nFitting the Classifier with data...')
@@ -180,11 +177,8 @@ class SearchTechnique_Ngram(BaseClassifier):
             disc = self.sfa_discretizers[window]
             word_sequence = disc.transform(data, labels)
             ngram_sequence = self._extract_ngram_words(word_sequence)
-            bag_of_words = self._get_feature_matrix(ngram_sequence, self.sfa_id)
+            bag_of_words = self._get_feature_matrix(ngram_sequence)
             bag_of_words = self._add_identifier(bag_of_words, self.sfa_id, window)
-            if bag_of_words.shape[0] != data.shape[0]:
-                raise RuntimeError('The ngram extractor had an number of ngram sequences'
-                                   'with different size of the number of samples in the dataset')
             if labels is None:
                 bag_of_words = self._feature_filtering(bag_of_words)
             else:
@@ -199,7 +193,7 @@ class SearchTechnique_Ngram(BaseClassifier):
             disc = self.sax_discretizers[window]
             word_sequence = disc.transform(data, labels)
             ngram_sequence = self._extract_ngram_words(word_sequence)
-            bag_of_words = self._get_feature_matrix(ngram_sequence, self.sax_id)
+            bag_of_words = self._get_feature_matrix(ngram_sequence)
             bag_of_words = self._add_identifier(bag_of_words, self.sax_id, window)
             if labels is None:
                 bag_of_words = self._feature_filtering(bag_of_words)
@@ -245,11 +239,11 @@ class SearchTechnique_Ngram(BaseClassifier):
             print('Intersecting words: {}'.format( mask.sum()) )
         return bag_of_bags[self.selected_words]   
     
-    def _get_feature_matrix(self, ngram_sequences, disc_id):
+    def _get_feature_matrix(self, ngram_sequences):
                 
         ngram_counts = list(map(pd.value_counts, ngram_sequences))
         bag_of_words = pd.concat(ngram_counts, axis=1).T  
-        return bag_of_words.fillna(0).astype(np.int16)
+        return bag_of_words.fillna(0).astype(np.int32)
     
     def _extract_ngram_words(self, word_sequences):
         
