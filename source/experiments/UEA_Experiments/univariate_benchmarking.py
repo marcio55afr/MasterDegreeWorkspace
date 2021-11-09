@@ -575,16 +575,15 @@ strategies_V3 = [
         name="ST_3gram_WL4_A2"),
     ]
 
+'''
 strategies_V3_reso = [
                   
     TSCStrategy_proba(
         SearchTechnique_NgramResolution(N=5,
-                                        n_words = 200,
                                         random_state=random_state),
         name="ST_5grams_reso"),
     TSCStrategy_proba(
         SearchTechnique_NgramResolution(N=3,
-                                        n_words = 200,
                                         random_state=random_state),
         name="ST_3grams_reso"),
     TSCStrategy_proba(
@@ -610,7 +609,6 @@ strategies_V3_reso = [
     ]
 
 
-'''
     TSCStrategy_proba(
         SearchTechnique_NgramResolution(N=5,
                               word_length=4,
