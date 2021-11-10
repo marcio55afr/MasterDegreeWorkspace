@@ -38,6 +38,8 @@ class SearchTechnique_NgramResolution(BaseClassifier):
                  max_sax_windows = 2,
                  n_sfa_words = 200,
                  n_sax_words = 200,
+                 declined = False,
+                 remove_n_words = 40,
                  normalize = True,
                  verbose = False,
                  random_state = None):
@@ -55,6 +57,8 @@ class SearchTechnique_NgramResolution(BaseClassifier):
         self.max_sax_windows = max_sax_windows
         self.n_sfa_words = n_sfa_words
         self.n_sax_words = n_sax_words
+        self.declined = declined
+        self.remove_n_words = remove_n_words
         
         self.normalize = normalize
         self.verbose = verbose
@@ -179,6 +183,7 @@ class SearchTechnique_NgramResolution(BaseClassifier):
             if self.verbose:
                 print('#', end='')
             
+            n_words = self.n_sfa_words
             for n in range(self.N):
                 disc = self.sfa_discretizers[window]
                 word_sequence = disc.transform(data, labels)
@@ -188,13 +193,16 @@ class SearchTechnique_NgramResolution(BaseClassifier):
                 if labels is None:
                     bag_of_words = self._feature_filtering(bag_of_words)
                 else:
-                    bag_of_words = self._feature_selection(bag_of_words, labels, self.n_sfa_words)
+                    bag_of_words = self._feature_selection(bag_of_words, labels, n_words)
+                    if self.declined:
+                        n_words -= self.remove_n_words
                 bob = pd.concat([bob, bag_of_words], axis=1)
                 
         for window in self.sax_windows:
             if self.verbose:
                 print('#', end='')
             
+            n_words = self.n_sax_words
             for n in range(self.N):
                 disc = self.sax_discretizers[window]
                 word_sequence = disc.transform(data, labels)
@@ -204,7 +212,9 @@ class SearchTechnique_NgramResolution(BaseClassifier):
                 if labels is None:
                     bag_of_words = self._feature_filtering(bag_of_words)
                 else:
-                    bag_of_words = self._feature_selection(bag_of_words, labels, self.n_sax_words)
+                    bag_of_words = self._feature_selection(bag_of_words, labels, n_words)
+                if self.declined:
+                        n_words -= self.remove_n_words
                 bob = pd.concat([bob, bag_of_words], axis=1)
         
         return bob

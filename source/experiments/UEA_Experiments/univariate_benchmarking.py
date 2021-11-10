@@ -60,8 +60,8 @@ RESULT_PATH = os.path.join(actual_path, "results/")
 #]
 
 # Alternatively, we can use a helper function to create them automatically
-names = LARGER_DATASETS_NAMES
 names = DATASET_NAMES
+names = LARGER_DATASETS_NAMES
 datasets = [UEADataset(path=DATA_PATH, name=name) for name in names]
 
 tasks = [TSCTask(target="target") for _ in range(len(datasets))]
@@ -606,67 +606,53 @@ strategies_V3_reso = [
                                         n_sfa_words=50, n_sax_words=50,
                                         random_state=random_state),
         name="ST_3grams_reso_nw50_50"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=3,
+                                        n_sfa_words=200, n_sax_words=200,
+                                        declined = True,
+                                        random_state=random_state),
+        name="ST_3grams_reso_nw200_Declined"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=3,
+                                        n_sfa_words=150, n_sax_words=150,
+                                        declined = True,
+                                        remove_n_words = 30,
+                                        random_state=random_state),
+        name="ST_3grams_reso_nw150_Declined"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=3, word_length=4,
+                                        random_state=random_state),
+        name="ST_3grams_reso_WL4"),
+    TSCStrategy_proba(
+        SearchTechnique_NgramResolution(N=3, word_length=4,
+                                        alphabet_size=2,
+                                        random_state=random_state),
+        name="ST_3grams_reso_WL4_A2"),
     ]
 
 
-'''
-
-
-
-
-    
+strategies_V3_FULL = [
     TSCStrategy_proba(
-        SearchTechnique_Ngram(only_sfa=True,
+        SearchTechnique_Ngram(N=3, word_length=4,
+                              alphabet_size=2,
                               random_state=random_state),
-        name="ST_SFA_Ngram"),
+        name="ST_3gram_WL4_A2"),
     TSCStrategy_proba(
-        SearchTechnique_Ngram(N=3, only_sfa=True,
-                              random_state=random_state),
-        name="ST_SFA_Ngram_n3"),
-    TSCStrategy_proba(
-        SearchTechnique_Ngram(N=3, word_length=4, only_sfa=True,
-                              random_state=random_state),
-        name="ST_SFA_Ngram_n3_wl4"),
-    TSCStrategy_proba(
-        SearchTechnique_Ngram(N=3, word_length=4, only_sfa=True,
-                              random_state=random_state),
-        name="ST_SFA_Ngram_n3_wl4_svc"),
-    TSCStrategy_proba(
-        SearchTechnique_Ngram(random_state=random_state),
-        name="ST_Ngram"),
-    TSCStrategy_proba(
-        SearchTechnique_Ngram(N=3,
-                              random_state=random_state),
-        name="ST_Ngram_n3"),
-    TSCStrategy_proba(
-        SearchTechnique_Ngram(N=1,
-                              random_state=random_state),
-        name="ST_Ngram_n1"),
-    TSCStrategy_proba(
-        SearchTechnique_Ngram(random_selection = True,
-                              random_state=random_state),
-        name="ST_Ngram_RS"),
-    TSCStrategy_proba(
-        SearchTechnique_Ngram(n_sfa_words = 20,
-                              n_sax_words = 40,
-                              randomize_best_words = True,
-                              random_state=random_state),
-        name="ST_Ngram_RBW"),
-    TSCStrategy_proba(
-        SearchTechnique_Ngram(n_sfa_words = 50,
-                              n_sax_words = 100,
-                              random_state=random_state),
-        name="ST_Ngram_50_100"),
+        SearchTechnique_NgramResolution(N=3, word_length=4,
+                                        alphabet_size=2,
+                                        random_state=random_state),
+        name="ST_3grams_reso_WL4_A2"), 
     ]
-'''
+
+
 strategies_V4 = [
     TSCStrategy_proba(
         SearchTechnique(random_state=random_state),
         name="ST"),    
     ]
 
-strategy = strategies_V3_reso
-variant = "ST_V3_reso"
+strategy = strategies_V3_FULL
+variant = "ST_V3_FULL"
 
 score_strategy_path = SCORE_PATH + variant
 
