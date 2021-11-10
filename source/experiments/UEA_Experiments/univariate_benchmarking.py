@@ -639,9 +639,8 @@ strategies_V3_FULL = [
         name="ST_3gram_WL4_A2"),
     TSCStrategy_proba(
         SearchTechnique_NgramResolution(N=3, word_length=4,
-                                        alphabet_size=2,
                                         random_state=random_state),
-        name="ST_3grams_reso_WL4_A2"), 
+        name="ST_3grams_reso_WL4"), 
     ]
 
 
