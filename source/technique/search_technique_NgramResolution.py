@@ -25,7 +25,8 @@ from sklearn.feature_selection import chi2
 
 class SearchTechnique_NgramResolution(BaseClassifier):
     """
-        Shotgun approach with anothers classifiers
+        Ngram Resolution approach with words extracted from the Multidomain
+        approach and changing the SAX and SFA algorithms
     
     """
     
@@ -144,7 +145,6 @@ class SearchTechnique_NgramResolution(BaseClassifier):
                              ).fit(data, labels)                
             self.sax_discretizers.loc[window] = sax
         
-        
         bag_of_bags = self._extract_features(data, labels)            
         self.selected_words = bag_of_bags.columns.values
         self.clf.fit(bag_of_bags, labels)
@@ -156,10 +156,18 @@ class SearchTechnique_NgramResolution(BaseClassifier):
             print('Predicting data with the Classifier...\n')
         
         self.check_is_fitted()
+                
+        predictions = np.ndarray(0)
+        n_samples = data.shape[0]
+        aux = 0
+        while aux < n_samples:
+            bag_of_bags =  self._extract_features(data[aux:aux+1000], None)            
+            bag_of_bags = self._feature_fixing(bag_of_bags)
+            pred = self.clf.predict(bag_of_bags)
+            predictions = np.concatenate([predictions,pred])
+            aux += 1000
         
-        bag_of_bags = self._extract_features(data, None)
-        bag_of_bags = self._feature_fixing(bag_of_bags)
-        return self.clf.predict(bag_of_bags)
+        return predictions
     
     def predict_proba(self, data):
         
@@ -168,16 +176,29 @@ class SearchTechnique_NgramResolution(BaseClassifier):
         
         self.check_is_fitted()
                 
-        bag_of_bags = self._extract_features(data, None)
-        bag_of_bags = self._feature_fixing(bag_of_bags)
-        return self.clf.predict_proba(bag_of_bags)
+        probabilities = None
+        n_samples = data.shape[0]
+        aux = 0
+        while aux < n_samples:
+            bag_of_bags =  self._extract_features(data[aux:aux+1000], None)            
+            bag_of_bags = self._feature_fixing(bag_of_bags)
+            pred = self.clf.predict_proba(bag_of_bags)
+            if probabilities is None:
+                probabilities = pred 
+            else:
+                probabilities = np.concatenate([probabilities,pred])
+            aux += 1000
+        
+        return probabilities
     
     def _extract_features(self, data, labels):
         if self.verbose:
             print('\nExtracting features from all resolutions...')
-            for w in self.windows:
+            for w in self.sfa_windows:
                 print('_',end='')
-            print('')            
+            for w in self.sax_windows:
+                print('_',end='')
+            print('')
         bob = pd.DataFrame()
         for window in self.sfa_windows:
             if self.verbose:
@@ -248,7 +269,7 @@ class SearchTechnique_NgramResolution(BaseClassifier):
         indices = bag_of_bags.columns.get_indexer(self.selected_words)
         mask = indices >= 0
         for missing_word in self.selected_words[~mask]:
-            bag_of_bags.insert(bag_of_bags.shape[1],missing_word,0)
+            bag_of_bags[missing_word] = 0
         
         if self.verbose:
             print('Intersecting words: {}'.format( mask.sum()) )
