@@ -32,6 +32,7 @@ class SearchTechnique_Ngram(BaseClassifier):
                  max_sax_windows = 2,
                  n_sfa_words = 200,
                  n_sax_words = 200,
+                 random_selection = True,
                  normalize = True,
                  verbose = False,
                  random_state = None):
@@ -50,6 +51,7 @@ class SearchTechnique_Ngram(BaseClassifier):
         self.n_sfa_words = n_sfa_words
         self.n_sax_words = n_sax_words
         
+        self.random_selection = random_selection
         self.normalize = normalize
         self.verbose = verbose        
         self.random_state = random_state
@@ -212,6 +214,8 @@ class SearchTechnique_Ngram(BaseClassifier):
 
     def _feature_selection(self, bag_of_words, labels, n_words):
         
+        if self.random_selection:
+            bag_of_words = bag_of_words.sample(frac=.5, axis=1)
         rank_value, p = chi2(bag_of_words, labels)
         word_rank = pd.DataFrame(index = bag_of_words.columns)
         word_rank['rank'] = rank_value
@@ -233,7 +237,7 @@ class SearchTechnique_Ngram(BaseClassifier):
         indices = bag_of_bags.columns.get_indexer(self.selected_words)
         mask = indices >= 0
         for missing_word in self.selected_words[~mask]:
-            bag_of_bags.insert(bag_of_bags.shape[1],missing_word,0)
+            bag_of_bags[missing_word] = 0
         
         if self.verbose:
             print('Intersecting words: {}'.format( mask.sum()) )

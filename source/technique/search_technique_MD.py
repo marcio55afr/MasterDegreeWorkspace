@@ -19,8 +19,7 @@ from sklearn.feature_selection import chi2
 
 class SearchTechnique_MD(BaseClassifier):
     """
-        Multidomain approach with the Shotgun using Support Vector Machina
-        as clf
+        Multidomain approach with the Shotgun using Random Forest as clf
     
     """
     

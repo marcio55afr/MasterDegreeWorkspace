@@ -31,9 +31,6 @@ class SearchTechniqueCV(BaseClassifier):
     def __init__(self,
                  word_length = 6,
                  alphabet_size = 4,
-                 #word_ranking_method = 'chi2',
-                 #word_selection = 'best n words', # ['p threshold', 'best n words']
-                 #p_threshold = 0.05,
                  discretization = 'SFA',
                  max_window_length = .5,
                  max_num_windows = 20,

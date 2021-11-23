@@ -7,15 +7,17 @@ class ResolutionMatrix(object):
                  ts_length,
                  word_length,
                  max_window_length = .5,
-                 max_num_windows = 20):
+                 max_num_windows = None):
         
         self.word_length = word_length
         self.smallest_window = word_length
         self.biggest_window = max( self.smallest_window, int(ts_length * max_window_length) )
+        
+        self.num_windows =  self.biggest_window-self.smallest_window
+        if max_num_windows is not None:
+            self.num_windows = min(max_num_windows, self.num_windows)
             
-        self.num_windows = min(max_num_windows, self.biggest_window-self.smallest_window)
-            
-        self.max_ngram = min(5, self.biggest_window//self.smallest_window)
+        self.max_ngram = min(3, self.biggest_window//self.smallest_window)
         self.matrix = self.create_matrix(ts_length)
 
     def create_matrix(self, ts_length):        
