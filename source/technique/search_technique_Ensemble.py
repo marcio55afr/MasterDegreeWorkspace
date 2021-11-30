@@ -5,6 +5,7 @@ sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace/source')
 sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace')
 
 import os
+import shutil
 import joblib
 import pandas as pd
 import numpy as np
@@ -12,7 +13,7 @@ from sktime.classification.base import BaseClassifier
 from sklearn.ensemble import RandomForestClassifier
 
 from source.transformations import AdaptedSAX, AdaptedSFA
-#import multiprocessing as mp
+import multiprocessing as mp
 #from sktime.transformations.panel.dictionary_based import SFA, SAX
 #from multiprocessing import Pool
 #import functools
@@ -29,6 +30,7 @@ class Selector(object):
                  alphabet_size,
                  method,
                  n_windows,
+                 max_window_length,
                  discretization='SFA',
                  random_state=None):
         
@@ -44,50 +46,79 @@ class Selector(object):
         self.remove_repeat_words = False
         self.normalize = True
         self.random_state = random_state
-        
         self.rng = np.random.default_rng(random_state)
-        self.discretizers = pd.Series()
-        self.n_windows = min(ts_length//2 - word_length + 1, n_windows)
-        self.windows = self._get_windows()
-        self.ngrams = self._get_ngrams()
+        
+        self._discs_is_fitted = False
+        self._is_fitted = False
         self.clf =  RandomForestClassifier(criterion="gini",
                                            n_estimators = 1000,
                                            class_weight='balanced_subsample',
-                                           n_jobs=-1,
+                                           n_jobs=1,
                                            random_state=random_state)
-        self._is_fitted = False
-        
+
+        self.discretizers = pd.Series()
+        self.n_windows = min(ts_length//2 - word_length + 1, n_windows)
+        self.max_window_length = max_window_length
+        self.windows = self._get_windows()
+        self.ngrams = self._get_ngrams()
+        self.selected_words = np.ndarray(0, dtype='<U20')
+    
+    def fit_discretizers(self, data, labels):
+        self._fit_discs(data, labels)   
+        self._discs_is_fitted = True
+    
     def fit(self, data, labels):
         
-        self._fit_discs(data, labels)     
-        bag_of_bags = self._extract_features(data, labels)            
+        self._check_discs()
+        bag_of_bags = self._extract_features(data, labels)    
         self.selected_words = bag_of_bags.columns.values
         self.clf.fit(bag_of_bags, labels)
         self._is_fitted = True
-        #self._save_model()
+        self._save_model()
         
     def predict(self, data):
-                
-        #self._load_model()
+        
+        self._load_model()
         self._check_is_fitted()
-        bag_of_bags =  self._extract_features(data, None)            
-        bag_of_bags = self._feature_fixing(bag_of_bags)
-        predictions = self.clf.predict(bag_of_bags)
+        
+        print(f'Selector {self.selector_id} precting')
+        predictions = np.ndarray(0)
+        n_samples = data.shape[0]
+        aux = 0
+        while aux < n_samples:
+            bag_of_bags =  self._extract_features(data[aux:aux+3000], None)
+            bag_of_bags = self._feature_fixing(bag_of_bags)
+            pred = self.clf.predict(bag_of_bags)
+            predictions = np.concatenate([predictions,pred])
+            aux += 3000
+        print(f'Selector {self.selector_id} predicted') 
         return predictions
     
     def predict_proba(self, data):
         
-        #self._load_model()
+        self._load_model()
         self._check_is_fitted()
-        bag_of_bags =  self._extract_features(data, None)            
-        bag_of_bags = self._feature_fixing(bag_of_bags)
-        probabilities = self.clf.predict_proba(bag_of_bags)
+        
+        print(f'Selector {self.selector_id} precting probabilities')
+        probabilities = None
+        n_samples = data.shape[0]
+        aux = 0
+        while aux < n_samples:
+            bag_of_bags =  self._extract_features(data[aux:aux+3000], None)            
+            bag_of_bags = self._feature_fixing(bag_of_bags)
+            pred = self.clf.predict_proba(bag_of_bags)
+            if probabilities is None:
+                probabilities = pred 
+            else:
+                probabilities = np.concatenate([probabilities,pred])
+            aux += 3000
+        print(f'Selector {self.selector_id} predicted') 
         return probabilities
     
     def _get_windows(self):
         
         min_window_size = self.word_length
-        max_window_size = self.ts_length//2
+        max_window_size = int(self.ts_length*self.max_window_length)
         windows = self.rng.choice(max_window_size-min_window_size+1,
                                   self.n_windows, replace=False)
         
@@ -106,7 +137,7 @@ class Selector(object):
                                  norm=self.normalize,
                                  remove_repeat_words=self.remove_repeat_words,
                                  return_pandas_data_series=False,
-                                 n_jobs=-1
+                                 n_jobs=1
                                  ).fit(data, labels)
                 self.discretizers.loc[window] = sfa
         else:
@@ -211,24 +242,38 @@ class Selector(object):
         return ngram_sequence
      
     def _check_is_fitted(self):
-        
         if self._is_fitted == False:
-            raise RuntimeError('The Selector is not fitted yet to do that')
+            raise RuntimeError('The Selector is not fitted')
+            
+    
+    def _check_discs(self):
+        if self._discs_is_fitted == False:
+            raise RuntimeError('The discretizers is not fitted yet')
             
     def _save_model(self):       
         if not os.path.exists('temp'):
-            os.mkdir('temp')
-            os.mkdir('temp/selectors')            
-        path = f'temp/selectors/selector_{self.selector_id}/'
+            os.mkdir('temp')         
+        path = f'temp/selector_{self.selector_id}/'
         self._save_clf(path)
+        self._save_selected_words(path)
         self._save_discs(path)
     
     def _load_model(self):            
-        path = f'temp/selectors/selector_{self.selector_id}/'
-        if (not os.path.exists('temp')) or (not os.path.exists('temp/selectors')):
+        path = f'temp/selector_{self.selector_id}/'
+        if not os.path.exists('temp'):
             raise RuntimeError('The Selector is not fitted')        
         self._load_clf(path)
-        self._load_discs(path)       
+        self._load_selected_words(path)
+        self._load_discs(path)
+    
+    def _save_selected_words(self,path):
+        file = path + 'selected_words.npy'
+        np.save(file, self.selected_words)
+    
+    def _load_selected_words(self,path):
+        file = path + 'selected_words.npy'
+        self.selected_words = np.load(file, allow_pickle=True)
+        self._is_fitted = True      
     
     def _save_clf(self,path):
         file = path + 'rf.joblib'
@@ -240,17 +285,19 @@ class Selector(object):
         self.clf = joblib.load(file)
         self._is_fitted = True
     
+    #The classes SAX and SFA doesn't not support save and load apparently
     def _save_discs(self,path):
         for window in self.discretizers.index:
             file = path+ f'disc_{window}.joblib'
             joblib.dump(self.discretizers.loc[window], file, compress=0) 
     
     def _load_discs(self,path):
-        for window in self.discretizers.index:
+        for window in self.windows:
             file = path+ f'disc_{window}.joblib'
             if not os.path.isfile(file):
                 raise RuntimeError(f'There is no discretizer with window {window}')
             self.discretizers.loc[window] = joblib.load(file)
+        
         
         
         
@@ -272,8 +319,10 @@ class SearchTechnique_Ensemble(BaseClassifier):
                  n_sfa_words = 200,
                  n_sax_words = 200,
                  method=1,
-                 normalize = True,
+                 data_frac = .20,
+                 sfa_per_sax = 3,
                  verbose = False,
+                 n_jobs = 3,
                  random_state = None):
         
         
@@ -281,9 +330,10 @@ class SearchTechnique_Ensemble(BaseClassifier):
         #    raise ValueError('The word selection must the a valid method of selection, as "p threshold" or "best n words"')
         
         self.num_clfs = num_clfs
-        self.n_sax_slc = num_clfs//3
+        self.sfa_per_sax = sfa_per_sax
+        self.n_sax_slc = num_clfs//sfa_per_sax
         self.n_sfa_slc = num_clfs - self.n_sax_slc
-        self.data_frac = 2*1/self.num_clfs
+        self.data_frac = data_frac
         
         self.N = N
         self.word_length = word_length
@@ -296,26 +346,14 @@ class SearchTechnique_Ensemble(BaseClassifier):
         self.n_sax_words = n_sax_words
         self.method = method
         
-        self.normalize = normalize
         self.verbose = verbose
         self.random_state = random_state
-        #self.n_jobs = n_jobs
-
-        self.sfa_discretizers = pd.Series()
-        self.sax_discretizers = pd.Series()        
+        self.n_jobs = n_jobs       
         
         self.rng = np.random.default_rng(random_state)
-        self.remove_repeat_words = False
-        self.ts_length = None
-        self.windows = None
-        self.results = pd.DataFrame()
-        self.selected_words = set()
-        self.sfa_id = 0
-        self.sax_id = 1
         
         self.ensemble = []
         self.ensemble_is_created = False
-        self.slc = []
 
     
     def fit(self, data, labels):
@@ -339,13 +377,11 @@ class SearchTechnique_Ensemble(BaseClassifier):
         if self.method == 2:
             self.sfa_window_per_slc = 1
             self.sax_window_per_slc = 1
-            self.n_sax_slc = self.num_clfs//5
-            self.n_sfa_slc = self.num_clfs - self.n_sax_slc
-            self.data_frac = 0.05
         
         
         ts_length = data.iloc[0,0].size        
         self._create_ensemble(ts_length)
+        self._fit_discretizers(data, labels)
         self._fit_ensemble(data, labels)        
         self._is_fitted = True
     
@@ -372,20 +408,26 @@ class SearchTechnique_Ensemble(BaseClassifier):
     
     def _create_ensemble(self, ts_length):
         
+        folder_path = 'temp/'
+        if os.path.exists(folder_path):
+            shutil.rmtree(folder_path)
+        
         rand_ints = self.rng.integers(low=0, high=1000, size=self.n_sfa_slc)
         sfa_selectors = [Selector(selector_id = i,
                                   n_windows = self.sfa_window_per_slc,
+                                  max_window_length = self.max_window_length,
                                   ts_length = ts_length,
-                                   word_length = self.word_length,
-                                   alphabet_size = self.alphabet_size,
-                                   discretization='SFA',
-                                   method = 1,
-                                   random_state = rand_ints[i]) 
+                                  word_length = self.word_length,
+                                  alphabet_size = self.alphabet_size,
+                                  discretization='SFA',
+                                  method = 1,
+                                  random_state = rand_ints[i]) 
                          for i in range(self.n_sfa_slc)]
         
         rand_ints = self.rng.integers(low=0, high=1000, size=self.n_sax_slc)
         sax_selectors = [Selector(selector_id = i+self.n_sfa_slc,
                                   n_windows = self.sax_window_per_slc,
+                                  max_window_length = self.max_window_length,
                                   ts_length = ts_length,
                                   word_length = self.word_length,
                                   alphabet_size = self.alphabet_size,
@@ -393,9 +435,13 @@ class SearchTechnique_Ensemble(BaseClassifier):
                                   method = 1,
                                   random_state = rand_ints[i]) 
                          for i in range(self.n_sax_slc)]
-        
+                
         self.ensemble = sfa_selectors + sax_selectors
         self.ensemble_is_created = True
+        
+    def _fit_discretizers(self, data, labels):        
+        for slc in self.ensemble:
+            slc.fit_discretizers(data, labels)
         
 
     def _fit_ensemble(self, data, labels):
@@ -417,22 +463,16 @@ class SearchTechnique_Ensemble(BaseClassifier):
         samples = zip(*samples)
         samples = list(map(pd.concat, samples))
         
-        #pool = []  
+        pool = mp.Pool(self.n_jobs)  
         for i in range(self.num_clfs):
             sample = samples[i]
             y = sample['target']
             X = sample.drop('target', axis=1)
             selector = self.ensemble[i]
-            selector.fit(X,y)
-            #pool += [mp.Process(target=selector.fit, args=(X,y))]
-        '''
-        for p in pool[:2]:
-            p.start()
-        for p in pool[:2]:
-            p.join()
-        input('Helllo')
+            pool.apply_async(selector.fit, args=(X,y))
         
-        pool.close'''
+        pool.close()
+        pool.join()
 
 
 
