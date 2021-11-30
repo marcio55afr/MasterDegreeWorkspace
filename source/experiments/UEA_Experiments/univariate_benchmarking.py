@@ -67,8 +67,8 @@ if __name__ == "__main__":
     #]
     
     # Alternatively, we can use a helper function to create them automatically
-    names = LARGER_DATASETS_NAMES
     names = DATASET_NAMES
+    names = LARGER_DATASETS_NAMES
     datasets = [UEADataset(path=DATA_PATH, name=name) for name in names]
     
     tasks = [TSCTask(target="target") for _ in range(len(datasets))]
@@ -666,17 +666,167 @@ if __name__ == "__main__":
         TSCStrategy_proba(
             SearchTechnique_Ensemble(num_clfs = 10,
                                      random_state=random_state,
-                                     method=1),
+                                     method=1,
+                                     sfa_per_sax = 3,
+                                     data_frac=.2),
             name="Ensemble_S10"),
         TSCStrategy_proba(
-            SearchTechnique_Ensemble(num_clfs = 100,
+            SearchTechnique_Ensemble(num_clfs = 10,
                                      random_state=random_state,
-                                     method=2),
-            name="Ensemble_S100_singleW"),  
+                                     sfa_window_per_slc = 4,
+                                     sax_window_per_slc  = 1,
+                                     method=1,
+                                     sfa_per_sax = 3,
+                                     data_frac=.2),
+            name="Ensemble_S10_halfW"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 60,
+                                     random_state=random_state,
+                                     method=2,
+                                     sfa_per_sax = 10,
+                                     data_frac=.05),
+            name="Ensemble_S60_singleW"),  
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 40,
+                                     random_state=random_state,
+                                     method=2,
+                                     sfa_per_sax = 10,
+                                     data_frac=.05),
+            name="Ensemble_S40_singleW"),  
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 60,
+                                     random_state=random_state,
+                                     method=2,
+                                     sfa_per_sax = 10,
+                                     data_frac=.1),
+            name="Ensemble_S60_singleW_frac01"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 40,
+                                     random_state=random_state,
+                                     method=2,
+                                     sfa_per_sax = 10,
+                                     data_frac=.1),
+            name="Ensemble_S40_singleW_frac01"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 40,
+                                     random_state=random_state,
+                                     method=2,
+                                     sfa_per_sax = 10,
+                                     data_frac=.2),
+            name="Ensemble_S40_singleW_frac02"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 20,
+                                     random_state=random_state,
+                                     sfa_window_per_slc = 4,
+                                     sax_window_per_slc  = 1,
+                                     method=1,
+                                     sfa_per_sax = 3,
+                                     data_frac=.2),
+            name="Ensemble_S20_halfW"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 30,
+                                     random_state=random_state,
+                                     method=2,
+                                     sfa_per_sax = 10,
+                                     data_frac=.2),
+            name="Ensemble_S30_singleW_frac02"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 30,
+                                     random_state=random_state,
+                                     method=2,
+                                     sfa_per_sax = 10,
+                                     data_frac=.3),
+            name="Ensemble_S30_singleW_frac03"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 10,
+                                     random_state=random_state,
+                                     sfa_window_per_slc = 4,
+                                     sax_window_per_slc  = 1,
+                                     method=1,
+                                     sfa_per_sax = 3,
+                                     data_frac=.3),
+            name="Ensemble_S10_halfW_frac03"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 10,
+                                     random_state=random_state,
+                                     sfa_window_per_slc = 4,
+                                     sax_window_per_slc  = 1,
+                                     method=1,
+                                     sfa_per_sax = 3,
+                                     data_frac=.6),
+            name="Ensemble_S10_halfW_frac06"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 30,
+                                     random_state=random_state,
+                                     method=2,
+                                     sfa_per_sax = 10,
+                                     data_frac=.6),
+            name="Ensemble_S30_singleW_frac06"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 30,
+                                     random_state=random_state,
+                                     method=2,
+                                     sfa_per_sax = 5,
+                                     data_frac=.6),
+            name="Ensemble_S30_singleW_frac06_sfa5"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 30,
+                                     random_state=random_state,
+                                     method=2,
+                                     sfa_per_sax = 3,
+                                     n_jobs=5,
+                                     data_frac=.6),
+            name="Ensemble_S30_singleW_frac06_sfa3_parallel5"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 10,
+                                     random_state=random_state,
+                                     sfa_window_per_slc = 4,
+                                     sax_window_per_slc  = 1,
+                                     method=1,
+                                     sfa_per_sax = 3,
+                                     data_frac=.6),
+            name="Ensemble_S10_halfW_frac06_parallel3"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 30,
+                                     random_state=random_state,
+                                     method=2,
+                                     sfa_per_sax = 3,
+                                     n_jobs=5,
+                                     data_frac=.4),
+            name="Ensemble_S30_singleW_frac04_sfa3_parallel5"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 10,
+                                     random_state=random_state,
+                                     sfa_window_per_slc = 4,
+                                     sax_window_per_slc  = 1,
+                                     method=1,
+                                     sfa_per_sax = 3,
+                                     data_frac=.5),
+            name="Ensemble_S10_halfW_frac05_parallel3"),
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 30,
+                                     random_state=random_state,
+                                     method=2,
+                                     sfa_per_sax = 4,
+                                     n_jobs=5,
+                                     data_frac=.6),
+            name="Ensemble_S30_singleW_frac02_sfa4_parallel6"),
         ]
     
-    strategy = strategies_V4
-    variant = "ST_V4"
+    strategies_V4_FULL = [ 
+        TSCStrategy_proba(
+            SearchTechnique_Ensemble(num_clfs = 10,
+                                     random_state=random_state,
+                                     sfa_window_per_slc = 4,
+                                     sax_window_per_slc  = 1,
+                                     method=1,
+                                     sfa_per_sax = 3,
+                                     data_frac=.5),
+            name="Ensemble_S10_halfW_frac05_parallel3"),
+        ]
+    
+    strategy = strategies_V4_FULL
+    variant = "ST_V4_FULL"
     
     score_strategy_path = SCORE_PATH + variant
     
