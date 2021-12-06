@@ -1,0 +1,2 @@
+strategy_name,Accuracy mean,ROC AUC mean,fit runtime mean,predict runtime mean,Accuracy efficency,ROC AUC efficency
+Ensemble_S10_halfW_frac05_parallel3,70.383,83.528,73.926,1159.315,2.377,4.854

@@ -1,0 +1,3 @@
+strategy_name,Accuracy mean,ROC AUC mean,fit runtime mean,predict runtime mean,Accuracy efficency,ROC AUC efficency
+ST_3gram_WL4_A2,83.433,92.521,71.745,566.368,23.505,23.762
+ST_3grams_reso_WL4,85.067,94.238,179.177,1703.536,12.491,12.812
