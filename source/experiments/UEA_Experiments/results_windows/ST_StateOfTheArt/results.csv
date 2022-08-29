@@ -1,0 +1,3 @@
+strategy_name,Accuracy mean,AUROC mean,fit runtime mean,predict runtime mean,Accuracy efficency,AUROC efficency
+MrSEQL_Default,80.379,88.102,18.257,0.642,54.406,43.421
+MrSEQL,81.398,89.171,28.472,2.181,41.628,33.508

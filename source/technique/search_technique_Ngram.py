@@ -32,7 +32,7 @@ class SearchTechnique_Ngram(BaseClassifier):
                  max_sax_windows = 2,
                  n_sfa_words = 200,
                  n_sax_words = 200,
-                 random_selection = True,
+                 random_selection = False,
                  normalize = True,
                  verbose = False,
                  random_state = None):

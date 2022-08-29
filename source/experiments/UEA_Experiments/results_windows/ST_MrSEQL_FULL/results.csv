@@ -1,0 +1,2 @@
+strategy_name,Accuracy mean,ROC AUC mean,fit runtime mean,predict runtime mean,Accuracy efficency,AUROC efficency
+MrSEQL,81.24,84.652,508.333,134.066,2.269,0.858

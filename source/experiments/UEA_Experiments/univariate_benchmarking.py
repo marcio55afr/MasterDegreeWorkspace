@@ -28,7 +28,8 @@ if __name__ == "__main__":
     from sktime.benchmarking.tasks import TSCTask
     from sktime.classification.dictionary_based import (
         ContractableBOSS,
-        WEASEL
+        WEASEL,
+        TemporalDictionaryEnsemble
     )
     from sktime.classification.shapelet_based import (
         MrSEQLClassifier
@@ -825,8 +826,14 @@ if __name__ == "__main__":
             name="Ensemble_S10_halfW_frac05_parallel3"),
         ]
     
-    strategy = strategies_V4_FULL
-    variant = "ST_V4_FULL"
+    strategies_mrseql = [
+        TSCStrategy_proba(
+            MrSEQLClassifier(symrep=('sax','sfa')),
+                name="MrSEQL")        
+        ]
+    
+    strategy = strategies_V3_FULL
+    variant = "ST_V3_FULL"
     
     score_strategy_path = SCORE_PATH + variant
     
@@ -851,7 +858,7 @@ if __name__ == "__main__":
     print(runtime)
     
     acc_scores = evaluator.get_all_datasets_scores('Accuracy', accuracy_score)
-    roc_scores = evaluator.get_all_datasets_scores('ROC AUC', roc_auc_score, probabilties=True, labels=True, multi_class='ovr')
+    roc_scores = evaluator.get_all_datasets_scores('AUROC', roc_auc_score, probabilties=True, labels=True, multi_class='ovr')
     
     
     result_strategy_path = RESULT_PATH + variant + '/'
@@ -865,18 +872,18 @@ if __name__ == "__main__":
     roc_scores = roc_scores.groupby('strategy_name').mean()*100
     
     score_results = pd.concat([acc_scores,roc_scores,runtime], axis=1)
-    score_results.columns = ['Accuracy mean', 'ROC AUC mean', 'fit runtime mean', 'predict runtime mean']
+    score_results.columns = ['Accuracy mean', 'AUROC mean', 'fit runtime mean', 'predict runtime mean']
     print(score_results.iloc[:,1:])
     
     score_results['Accuracy efficency'] = calculate_efficiency(score_results.iloc[:,[0,2,3]],
                                                                RANDOM_CLF_ACC_mean)
-    score_results['ROC AUC efficency'] = calculate_efficiency(score_results.iloc[:,[1,2,3]],
+    score_results['AUROC efficency'] = calculate_efficiency(score_results.iloc[:,[1,2,3]],
                                                               RANDOM_CLF_ROC_AUC_mean)
-    score_results = score_results.sort_values('ROC AUC mean')
+    score_results = score_results.sort_values('Accuracy mean')
     score_results = score_results.round(3)
     score_results.to_csv(result_strategy_path+'results.csv')
     print(score_results.iloc[:,:2])
-    score_results = score_results.sort_values('ROC AUC efficency')
+    score_results = score_results.sort_values('AUROC efficency')
     print(score_results.iloc[:,-2:])
     
     fig, ax = plt.subplots(figsize=[8,6], dpi=200)
@@ -909,7 +916,7 @@ if __name__ == "__main__":
     n_strategy = score_results.shape[0]
     colors = np.arange(n_strategy)
     scatter = ax.scatter(score_results['fit runtime mean'],
-                         score_results['ROC AUC mean'],
+                         score_results['AUROC mean'],
                          label=score_results.index.values,
                          c=colors, cmap='viridis')
     
@@ -920,9 +927,9 @@ if __name__ == "__main__":
                         title_fontsize=14,
                         borderpad=1.0)
     
-    ax.set_title('ROC AUC efficiency')
+    ax.set_title('AUROC efficiency')
     ax.set_xlabel('fit runtime mean')
-    ax.set_ylabel('roc auc mean')
+    ax.set_ylabel('AUROC mean')
     ax.add_artist(legend1)
     ax.grid(True)
     

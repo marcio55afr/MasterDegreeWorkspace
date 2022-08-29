@@ -161,11 +161,11 @@ class SearchTechnique_NgramResolution(BaseClassifier):
         n_samples = data.shape[0]
         aux = 0
         while aux < n_samples:
-            bag_of_bags =  self._extract_features(data[aux:aux+1000], None)            
+            bag_of_bags =  self._extract_features(data[aux:aux+3000], None)            
             bag_of_bags = self._feature_fixing(bag_of_bags)
             pred = self.clf.predict(bag_of_bags)
             predictions = np.concatenate([predictions,pred])
-            aux += 1000
+            aux += 3000
         
         return predictions
     
@@ -180,14 +180,14 @@ class SearchTechnique_NgramResolution(BaseClassifier):
         n_samples = data.shape[0]
         aux = 0
         while aux < n_samples:
-            bag_of_bags =  self._extract_features(data[aux:aux+1000], None)            
+            bag_of_bags =  self._extract_features(data[aux:aux+3000], None)            
             bag_of_bags = self._feature_fixing(bag_of_bags)
             pred = self.clf.predict_proba(bag_of_bags)
             if probabilities is None:
                 probabilities = pred 
             else:
                 probabilities = np.concatenate([probabilities,pred])
-            aux += 1000
+            aux += 3000
         
         return probabilities
     

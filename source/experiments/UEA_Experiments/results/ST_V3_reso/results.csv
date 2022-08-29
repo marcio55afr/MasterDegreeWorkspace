@@ -1,11 +1,11 @@
-strategy_name,Accuracy mean,AUROC mean,fit runtime mean,predict runtime mean,Accuracy efficency,AUROC efficency
+strategy_name,Accuracy mean,ROC AUC mean,fit runtime mean,predict runtime mean,Accuracy efficency,ROC AUC efficency
 ST_5grams_reso_nw50_50,76.586,88.519,91.381,99.748,5.634,9.324
+ST_3grams_reso_nw50_50,77.02,88.663,52.754,55.767,10.52,16.56
 ST_5grams_reso_nw100_100,76.677,88.935,93.236,100.904,5.61,9.822
 ST_3grams_reso_nw100_100,76.858,89.009,53.309,55.668,10.123,17.401
-ST_3grams_reso_nw50_50,77.02,88.663,52.754,55.767,10.52,16.56
-ST_5grams_reso,77.021,89.121,93.728,101.868,5.922,10.091
-ST_3grams_reso_nw200_Declined,77.059,89.06,54.032,57.341,10.341,17.321
-ST_3grams_reso,77.092,89.147,53.105,56.465,10.583,17.889
 ST_3grams_reso_nw150_Declined,77.13,89.033,52.462,56.291,10.782,17.757
-ST_3grams_reso_WL4,78.466,89.307,48.774,52.313,14.619,20.027
+ST_3grams_reso_nw200_Declined,77.059,89.06,54.032,57.341,10.341,17.321
 ST_3grams_reso_WL4_A2,78.91,89.061,47.06,49.847,16.365,19.889
+ST_5grams_reso,77.021,89.121,93.728,101.868,5.922,10.091
+ST_3grams_reso,77.092,89.147,53.105,56.465,10.583,17.889
+ST_3grams_reso_WL4,78.466,89.307,48.774,52.313,14.619,20.027
