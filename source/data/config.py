@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-download_link = 'http://www.timeseriesclassification.com/Downloads/Archives/Univariate2018_ts.zip'
+UNIVARIATE_TS_LINK = 'http://www.timeseriesclassification.com/Downloads/Archives/Univariate2018_ts.zip'
 
 DATASET_NAMES = [
                 'SmoothSubspace',

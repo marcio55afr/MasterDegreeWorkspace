@@ -2,8 +2,7 @@
 
 import sys
 sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace')
-from source.utils import calculate_efficiency
-from source.experiments.UEA_Experiments.datasets.config import LARGER_DATASETS_NAMES
+from source.data.config import LARGER_DATASETS_NAMES
 
 import os
 import numpy as np
