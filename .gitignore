@@ -1,4 +1,6 @@
 
+# virtual env
+venv/
 
 # experiment files
 source/experiments/data_visualizing/*.txt
