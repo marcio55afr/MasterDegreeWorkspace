@@ -14,7 +14,7 @@ source/experiments/database/hdf/
 source/experiments/database/bob/
 
 # datasets
-source/experiments/UEA_Experiments/datasets/Univariate_ts/
+source/data/Univariate2018_ts/
 
 # score files
 source/experiments/UEA_Experiments/official_UEA_results
