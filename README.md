@@ -1,5 +1,23 @@
 # Master's Degree Workspace
 
+## Tasks
+
+- [x] Set up the operational system (Manjaro)
+- [x] Configure my personal Git
+- [x] Download the project
+- [x] Install and configure Pycharm
+- [x] Configure a virtual environment
+- [ ] Install libraries and dependencies
+  - [x] Install Python
+  - [x] Install Sktime
+  - [ ] Install other dependencies
+- [ ] Create a setup file to config the environment
+- [ ] Test the experiments
+- [ ] Create a main with all experiments
+- [ ] Organize the folder's project
+- [ ] Clean up the code of each variant
+- [ ] ...
+
 
 ## Search Technique - functions
 
