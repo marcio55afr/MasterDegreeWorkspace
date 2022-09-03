@@ -7,11 +7,13 @@
 - [x] Download the project
 - [x] Install and configure Pycharm
 - [x] Configure a virtual environment
-- [ ] Install libraries and dependencies
+- [x] Install libraries and dependencies
   - [x] Install Python
   - [x] Install Sktime
-  - [ ] Install other dependencies
+  - [x] Install other dependencies
 - [ ] Create a setup file to config the environment
+- [x] Download all timeseries datasets
+- [ ] Centralize the receiving of datasets
 - [ ] Test the experiments
 - [ ] Create a main with all experiments
 - [ ] Organize the folder's project
