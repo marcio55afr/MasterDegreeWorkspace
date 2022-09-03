@@ -6,22 +6,16 @@ and its importance.
 """
 from genericpath import isfile
 import sys
-sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace/source')
-sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace')
 import os
 from collections import Counter
 import pandas as pd
 import numpy as np
-pd.set_option("display.width", 500)
-pd.set_option("max_colwidth", 80)
-pd.set_option("max_columns", 10)
-FLOAT_FORMAT = pd.options.display.float_format
 
 
-from experiments.database.ts_handler import get_dataset
-from utils import ResolutionMatrix, ResolutionHandler, NgramExtractor
-from technique import SearchTechnique
-from transformations import MSAX
+from source.experiments.database.ts_handler import get_dataset
+from source.utils import ResolutionMatrix, ResolutionHandler, NgramExtractor
+from source.technique import SearchTechnique
+from source.transformations import MSAX
 
 
 def main():
