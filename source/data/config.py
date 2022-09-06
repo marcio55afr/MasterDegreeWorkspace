@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
+import os
 
-UNIVARIATE_TS_LINK = 'http://www.timeseriesclassification.com/Downloads/Archives/Univariate2018_ts.zip'
+UNIVARIATE_TS_LINK = 'https://www.timeseriesclassification.com/Downloads/Archives/Univariate2018_ts.zip'
+
+UNIVARIATE_TS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  "Univariate2018_ts")
+UNIVARIATE_HDF_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   "Univariate2018_hdf")
 
 DATASET_NAMES = [
                 'SmoothSubspace',
