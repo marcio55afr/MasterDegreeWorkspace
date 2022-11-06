@@ -4,7 +4,6 @@ some knowledge about the number of ngram words created
 and its importance.
 
 """
-from genericpath import isfile
 import sys
 import os
 from collections import Counter
@@ -12,7 +11,7 @@ import pandas as pd
 import numpy as np
 
 
-from source.experiments.database.ts_handler import get_dataset
+from source.utils.handlers.ts_handler import get_dataset
 from source.utils import ResolutionMatrix, ResolutionHandler, NgramExtractor
 from source.technique import SearchTechnique
 from source.transformations import MSAX

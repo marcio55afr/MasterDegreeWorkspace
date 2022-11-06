@@ -3,17 +3,9 @@
 
 """
 
-import sys
-
 import os
-from collections import Counter
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-
-from source.experiments.database.ts_handler import get_dataset
-from source.utils import ResolutionMatrix, ResolutionHandler, NgramExtractor
-from source.transformations import MSAX
 
 
 def main():

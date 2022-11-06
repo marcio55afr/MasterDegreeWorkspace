@@ -4,7 +4,7 @@ import sys
 # sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace')
 
 from source.technique import SearchTechnique, SearchTechniqueCV
-from source.experiments.database import get_dataset, get_Xy_from, DATASET_NAMES
+from source.experiments.database import get_dataset, get_train_test_split, DATASET_NAMES
 
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
@@ -39,7 +39,7 @@ class ParametersRelevance:
         
         """
 
-        train, labels = get_Xy_from(dataset_name, split='train')
+        train, labels = get_train_test_split(dataset_name, split='train')
         ts_length = train.iloc[0, 0].size
 
         clf = SearchTechnique(ts_length)
@@ -62,7 +62,7 @@ class ParametersRelevance:
                         clf.resolution_matrix.matrix = unique_resolution
                         clf.fit(train, labels)
 
-                        test, y_true = get_Xy_from(dataset_name, split='test')
+                        test, y_true = get_train_test_split(dataset_name, split='test')
                         y_pred = clf.predict(test)
 
                         acc.loc[ngram, window] = accuracy_score(y_true, y_pred)
@@ -93,7 +93,7 @@ class ParametersRelevance:
                         clf.resolution_matrix_aux = unique_resolution
                         clf.fit(train, labels)
 
-                        test, y_true = get_Xy_from(dataset_name, split='test')
+                        test, y_true = get_train_test_split(dataset_name, split='test')
                         y_pred = clf.predict(test)
 
                         acc.loc[ngram, window] = accuracy_score(y_true, y_pred)
@@ -107,7 +107,7 @@ class ParametersRelevance:
                 print('\n\n', file=f)
 
     def chi2_p_value_relevance(dataset_name):
-        train, labels = get_Xy_from(dataset_name, split='train')
+        train, labels = get_train_test_split(dataset_name, split='train')
         ts_length = train.iloc[0, 0].size
 
         stdout = sys.stdout
@@ -122,7 +122,7 @@ class ParametersRelevance:
                                       random_state=19)
                 clf.fit(train, labels)
 
-                test, y_true = get_Xy_from(dataset_name, split='test')
+                test, y_true = get_train_test_split(dataset_name, split='test')
                 y_pred = clf.predict(test)
 
                 acc = accuracy_score(y_true, y_pred)
@@ -132,7 +132,7 @@ class ParametersRelevance:
                 sys.stdout = stdout
 
     def chi2_ranking_relevance(dataset_name):
-        train, labels = get_Xy_from(dataset_name, split='train')
+        train, labels = get_train_test_split(dataset_name, split='train')
         ts_length = train.iloc[0, 0].size
 
         verbose = True
@@ -150,7 +150,7 @@ class ParametersRelevance:
                 clf = SearchTechniqueCV()
                 clf.fit(train, labels)
 
-                test, y_true = get_Xy_from(dataset_name, split='test')
+                test, y_true = get_train_test_split(dataset_name, split='test')
                 y_pred = clf.predict(test)
 
                 acc = accuracy_score(y_true, y_pred)
@@ -162,7 +162,7 @@ class ParametersRelevance:
 
     def word_relevance(dataset_name):
 
-        train, labels = get_Xy_from(dataset_name, split='train')
+        train, labels = get_train_test_split(dataset_name, split='train')
         ts_length = train.iloc[0, 0].size
 
         stdout = sys.stdout
@@ -177,7 +177,7 @@ class ParametersRelevance:
                                       random_state=19)
                 clf.fit(train, labels)
 
-                test, y_true = get_Xy_from(dataset_name, split='test')
+                test, y_true = get_train_test_split(dataset_name, split='test')
                 y_pred = clf.predict(test)
 
                 acc = accuracy_score(y_true, y_pred)
@@ -190,7 +190,7 @@ class ParametersRelevance:
                 sys.stdout = stdout
 
     def classifier_parameters_relevance(dataset_name):
-        train, labels = get_Xy_from(dataset_name, split='train')
+        train, labels = get_train_test_split(dataset_name, split='train')
         ts_length = train.iloc[0, 0].size
 
         stdout = sys.stdout
@@ -240,7 +240,7 @@ class ParametersRelevance:
                     st.clf = clf_
                     st.fit(train, labels)
 
-                    test, y_true = get_Xy_from(dataset_name, split='test')
+                    test, y_true = get_train_test_split(dataset_name, split='test')
                     y_pred = st.predict(test)
 
                     acc = accuracy_score(y_true, y_pred)
@@ -250,7 +250,7 @@ class ParametersRelevance:
 
     def resolution_selection_relevance(dataset_name):
 
-        train, labels = get_Xy_from(dataset_name, split='train')
+        train, labels = get_train_test_split(dataset_name, split='train')
         ts_length = train.iloc[0, 0].size
 
         stdout = sys.stdout
@@ -268,7 +268,7 @@ class ParametersRelevance:
                                       random_state=19)
                 clf.fit(train, labels)
 
-                test, y_true = get_Xy_from(dataset_name, split='test')
+                test, y_true = get_train_test_split(dataset_name, split='test')
                 y_pred = clf.predict(test)
 
                 acc = accuracy_score(y_true, y_pred)
