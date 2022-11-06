@@ -74,7 +74,7 @@ class SearchTechnique_MD(BaseClassifier):
         self.sfa_id = 0
         self.sax_id = 1
     
-    def fit(self, data, labels):
+    def _fit(self, data, labels):
         
         if type(data) != pd.DataFrame:
             raise TypeError("The data must be a type of pd.DataFrame."
@@ -146,7 +146,7 @@ class SearchTechnique_MD(BaseClassifier):
         self.clf.fit(bag_of_bags, labels)
         self._is_fitted = True
     
-    def predict(self, data):
+    def _predict(self, data):
         
         if self.verbose:
             print('Predicting data with the Classifier...\n')
@@ -157,7 +157,7 @@ class SearchTechnique_MD(BaseClassifier):
         bag_of_bags = self._feature_fixing(bag_of_bags)
         return self.clf.predict(bag_of_bags)
     
-    def predict_proba(self, data):
+    def _predict_proba(self, data):
         
         if self.verbose:
             print('Predicting data with the Classifier...\n')
