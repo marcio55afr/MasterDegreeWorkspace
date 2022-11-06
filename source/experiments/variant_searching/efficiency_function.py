@@ -61,7 +61,7 @@ def extract_benchmark_summary():
 
 def plot_auroc_efficiency():
 
-    summary_file = "benchmark_summary.csv"
+    summary_file = "old/benchmark_summary.csv"
     if not os.path.isfile(summary_file):
         extract_benchmark_summary()
     df = pd.read_csv(summary_file, index_col=0)
@@ -168,7 +168,7 @@ def plot_auroc_efficiency():
     
 def plot_acc_efficiency():
 
-    summary_file = "benchmark_summary.csv"
+    summary_file = "old/benchmark_summary.csv"
     if not os.path.isfile(summary_file):
         extract_benchmark_summary()
     df = pd.read_csv(summary_file, index_col=0)

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    summary_file = "benchmark_summary.csv"
+    summary_file = "old/benchmark_summary.csv"
     if not os.path.isfile(summary_file):
         raise RuntimeError('The benchmark_summary.csv file must exist to procced')
     
