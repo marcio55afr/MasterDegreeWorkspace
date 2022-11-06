@@ -17,8 +17,8 @@ source/experiments/database/bob/
 source/data/Univariate2018_ts/
 
 # score files
-source/experiments/UEA_Experiments/official_UEA_results
-source/experiments/UEA_Experiments/scores/
+source/experiments/variant_searching/official_UEA_results
+source/experiments/variant_searching/scores/
 
 
 # vscode or spyder files
