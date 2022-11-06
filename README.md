@@ -11,13 +11,15 @@
   - [x] Install Python
   - [x] Install Sktime
   - [x] Install other dependencies
-- [ ] Create a setup file to config the environment
+  - [x] Create a setup file to config the environment
 - [x] Download all timeseries datasets
-- [ ] Centralize the receiving of datasets
-- [ ] Test the experiments
+- [x] Centralize the receiving of datasets
+- [x] Test the experiments
 - [ ] Create a main with all experiments
 - [ ] Organize the folder's project
 - [ ] Clean up the code of each variant
+- [ ] Create a Abstract Class called Variant to keep duplicated codes
+- [ ] Rewrite the ensemble variant and the function _fit_discretizers()
 - [ ] ...
 
 
