@@ -4,7 +4,7 @@ sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace/source')
 sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace')
 
 from source.technique import SearchTechnique
-from source.experiments.database import get_dataset, get_Xy_from, DATASET_NAMES
+from source.experiments.database import get_dataset, get_train_test_split, DATASET_NAMES
 
 from sklearn.metrics import accuracy_score
 import pandas as pd
@@ -13,7 +13,7 @@ import unittest
 class TestFunction_fit(unittest.TestCase):
     
     def __init__(self):
-        self.data, self.labels = get_Xy_from(DATASET_NAMES[0], split='train')
+        self.data, self.labels = get_train_test_split(DATASET_NAMES[0], split='train')
         self.ts_length = self.data.iloc[0,0].size        
     
     def test_NoErrors(self):
@@ -23,7 +23,7 @@ class TestFunction_fit(unittest.TestCase):
         
         
 
-train, labels = get_Xy_from(DATASET_NAMES[0], split='train')
+train, labels = get_train_test_split(DATASET_NAMES[0], split='train')
 ts_length = train.iloc[0,0].size
 
 clf = SearchTechnique(ts_length)
@@ -44,7 +44,7 @@ for window in rm:
             clf.fit(train, labels)
             
             
-            test, y_true = get_Xy_from(DATASET_NAMES[0], split='test')
+            test, y_true = get_train_test_split(DATASET_NAMES[0], split='test')
             y_pred = clf.predict(test)
             
             acc.loc[ngram,window] = accuracy_score(y_true, y_pred)
