@@ -2,6 +2,9 @@
 # virtual env
 venv/
 
+# pycharm files
+.idea/
+
 # experiment files
 source/experiments/data_visualizing/*.txt
 source/experiments/data_visualizing/ecg/
@@ -14,7 +17,7 @@ source/experiments/database/hdf/
 source/experiments/database/bob/
 
 # datasets
-source/data/Univariate2018_ts/
+source/data/*/
 
 # score files
 source/experiments/variant_searching/official_UEA_results
