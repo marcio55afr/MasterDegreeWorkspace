@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from source.utils import DatasetHandler, TsHandler
 from source.experiments.config import OUTPUT_PATH
 
-
+from sklearn.model_selection import StratifiedKFold
 
 from sklearn.metrics import accuracy_score, roc_auc_score  # f1_score, log_loss, balanced_accuracy_score,
 from sktime.benchmarking.data import UEADataset, make_datasets
@@ -43,7 +43,7 @@ from source.experiments.sktime_changes import Evaluator, HDDResults, TSCStrategy
 
 from source.utils import draw_cd_diagram, calculate_efficiency
 from source.experiments.variant_searching.datasets import DATASET_NAMES, LARGER_DATASETS_NAMES
-from source.technique import (
+from source.classifiers import (
     RandomClassifier,
     SearchTechnique,
     SearchTechniqueCV,
@@ -840,8 +840,8 @@ def run_guided_path():
         }
         return strategies_dict
 
-    random_clf_acc = 40.5545
-    random_clf_auc = 49.5794
+    random_clf_acc = 0.405545
+    random_clf_auc = 0.495794
     strategies = get_strategies()
     print(strategies.items())
     for variant, strategy in strategies.items():
@@ -856,24 +856,25 @@ def run_guided_path():
         orchestrator = Orchestrator(
             datasets=datasets,
             tasks=tasks,
-            strategies=strategy,
-            cv=PresplitFilesCV(),
+            strategies=list(strategies.values())[1],
+            cv=StratifiedKFold(n_splits=5, random_state=random_state, shuffle=True),
             results=results,
         )
         orchestrator.fit_predict(save_fitted_strategies=False,
                                  overwrite_predictions=False, verbose=True)
 
         evaluator = Evaluator(results)
-        runtime = evaluator.fit_runtime().groupby('strategy_name').mean()
-        print(runtime)
+        runtime = evaluator.fit_runtime().groupby('strategy_name').sum()
+        runtime.columns = ['fit runtime', 'predict runtime']
 
         acc_scores = evaluator.get_all_datasets_scores('Accuracy', accuracy_score)
         auc_scores = evaluator.get_all_datasets_scores('AUC', roc_auc_score, probabilties=True, labels=True,
                                                        multi_class='ovr')
 
-        print('Results:')
-        print(f'accuracy: {acc_scores}')
-        print(f'auc: {auc_scores}')
+        scores = acc_scores.merge(auc_scores, how='inner', on=['strategy_name', 'dataset_name'])
+        print(scores)
+
+        print(runtime)
 
         result_strategy_path = result_path + variant + '/'
         if not os.path.isdir(result_strategy_path):
@@ -881,17 +882,16 @@ def run_guided_path():
 
         # draw_cd_diagram(df_perf=acc_scores, image_path=result_path, title='Accuracy', labels=True)
 
-        acc_scores = acc_scores.groupby('strategy_name').mean() * 100
-        auc_scores = auc_scores.groupby('strategy_name').mean() * 100
-
-        score_results = pd.concat([acc_scores, auc_scores, runtime], axis=1)
-        score_results.columns = ['Accuracy mean', 'AUC mean', 'fit runtime mean', 'predict runtime mean']
-        print(score_results.iloc[:, 1:])
+        score_results = scores.groupby('strategy_name').mean().round(4)
+        score_results.columns += ' mean'
+        score_results = score_results.merge(runtime, how='left', left_index=True, right_index=True)
 
         score_results['Accuracy efficiency'] = calculate_efficiency(score_results.iloc[:, [0, 2, 3]],
                                                                     random_clf_acc)
         score_results['AUC efficiency'] = calculate_efficiency(score_results.iloc[:, [1, 2, 3]],
                                                                random_clf_auc)
+        print(score_results)
+
         score_results = score_results.sort_values('Accuracy mean')
         score_results = score_results.round(3)
         score_results.to_csv(result_strategy_path + 'results.csv')
@@ -903,7 +903,7 @@ def run_guided_path():
 
         n_strategy = score_results.shape[0]
         colors = np.arange(n_strategy)
-        scatter = ax.scatter(score_results['fit runtime mean'],
+        scatter = ax.scatter(score_results['fit runtime'],
                              score_results['Accuracy mean'],
                              label=score_results.index.values,
                              c=colors, cmap='viridis')
@@ -916,19 +916,19 @@ def run_guided_path():
                             borderpad=1.0)
 
         ax.set_title('Accuracy efficiency')
-        ax.set_xlabel('fit runtime mean')
+        ax.set_xlabel('fit runtime')
         ax.set_ylabel('accuracy mean')
         ax.add_artist(legend1)
         ax.grid(True)
 
-        fig.show()
+        # fig.show()
         plt.savefig(result_strategy_path + 'acc_efficiency')
 
         fig, ax = plt.subplots(figsize=[8, 6], dpi=200)
 
         n_strategy = score_results.shape[0]
         colors = np.arange(n_strategy)
-        scatter = ax.scatter(score_results['fit runtime mean'],
+        scatter = ax.scatter(score_results['fit runtime'],
                              score_results['AUC mean'],
                              label=score_results.index.values,
                              c=colors, cmap='viridis')
@@ -941,11 +941,11 @@ def run_guided_path():
                             borderpad=1.0)
 
         ax.set_title('AUC efficiency')
-        ax.set_xlabel('fit runtime mean')
+        ax.set_xlabel('fit runtime')
         ax.set_ylabel('AUC mean')
         ax.add_artist(legend1)
         ax.grid(True)
 
-        fig.show()
+        # fig.show()
         plt.savefig(result_strategy_path + 'auc_efficiency')
         break

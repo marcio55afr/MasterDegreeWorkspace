@@ -13,7 +13,7 @@ import numpy as np
 
 from source.utils.handlers.ts_handler import get_dataset
 from source.utils import ResolutionMatrix, ResolutionHandler, NgramExtractor
-from source.technique import SearchTechnique
+from source.classifiers import SearchTechnique
 from source.transformations import MSAX
 
 

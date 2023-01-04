@@ -16,7 +16,6 @@ class TsHandler:
     def get_ts_folder_path(cls):
         return UNIVARIATE_TS_PATH
 
-
     @classmethod
     def download_all_ts_and_transform(cls):
         if not os.path.exists(UNIVARIATE_TS_PATH):
@@ -39,14 +38,12 @@ class TsHandler:
             cls.write_ts(df.loc['train'], file_path, 'train')
             cls.write_ts(df.loc['test'], file_path, 'test')
 
-
     @classmethod
     def write_ts(cls, data: pd.DataFrame, path, key):
         data.index = range(data.shape[0])
         data.columns = ['data', 'target']
         data = data.astype({'target': np.int32})
         data.to_hdf(path, key=key)
-
 
     @classmethod
     def wget_all_datasets(cls):
