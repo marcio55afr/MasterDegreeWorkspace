@@ -181,7 +181,6 @@ class Classifier3M(BaseClassifier):
         self._is_fitted = True
 
     def _predict(self, data):
-
         if self.verbose:
             print('Predicting data with the Classifier...\n')
 
@@ -192,7 +191,6 @@ class Classifier3M(BaseClassifier):
         return self.clf.predict(bag_of_bags)
 
     def _predict_proba(self, data):
-
         if self.verbose:
             print('Predicting data with the Classifier...\n')
 
@@ -243,41 +241,6 @@ class Classifier3M(BaseClassifier):
                     bob = hstack([bob, bag_of_words], dtype=np.int16)
         return bob
 
-        if self.verbose:
-            print('\nExtracting features from all SAX resolutions...')
-            for w in self.sfa_windows:
-                print('_', end='')
-            print('')
-
-        for window in self.sax_windows:
-            if self.verbose:
-                print('#', end='')
-
-            disc = self.sax_discretizers[window]
-            word_sequence = disc.transform(data, labels)
-            print('word_sequence, ', sys.getsizeof(word_sequence))
-            ngram_sequence = self._extract_ngram_words(word_sequence)
-            print('ngram_sequence, ', sys.getsizeof(ngram_sequence))
-            bag_of_words, vocab = self._get_feature_sparsematrix(ngram_sequence)
-            self.sax_vocabs[window] = vocab
-            print('bag_of_words, ', sys.getsizeof(bag_of_words))
-            #bag_of_words = self._add_identifier(bag_of_words, self.sax_id, window)
-            print('bag_of_words_id, ', sys.getsizeof(bag_of_words))
-            if labels is None:
-                bag_of_words = self._feature_filtering(bag_of_words)
-            else:
-                bag_of_words = self._feature_selection(bag_of_words, labels, self.n_sax_features)
-
-            bob = pd.concat([bob, bag_of_words], axis=1)
-
-        return bob
-
-    def _add_identifier(self, bag_of_words, disc_id, window):
-
-        columns = bag_of_words.columns.map(lambda word: f'{disc_id} {window} {word}')
-        bag_of_words.columns = columns
-        return bag_of_words
-
     def _feature_selection(self, bag_of_words, vocabulary, labels, feature_percentile):
         if self.random_selection:
             items = sorted(vocabulary.items(), key=lambda x: x[1])
@@ -303,25 +266,7 @@ class Classifier3M(BaseClassifier):
 
         return bag_of_selected_words, selected_vocabulary
 
-
-
-        if self.random_selection:
-            bag_of_words = bag_of_words.sample(frac=.5, axis=1,
-                                               random_state=self.random_state)
-        rank_value, p = chi2(bag_of_words, labels)
-        word_rank = pd.DataFrame(index=bag_of_words.columns)
-        word_rank['rank'] = rank_value
-        word_rank = word_rank.sort_values('rank', ascending=False)
-
-        if n_words > 0:
-            best_words = word_rank.iloc[0:n_words].index.values
-        else:
-            best_words = word_rank.index.values
-
-        return bag_of_words[best_words]
-
     def _match_feature_format(self, bag_of_bags: csr_matrix, vocabulary: dict):
-
         n_fitted_words = len(vocabulary)
         if n_fitted_words > bag_of_bags.shape[1]:
             bag_of_bags.resize(bag_of_bags.shape[0], n_fitted_words)
