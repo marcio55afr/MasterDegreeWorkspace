@@ -3,6 +3,7 @@ __all__ = ["AdaptedSFA"]
 
 import math
 import sys
+from abc import ABC
 from collections import defaultdict
 
 import numpy as np
@@ -25,7 +26,7 @@ binning_methods = {"equi-depth", "equi-width", "information-gain", "kmeans"}
 # TODO remove imag-part from dc-component component
 
 
-class AdaptedSFA(_PanelToPanelTransformer):
+class AdaptedSFA(_PanelToPanelTransformer, ABC):
     """
     A slight different version of the SFA (Symbolic Fourier Approximation)
     Transformer, 
@@ -115,6 +116,22 @@ class AdaptedSFA(_PanelToPanelTransformer):
         return_pandas_data_series=False,
         n_jobs=1,
     ):
+
+        if binning_method not in binning_methods:
+            raise TypeError("binning_method must be one of: ", binning_methods)
+
+        if window_size < 3:
+            raise ValueError(f"Word length ({word_length}) can not be longer than window size ({window_size})")
+
+        if word_length > window_size:
+            raise ValueError(f"Word length ({word_length}) can not be longer than window size ({window_size})")
+
+        if (alphabet_size < 2) or (alphabet_size > 6):
+            raise ValueError(f"Alphabet size must be an integer between 2 and 6, not {alphabet_size}")
+
+        if (word_length < 1) or (word_length > 16):
+            raise ValueError(f"Word length must be an integer between 1 and 16, not {word_length}")
+
         self.words = []
         self.breakpoints = []
 
@@ -173,25 +190,21 @@ class AdaptedSFA(_PanelToPanelTransformer):
         -------
         self: object
         """
-
-        if self.alphabet_size < 2 or self.alphabet_size > 4:
-            raise ValueError("Alphabet size must be an integer between 2 and 4")
-
-        if self.word_length < 1 or self.word_length > 16:
-            raise ValueError("Word length must be an integer between 1 and 16")
-
-        if self.binning_method == "information-gain" and y is None:
-            raise ValueError(
-                "Class values must be provided for information gain binning"
-            )
-
-        if self.binning_method not in binning_methods:
-            raise TypeError("binning_method must be one of: ", binning_methods)
-
         X = check_X(X, enforce_univariate=True, coerce_to_numpy=True)
         X = X.squeeze(1)
-
         self.n_instances, self.series_length = X.shape
+
+        if self.binning_method == "information-gain" and y is None:
+            raise RuntimeError("Class values must be provided for information gain binning")
+
+        if self.window_size > self.series_length:
+            raise RuntimeError(f"Windows size ({self.window_size}) cannot be longer" +
+                               "than series length ({series_length})")
+
+        if self.word_length > self.series_length:
+            raise RuntimeError(f"Word length ({self.word_length}) cannot be longer" +
+                               "than series length ({series_length})")
+
         self.breakpoints = self._binning(X, y)
 
         self._is_fitted = True
@@ -342,7 +355,7 @@ class AdaptedSFA(_PanelToPanelTransformer):
         breakpoints = np.zeros((self.word_length, self.alphabet_size))
         clf = DecisionTreeClassifier(
             criterion="entropy",
-            max_depth=np.log2(self.alphabet_size),
+            max_depth=int(np.ceil(np.log2(self.alphabet_size))),
             max_leaf_nodes=self.alphabet_size,
             random_state=1,
         )
@@ -376,7 +389,6 @@ class AdaptedSFA(_PanelToPanelTransformer):
 
         for i, row in enumerate(split):
             result[i] = self._discrete_fourier_transform(row)
-
         return result
 
     def _discrete_fourier_transform(self, series):

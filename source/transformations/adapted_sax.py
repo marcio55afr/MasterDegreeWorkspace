@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+from abc import ABC
 
 import numpy as np
 import pandas as pd
@@ -16,7 +17,7 @@ from sktime.utils.validation.panel import check_X
 # from numba.experimental import jitclass
 
 
-class AdaptedSAX(_PanelToPanelTransformer):
+class AdaptedSAX(_PanelToPanelTransformer, ABC):
     """    
     A slight different version of the SAX (Symbolic Aggregate approXimation)
     Transformer, as described in Jessica Lin, Eamonn Keogh, Li Wei and
@@ -67,6 +68,16 @@ class AdaptedSAX(_PanelToPanelTransformer):
         remove_repeat_words=False,
         return_pandas_data_series=True,
     ):
+
+        if word_length > window_size:
+            raise ValueError(f"Word length ({word_length}) can not be longer than window size ({window_size})")
+
+        if (word_length < 1) or (word_length > 16):
+            raise ValueError(f"Word length ({word_length}) must be an integer between 1 and 16")
+
+        if (alphabet_size < 2) or (alphabet_size > 6):
+            raise ValueError(f"Alphabet size ({alphabet_size}) must be a integer between 2 a 6")
+
         self.word_length = word_length
         self.alphabet_size = alphabet_size
         self.window_size = window_size
@@ -83,6 +94,8 @@ class AdaptedSAX(_PanelToPanelTransformer):
         X : nested pandas DataFrame of shape [n_instances, 1]
             Nested dataframe with univariate time-series in cells.
 
+        y : Numpy.Ndarray with labels of length (n_instances), not used in this transformation
+
         Returns
         -------
         dims: Pandas data frame with first dimension in column zero
@@ -90,14 +103,17 @@ class AdaptedSAX(_PanelToPanelTransformer):
         self.check_is_fitted()
         X = check_X(X, enforce_univariate=True, coerce_to_numpy=True)
         X = X.squeeze(1)
+        n_instances, series_length = X.shape
 
-        if self.alphabet_size < 2 or self.alphabet_size > 4:
-            raise RuntimeError("Alphabet size must be an integer between 2 and 4")
-        if self.word_length < 1 or self.word_length > 16:
-            raise RuntimeError("Word length must be an integer between 1 and 16")
+        if self.window_size > series_length:
+            raise RuntimeError(f"Windows size ({self.window_size}) cannot be longer" +
+                               "than series length ({series_length})")
+
+        if self.word_length > series_length:
+            raise RuntimeError(f"Word length ({self.word_length}) cannot be longer" +
+                               "than series length ({series_length})")
 
         breakpoints = self._generate_breakpoints()
-        n_instances, series_length = X.shape
 
         #TODO test dim as a pandas Series
         dim = []
@@ -119,7 +135,7 @@ class AdaptedSAX(_PanelToPanelTransformer):
 
             split = scipy.stats.zscore(split, axis=1)
 
-            paa = PAA(num_intervals=self.word_length)
+            paa = PAA(num_intervals=int(self.word_length))
             data = pd.DataFrame()
             data[0] = [pd.Series(x, dtype=np.float32) for x in split]
             patterns = paa.fit_transform(data)
