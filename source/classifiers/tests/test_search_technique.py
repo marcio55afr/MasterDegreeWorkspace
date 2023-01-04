@@ -3,7 +3,7 @@ import sys
 sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace/source')
 sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace')
 
-from source.technique import SearchTechnique
+from source.classifiers import SearchTechnique
 from source.experiments.database import get_dataset, get_train_test_split, DATASET_NAMES
 
 from sklearn.metrics import accuracy_score
