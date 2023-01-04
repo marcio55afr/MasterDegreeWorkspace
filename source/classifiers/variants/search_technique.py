@@ -4,23 +4,13 @@ sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace')
 
 import time
 import pandas as pd
-import numpy as np
 from sktime.classification.base import BaseClassifier
-from sklearn.feature_extraction import DictVectorizer
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
 
-from source.utils import ResolutionHandler, ResolutionMatrix, NgramExtractor
+from source.utils import ResolutionMatrix, NgramExtractor
 from source.transformations import MultiresolutionFramework
 
-from source.technique.word_ranking import WordRanking
 from sklearn.feature_selection import chi2
-from sklearn.feature_selection import SelectKBest
-
-from source.technique.resolution_selector import ResolutionSelector
-
-from source.experiments.database import read_bob, write_bob
-from source.experiments.database.bob_handler import read_bag, write_bag
 
 
 class SearchTechnique(BaseClassifier):

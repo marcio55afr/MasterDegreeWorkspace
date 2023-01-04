@@ -3,24 +3,16 @@ import sys
 sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace/source')
 sys.path.append('C:/Users/marci/Desktop/MasterDegreeWorkspace')
 
-import time
 import pandas as pd
 import numpy as np
 from sktime.classification.base import BaseClassifier
-from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
 
-from source.utils import ResolutionHandler, ResolutionMatrix
+from source.utils import ResolutionMatrix
 from sktime.transformations.panel.dictionary_based import SFA, SAX
 from sklearn.model_selection import cross_validate
 
-from source.technique.word_ranking import WordRanking
 from sklearn.feature_selection import chi2
-from sklearn.feature_selection import SelectKBest
-
-from source.technique.resolution_selector import ResolutionSelector
-
-from source.experiments.database import read_bob, write_bob
 
 
 class SearchTechniqueCV(BaseClassifier):
@@ -73,13 +65,15 @@ class SearchTechniqueCV(BaseClassifier):
 
     def _fit(self, data, labels):
 
+        labels = pd.Series(labels, index=data.index)
+
         if type(data) != pd.DataFrame:
             raise TypeError("The data must be a type of pd.DataFrame."
                             " It was received as {}".format(type(data)))
 
-        if type(labels) != pd.Series:
-            raise TypeError("The data must be a type of pd.Series."
-                            " It was received as {}".format(type(labels)))
+        #if type(labels) != pd.Series:
+        #    raise TypeError("The data must be a type of pd.Series."
+        #                    " It was received as {}".format(type(labels)))
 
         if data.shape[0] != labels.shape[0]:
             raise RuntimeError('The labels isn\'t compatible with the data received')

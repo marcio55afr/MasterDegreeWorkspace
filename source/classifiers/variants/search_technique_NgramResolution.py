@@ -63,8 +63,8 @@ class SearchTechnique_NgramResolution(BaseClassifier):
         self.verbose = verbose
         self.random_state = random_state
 
-        self.sfa_discretizers = pd.Series()
-        self.sax_discretizers = pd.Series()
+        self.sfa_discretizers = pd.Series(dtype=object)
+        self.sax_discretizers = pd.Series(dtype=object)
 
         self.clf = RandomForestClassifier(criterion="gini",
                                           n_estimators=1000,
