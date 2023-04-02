@@ -4,9 +4,11 @@ import os
 UNIVARIATE_TS_LINK = 'https://www.timeseriesclassification.com/Downloads/Archives/Univariate2018_ts.zip'
 
 UNIVARIATE_TS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  "Univariate2018_ts/")
+                                  "Univariate_ts")
 UNIVARIATE_HDF_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    "Univariate2018_hdf/")
+DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+
 
 EXTENSION = '.h5'
 

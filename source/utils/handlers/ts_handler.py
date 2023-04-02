@@ -59,7 +59,7 @@ class TsHandler:
 
         print("Unzipping the archive...\n")
         with zipfile.ZipFile(univariate_ts_zip, 'r') as zip_ref:
-            zip_ref.extractall(UNIVARIATE_TS_PATH)
+            zip_ref.extractall(DATA_PATH)
         os.remove(univariate_ts_zip)
 
         print("It's done!\n")
