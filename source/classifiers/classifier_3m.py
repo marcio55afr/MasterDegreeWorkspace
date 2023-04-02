@@ -59,7 +59,7 @@ class Classifier3M(BaseClassifier):
         if (sfa_features_percentile < 1) or (sfa_features_percentile > 100) or\
                 (sax_features_percentile < 1) or (sax_features_percentile > 100):
             raise ValueError(
-                "Both number of sax nor sfa features percentile must be between (0,100]! And it was received: " +
+                "Both number of sax and sfa feature percentiles must be between (0,100]! And it was received: " +
                 f"sfa_features_percentile: {sfa_features_percentile}, " +
                 f"sax_features_percentile: {sax_features_percentile}"
             )
@@ -306,7 +306,7 @@ class Classifier3M(BaseClassifier):
         if data:
             bag_of_words = csr_matrix((data, indices, indptr), dtype=int).asformat('csc')
         else:
-            bag_of_words = csr_matrix((data, [len(vocabulary)-1], indptr), dtype=int).asformat('csc')
+            bag_of_words = csr_matrix(([0], [len(vocabulary)-1], indptr), dtype=int).asformat('csc')
         return bag_of_words
 
     def _extract_ngram_words(self, word_sequences):
