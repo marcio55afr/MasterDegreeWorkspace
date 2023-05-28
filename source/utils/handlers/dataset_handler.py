@@ -26,6 +26,10 @@ class DatasetHandler:
         return WIDEST_DATASETS
 
     @classmethod
+    def get_medium_datasets(cls):
+        return MEDIUM_DATASETS
+
+    @classmethod
     def get_train_data(cls, dataset_name):
         train_x, train_y = cls.get_split_dataset(dataset_name, 'train')
         train_x = cls.parse_to_array(train_x)

@@ -12,9 +12,16 @@ DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 EXTENSION = '.h5'
 
+MEDIUM_DATASETS = ['Trace', 'Plane', 'GunPointAgeSpan', 'FreezerRegularTrain', 'PowerCons', 'FacesUCR',
+                   'InsectWingbeatSound', 'WordSynonyms']
+# Choosing only one dataset of GunPoint
+# WordSynonyms doesn't have 4 objects for every class, making the folds for the cross validation "unbalanced".
+# Thus, we disconsidered it
+
 LONGEST_DATASETS = ['Strawberry', 'MiddlePhalanxOutlineCorrect', 'Wafer', 'TwoPatterns', 'PhalangesOutlinesCorrect']
 # Crop too large for tuning parameters...
 WIDEST_DATASETS = ['ACSF1', 'CinCECGTorso', 'InlineSkate', 'HouseTwenty', 'Rock']
+
 LARGEST_DATASETS = ['NonInvasiveFetalECGThorax2', 'FordB', 'HandOutlines']
 # PigCVP, PigArtPressure and PigAirwayPressure has less than 5 objects per class
 
