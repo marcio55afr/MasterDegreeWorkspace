@@ -30,11 +30,11 @@ class Classifier3M(BaseClassifier):
                  word_length=6,
                  alphabet_size=4,
                  max_window_length=.5,
-                 n_sfa_resolutions=8,
                  n_sax_resolutions=2,
+                 rate_sfa_resolutions=4,
                  random_selection=False,
-                 sfa_features_percentile=50,
                  sax_features_percentile=50,
+                 sfa_features_percentile=50,
                  normalize=True,
                  verbose=False,
                  random_state=None):
@@ -52,9 +52,14 @@ class Classifier3M(BaseClassifier):
         if (max_window_length <= 0) or (max_window_length > 1.0):
             raise ValueError(f"Maximum window length ({max_window_length}) must be a positive float between 0 and 1")
 
-        if (n_sfa_resolutions < 1) or (n_sax_resolutions < 1):
-            raise ValueError("Neither number of sax nor sfa resolutions can be lesser than 1, but it was received: " +
-                             f"n_sfa_resolutions: {n_sfa_resolutions}, n_sax_resolutions: {n_sax_resolutions}, " )
+        if (rate_sfa_resolutions < 1) or (n_sax_resolutions < 1):
+            raise ValueError("Neither number of sax nor rate of sfa resolutions can be lesser than 1, but it was"
+                             f"received: n_sfa_resolutions: {rate_sfa_resolutions},"
+                             f" n_sax_resolutions: {n_sax_resolutions}")
+
+        if rate_sfa_resolutions > 5:
+            raise ValueError("The rate of sfa resolutions over sax resolutions can not be bigger than 5,"
+                             f"but it was received {rate_sfa_resolutions}")
 
         if (sfa_features_percentile < 1) or (sfa_features_percentile > 100) or\
                 (sax_features_percentile < 1) or (sax_features_percentile > 100):
@@ -69,10 +74,11 @@ class Classifier3M(BaseClassifier):
         self.alphabet_size = alphabet_size
         self.max_window_length = max_window_length
 
-        self.n_sfa_resolutions = n_sfa_resolutions
-        self.sfa_features_percentile = sfa_features_percentile
         self.n_sax_resolutions = n_sax_resolutions
         self.sax_features_percentile = sax_features_percentile
+        self.rate_sfa_resolutions = rate_sfa_resolutions
+        self.n_sfa_resolutions = round(rate_sfa_resolutions * n_sax_resolutions)
+        self.sfa_features_percentile = sfa_features_percentile
 
         self.random_selection = random_selection
         self.normalize = normalize
@@ -100,7 +106,7 @@ class Classifier3M(BaseClassifier):
                                   index=self._discretizers_id, dtype=object)
         self._vocabularies = self._windows.copy()
         self._discretizers = self._windows.copy()
-        self._n_resolutions = pd.Series([n_sax_resolutions, n_sfa_resolutions],
+        self._n_resolutions = pd.Series([self.n_sax_resolutions, self.n_sfa_resolutions],
                                         index=self._discretizers_id)
         self._feature_percentile = pd.Series([sax_features_percentile, sfa_features_percentile],
                                              index=self._discretizers_id)
@@ -119,8 +125,8 @@ class Classifier3M(BaseClassifier):
 
         self.ts_length = len(data[0, 0])  # Equal length for all series
         if self.word_length > self.ts_length:
-            warnings.warn('Word length was reduced to {self.ts_length} because its previous value ({self.word_length})'+
-                          ' was bigger than time series length ({self.ts_length}).')
+            warnings.warn(f'Word length was reduced to {self.ts_length} because its previous value ({self.word_length})'
+                          f' was bigger than time series length ({self.ts_length}).')
             self.word_length = self.ts_length
 
         if self.verbose:
